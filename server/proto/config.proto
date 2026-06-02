@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package metrics_explorer;
+
+option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer";
+
+message MysqlConfigs {
+    // @yamlName=dsn
+    string dsn = 1;
+}
+
+message HttpServer {
+    // @yamlName=port
+    int32 port = 1;
+
+    // @yamlName=path
+    string path = 2;
+}
+
+message AdminConfig {
+    // @yamlName=name
+    string name = 1;
+
+    // @yamlName=passwd
+    string passwd = 2;
+}
+
+message MetricsExplorerConfigs {
+  // @yamlName=salt
+  string salt = 1;
+
+  // @yamlName=http
+  HttpServer http = 2;
+
+  // @yamlName=mysql
+  MysqlConfigs mysql = 3;
+
+  // @yamlName=admin
+  AdminConfig admin = 4;
+}
+
+// 定义配置文件
+message Configs {
+  // @yamlName=metrics_explorer
+  MetricsExplorerConfigs metrics_explorer = 1;
+}

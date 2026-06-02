@@ -7,6 +7,8 @@ I hate spending time creating Grafana dashboards. So I'm going to create a tool 
 
 # Plan & Design
 
+![](./doc/images/arch.png)
+
 ## 前端
 
 * 使用 flutter 框架来制作 UI

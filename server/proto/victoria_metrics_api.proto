@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package vectoria_metrics_api;
+
+option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/vectoria_metrics_api";
+
+
+// curl "http://127.0.0.1:8428/api/v1/labels"
+// curl "http://127.0.0.1:8428/api/v1/label/__name__/values"
+
+// curl -G "http://127.0.0.1:8481/select/0/prometheus/api/v1/labels"
+// curl -G "http://127.0.0.1:8481/select/0/prometheus/api/v1/label/__name__/values"
+message QueryLabelResponse {
+    string status = 1;
+    repeated string data = 2;
+}

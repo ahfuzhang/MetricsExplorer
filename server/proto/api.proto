@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package metrics_explorer;
+
+option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer";
+
+message GetGlobalConfigsResponse {
+    int32 code = 1;
+    string message = 2;
+    string salt = 3;
+    // @VarName=APIPath
+    string api_path = 4;
+}
+
+message LoginRequest {
+    string user_name = 1;
+    string passwd = 2;
+}
+
+message LoginResponse {
+    int32 code = 1;
+    string message = 2;
+    string session = 3;
+}
+
+message AddUserRequest {
+    string session = 1;
+    string user_name = 2;
+    string sha256 = 3;
+}
+
+message AddUserResponse {
+    int32 code = 1;
+    string message = 2;    
+}
+
+message ListUserRequest {
+    string session = 1;
+}
+
+message User {
+    uint64 user_id = 1;
+    string user_name = 2;
+}
+
+message ListUserResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated User users = 3;
+}
+
+message RemoveUserRequest {
+    string session = 1;
+    uint64 user_id = 2;
+}
+
+message RemoveUserResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message VictoriaMetricsDatasource {
+    uint64 vm_datasource_id = 1;
+    string datasource_name = 2;
+    string addr = 3;
+}
+
+message ListDatasourceRequest {
+    string session = 1;
+}
+
+message ListDatasourceResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated VictoriaMetricsDatasource datasources = 3;
+}
+
+message AddDatasourceRequest {
+    string session = 1;
+    string datasource_name = 2;
+    string addr = 3;
+}
+
+message AddDatasourceResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message RemoveDatasourceRequest {
+    string session = 1;
+    uint64 vm_datasource_id = 2;
+}
+
+message RemoveDatasourceResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message GetLabelsByDatasourceRequest {
+    string session = 1;
+    string vm_datasource_name = 2;
+}
+
+message GetLabelsByDatasourceResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated string labels = 3;
+}
+
+message GetMetricNamesByDatasourceRequest {
+    string session = 1;
+    string vm_datasource_name = 2;
+}
+
+message GetMetricNamesByDatasourceResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated string metric_names = 3;
+}
+
+message GetMenuListRequest {
+    string session = 1;
+}
+
+message Menu {
+    uint64 menu_id = 1;
+    string menu_name = 2;
+    uint64 parent_id = 3;
+    uint64 role_id = 4;
+    string link = 5;
+    string target = 6;
+    uint64 bit_flags = 7;
+}
+
+message GetMenuListResponse {
+    int32 code = 1;
+    string message = 2;
+    repeated Menu menus = 3;
+}
+
+message AddMenuRequest {
+    string session = 1;
+    Menu menu = 2;
+}
+
+message AddMenuResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message RemoveMenuRequest {
+    string session = 1;
+    uint64 menu_id = 2;
+}
+
+message RemoveMenuResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message ModifyMenuRequest {
+    string session = 1;
+    Menu menu = 2;
+}
+
+message ModifyMenuResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+message LoadMenuTreeRequest {
+    string session = 1;
+}
+
+message MenuTreeNode {
+    uint64 menu_id = 1;
+    string menu_name = 2;
+    string link = 3;
+    string target = 4;
+    bool expanded = 5;
+    repeated MenuTreeNode children = 6;
+}
+
+message LoadMenuTreeResponse {
+    int32 code = 1;
+    string message = 2;
+    MenuTreeNode menus = 3;
+}
