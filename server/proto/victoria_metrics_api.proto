@@ -4,13 +4,59 @@ package vectoria_metrics_api;
 
 option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/vectoria_metrics_api";
 
-
 // curl "http://127.0.0.1:8428/api/v1/labels"
 // curl "http://127.0.0.1:8428/api/v1/label/__name__/values"
 
 // curl -G "http://127.0.0.1:8481/select/0/prometheus/api/v1/labels"
 // curl -G "http://127.0.0.1:8481/select/0/prometheus/api/v1/label/__name__/values"
 message QueryLabelResponse {
-    string status = 1;
-    repeated string data = 2;
+  string status = 1;
+  repeated string data = 2;
+}
+
+// @AsMap
+message TimeSeries {
+  map<string, string> labels = 1;
+}
+
+// curl http://127.0.0.1:8481/select/0/prometheus/api/v1/series -d 'match[]=vm_http_request_errors_total'
+message QuerySeriesResponse {
+  string status = 1;
+  // @jsonName=isPartial
+  bool is_partial = 2;
+  repeated TimeSeries data = 3;
+}
+
+message Stats {
+  // @jsonName=seriesFetched
+  int64 series_fetched = 1;
+
+  // @jsonName=executionTimeMsec
+  int64 execution_time_msec = 2;
+}
+
+// @AsArray
+message Series {
+  repeated double values = 1;
+}
+
+message MetricData {
+  map<string, string> metric = 1;
+  repeated Series values = 2;
+}
+
+message TimeSeriesData {
+  // @jsonName=resultType
+  string result_type = 1;
+
+  repeated MetricData result = 2;
+}
+
+// 范围查询的响应格式
+message RangeQueryResponse {
+  string status = 1;
+  // @jsonName=isPartial
+  bool is_partial = 2;
+  TimeSeriesData data = 3;
+  Stats stats = 4;
 }

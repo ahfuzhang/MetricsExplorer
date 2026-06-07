@@ -38,7 +38,7 @@ func GetLabelsByDatasource() http.HandlerFunc {
 			return
 		}
 
-		respond := func(code int32, msg string, labels []string) {
+		respond := func(code int32, msg string, labels map[string]*pb.LabelValues) {
 			rsp := &pb.GetLabelsByDatasourceResponse{Code: code, Message: msg, Labels: labels}
 			w.Header().Set("Content-Type", "application/protobuf")
 			w.WriteHeader(http.StatusOK)
@@ -56,15 +56,15 @@ func GetLabelsByDatasource() http.HandlerFunc {
 			respond(3, "datasource not available", nil)
 			return
 		}
-
-		labels := make([]string, 0, len(ds.Labels))
-		for label := range ds.Labels {
-			labels = append(labels, label)
+		m := ds.GetLabels()
+		outMap := make(map[string]*pb.LabelValues, len(m))
+		for k, v := range m {
+			values := make([]string, 0, len(v))
+			for labelValue := range v {
+				values = append(values, labelValue)
+			}
+			outMap[k] = &pb.LabelValues{Values: values}
 		}
-		// sort.Slice(labels, func(i, j int) bool {
-		// 	return strings.ToLower(labels[i]) < strings.ToLower(labels[j])
-		// })
-
-		respond(0, "success", labels)
+		respond(0, "success", outMap)
 	}
 }

@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/VictoriaMetrics/metrics v1.43.2
-	github.com/ahfuzhang/BaoHuLu v0.9.0
 	github.com/ahfuzhang/MetricsExplorer v0.0.0
 	github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer v0.0.0
 	github.com/ahfuzhang/MetricsExplorer/server/generated/vectoria_metrics_api v0.0.0
@@ -16,8 +15,10 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
+	github.com/ahfuzhang/BaoHuLu v0.11.0 // indirect
 	github.com/valyala/fastrand v1.1.0 // indirect
 	github.com/valyala/histogram v1.2.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 )
 

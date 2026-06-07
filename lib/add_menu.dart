@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'generated/api.pb.dart';
-import 'main.dart';
+import 'session.dart';
 
 class AddMenuPage extends StatefulWidget {
   final AppSession session;

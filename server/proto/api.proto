@@ -5,184 +5,249 @@ package metrics_explorer;
 option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer";
 
 message GetGlobalConfigsResponse {
-    int32 code = 1;
-    string message = 2;
-    string salt = 3;
-    // @VarName=APIPath
-    string api_path = 4;
+  int32 code = 1;
+  string message = 2;
+  string salt = 3;
+  // @VarName=APIPath
+  string api_path = 4;
 }
 
 message LoginRequest {
-    string user_name = 1;
-    string passwd = 2;
+  string user_name = 1;
+  string passwd = 2;
 }
 
 message LoginResponse {
-    int32 code = 1;
-    string message = 2;
-    string session = 3;
+  int32 code = 1;
+  string message = 2;
+  string session = 3;
 }
 
 message AddUserRequest {
-    string session = 1;
-    string user_name = 2;
-    string sha256 = 3;
+  string session = 1;
+  string user_name = 2;
+  string sha256 = 3;
 }
 
 message AddUserResponse {
-    int32 code = 1;
-    string message = 2;    
+  int32 code = 1;
+  string message = 2;
 }
 
 message ListUserRequest {
-    string session = 1;
+  string session = 1;
 }
 
 message User {
-    uint64 user_id = 1;
-    string user_name = 2;
+  uint64 user_id = 1;
+  string user_name = 2;
 }
 
 message ListUserResponse {
-    int32 code = 1;
-    string message = 2;
-    repeated User users = 3;
+  int32 code = 1;
+  string message = 2;
+  repeated User users = 3;
 }
 
 message RemoveUserRequest {
-    string session = 1;
-    uint64 user_id = 2;
+  string session = 1;
+  uint64 user_id = 2;
 }
 
 message RemoveUserResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message VictoriaMetricsDatasource {
-    uint64 vm_datasource_id = 1;
-    string datasource_name = 2;
-    string addr = 3;
+  uint64 vm_datasource_id = 1;
+  string datasource_name = 2;
+  string addr = 3;
 }
 
 message ListDatasourceRequest {
-    string session = 1;
+  string session = 1;
 }
 
 message ListDatasourceResponse {
-    int32 code = 1;
-    string message = 2;
-    repeated VictoriaMetricsDatasource datasources = 3;
+  int32 code = 1;
+  string message = 2;
+  repeated VictoriaMetricsDatasource datasources = 3;
 }
 
 message AddDatasourceRequest {
-    string session = 1;
-    string datasource_name = 2;
-    string addr = 3;
+  string session = 1;
+  string datasource_name = 2;
+  string addr = 3;
 }
 
 message AddDatasourceResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message RemoveDatasourceRequest {
-    string session = 1;
-    uint64 vm_datasource_id = 2;
+  string session = 1;
+  uint64 vm_datasource_id = 2;
 }
 
 message RemoveDatasourceResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message GetLabelsByDatasourceRequest {
-    string session = 1;
-    string vm_datasource_name = 2;
+  string session = 1;
+  string vm_datasource_name = 2;
+}
+
+message LabelValues {
+  repeated string values = 1;
 }
 
 message GetLabelsByDatasourceResponse {
-    int32 code = 1;
-    string message = 2;
-    repeated string labels = 3;
+  int32 code = 1;
+  string message = 2;
+  map<string, LabelValues> labels = 3;
 }
 
 message GetMetricNamesByDatasourceRequest {
-    string session = 1;
-    string vm_datasource_name = 2;
+  string session = 1;
+  string vm_datasource_name = 2;
 }
 
 message GetMetricNamesByDatasourceResponse {
-    int32 code = 1;
-    string message = 2;
-    repeated string metric_names = 3;
+  int32 code = 1;
+  string message = 2;
+  repeated string metric_names = 3;
+}
+
+message GetSeriesByDatasourceRequest {
+  string session = 1;
+  string vm_datasource_name = 2;
+  string metric_name = 3;
+}
+
+message TagValues {
+  repeated string values = 1;
+  repeated int32 show_times = 2; // 每个 value 出现了多少次
+}
+
+message MetricTags {
+  map<string, string> tags = 1;
+}
+
+message GetSeriesByDatasourceResponse {
+  int32 code = 1;
+  string message = 2;
+  //repeated string series = 3;
+  map<string, TagValues> tags = 4;
+  repeated MetricTags ts = 5;
+}
+
+message GetRangeByDatasourceRequest {
+  string session = 1;
+  string vm_datasource_name = 2;
+  repeated string queries = 3; // 一次提交多个查询
+  string start = 4;
+  string end = 5;
+  string step = 6;
+  string timeout = 7;
+}
+
+enum MetricType {
+  Unknown = 0;
+  Counter = 1;
+  StaticValue = 2;
+  Histogram = 3;
+}
+
+message RangeData {
+  map<string, string> tags = 3;
+  repeated double points = 4;
+  double const_value = 5; // 如果检测到数组中的内容的值全部一样，则用 const_value 代替。
+  MetricType metric_type = 6; // 猜测 metric 是什么数据类型
+}
+
+message QueryResult {
+  int32 code = 1;
+  string message = 2;
+  repeated RangeData datas = 3; // 每个查询会返回多个 metric
+  //MetricType metric_type = 4; // 猜测 metric 是什么数据类型  => 看起来意义不大
+}
+
+message GetRangeByDatasourceResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated QueryResult queries_result = 3; // 对应着多个查询的结果
+  repeated int64 timestamps = 4;
 }
 
 message GetMenuListRequest {
-    string session = 1;
+  string session = 1;
 }
 
 message Menu {
-    uint64 menu_id = 1;
-    string menu_name = 2;
-    uint64 parent_id = 3;
-    uint64 role_id = 4;
-    string link = 5;
-    string target = 6;
-    uint64 bit_flags = 7;
+  uint64 menu_id = 1;
+  string menu_name = 2;
+  uint64 parent_id = 3;
+  uint64 role_id = 4;
+  string link = 5;
+  string target = 6;
+  uint64 bit_flags = 7;
 }
 
 message GetMenuListResponse {
-    int32 code = 1;
-    string message = 2;
-    repeated Menu menus = 3;
+  int32 code = 1;
+  string message = 2;
+  repeated Menu menus = 3;
 }
 
 message AddMenuRequest {
-    string session = 1;
-    Menu menu = 2;
+  string session = 1;
+  Menu menu = 2;
 }
 
 message AddMenuResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message RemoveMenuRequest {
-    string session = 1;
-    uint64 menu_id = 2;
+  string session = 1;
+  uint64 menu_id = 2;
 }
 
 message RemoveMenuResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message ModifyMenuRequest {
-    string session = 1;
-    Menu menu = 2;
+  string session = 1;
+  Menu menu = 2;
 }
 
 message ModifyMenuResponse {
-    int32 code = 1;
-    string message = 2;
+  int32 code = 1;
+  string message = 2;
 }
 
 message LoadMenuTreeRequest {
-    string session = 1;
+  string session = 1;
 }
 
 message MenuTreeNode {
-    uint64 menu_id = 1;
-    string menu_name = 2;
-    string link = 3;
-    string target = 4;
-    bool expanded = 5;
-    repeated MenuTreeNode children = 6;
+  uint64 menu_id = 1;
+  string menu_name = 2;
+  string link = 3;
+  string target = 4;
+  uint64 bit_flags = 5;
+  repeated MenuTreeNode children = 6;
 }
 
 message LoadMenuTreeResponse {
-    int32 code = 1;
-    string message = 2;
-    MenuTreeNode menus = 3;
+  int32 code = 1;
+  string message = 2;
+  MenuTreeNode menus = 3;
 }

@@ -72,7 +72,6 @@ func (m *MysqlConfigs) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *MysqlConfigs) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -96,6 +95,7 @@ func (m *MysqlConfigs) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMysqlConfigs struct {
+	parser                          fastjson.Parser
 	Dsn       string `json:"dsn,omitempty" yaml:"dsn"`
 	rawBuffer []byte
 }
@@ -124,6 +124,7 @@ func (r *ReadonlyMysqlConfigs) Clone(dst *MysqlConfigs) *MysqlConfigs {
 
 func (r *ReadonlyMysqlConfigs) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Dsn = ""
 }
 
@@ -137,40 +138,6 @@ func (r *ReadonlyMysqlConfigs) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case MysqlConfigsDsnTag: // Dsn
 			if wt != utils.WireTypeLenDelim {
@@ -190,7 +157,6 @@ func (r *ReadonlyMysqlConfigs) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyMysqlConfigs) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -212,11 +178,9 @@ func (r *ReadonlyMysqlConfigs) fromJSONValue(obj *fastjson.Object, parser *fastj
 	return visitErr
 }
 
-func (r *ReadonlyMysqlConfigs) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMysqlConfigs) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -238,14 +202,14 @@ func (r *ReadonlyMysqlConfigs) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyMysqlConfigs) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMysqlConfigs) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -346,7 +310,6 @@ func (m *HttpServer) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *HttpServer) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -380,6 +343,7 @@ func (m *HttpServer) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyHttpServer struct {
+	parser                          fastjson.Parser
 	Path      string `json:"path,omitempty" yaml:"path"`
 	rawBuffer []byte
 	Port      int32 `json:"port,omitempty" yaml:"port"`
@@ -410,6 +374,7 @@ func (r *ReadonlyHttpServer) Clone(dst *HttpServer) *HttpServer {
 
 func (r *ReadonlyHttpServer) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Path = ""
 	r.Port = 0
 }
@@ -424,40 +389,6 @@ func (r *ReadonlyHttpServer) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case HttpServerPathTag: // Path
 			if wt != utils.WireTypeLenDelim {
@@ -490,7 +421,6 @@ func (r *ReadonlyHttpServer) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyHttpServer) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -519,11 +449,9 @@ func (r *ReadonlyHttpServer) fromJSONValue(obj *fastjson.Object, parser *fastjso
 	return visitErr
 }
 
-func (r *ReadonlyHttpServer) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyHttpServer) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -545,14 +473,14 @@ func (r *ReadonlyHttpServer) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyHttpServer) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyHttpServer) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -659,7 +587,6 @@ func (m *AdminConfig) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AdminConfig) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -695,6 +622,7 @@ func (m *AdminConfig) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAdminConfig struct {
+	parser                          fastjson.Parser
 	Name      string `json:"name,omitempty" yaml:"name"`
 	Passwd    string `json:"passwd,omitempty" yaml:"passwd"`
 	rawBuffer []byte
@@ -731,6 +659,7 @@ func (r *ReadonlyAdminConfig) Clone(dst *AdminConfig) *AdminConfig {
 
 func (r *ReadonlyAdminConfig) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Name = ""
 	r.Passwd = ""
 }
@@ -745,40 +674,6 @@ func (r *ReadonlyAdminConfig) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AdminConfigNameTag: // Name
 			if wt != utils.WireTypeLenDelim {
@@ -806,7 +701,6 @@ func (r *ReadonlyAdminConfig) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAdminConfig) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -836,11 +730,9 @@ func (r *ReadonlyAdminConfig) fromJSONValue(obj *fastjson.Object, parser *fastjs
 	return visitErr
 }
 
-func (r *ReadonlyAdminConfig) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAdminConfig) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -862,14 +754,14 @@ func (r *ReadonlyAdminConfig) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAdminConfig) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAdminConfig) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -921,20 +813,241 @@ func (m *AdminConfig) ToProtobufVT(dst []byte) []byte {
 func (m *AdminConfig) ToProtobuf(dst []byte) []byte {
 	return m.ToProtobufVT(dst)
 }
+// MetricDataSourceConfig field tag IDs.
+const (
+	MetricDataSourceConfigResfreshIntervalSecondsTag = 1
+)
+
+// MetricDataSourceConfig JSON field name string constants.
+const (
+	NameOfMetricDataSourceConfigResfreshIntervalSeconds = "resfresh_interval_seconds"
+)
+
+// MetricDataSourceConfig YAML field name string constants.
+const (
+	NameOfYamlFieldMetricDataSourceConfigResfreshIntervalSeconds = "resfresh_interval_seconds"
+)
+
+// MetricDataSourceConfig writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type MetricDataSourceConfig struct {
+	ResfreshIntervalSeconds int32 `json:"resfresh_interval_seconds,omitempty" yaml:"resfresh_interval_seconds"`
+	arena                   []byte
+}
+
+func (m *MetricDataSourceConfig) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.ResfreshIntervalSeconds = 0
+}
+
+func (m *MetricDataSourceConfig) ProtobufSize() int {
+	size := 0
+	if m.ResfreshIntervalSeconds != 0 {
+		size += 1 /* TagSize(MetricDataSourceConfigResfreshIntervalSecondsTag, Varint=0) */ + (bits.Len64((uint64(m.ResfreshIntervalSeconds))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *MetricDataSourceConfig) ToProtobufByAppend(in []byte) []byte {
+	if m.ResfreshIntervalSeconds != 0 {
+		in = utils.AppendTag(in, MetricDataSourceConfigResfreshIntervalSecondsTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.ResfreshIntervalSeconds))
+	}
+	return in
+}
+func (m *MetricDataSourceConfig) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if m.ResfreshIntervalSeconds != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfMetricDataSourceConfigResfreshIntervalSeconds...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.ResfreshIntervalSeconds), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyMetricDataSourceConfig readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyMetricDataSourceConfig struct {
+	parser                          fastjson.Parser
+	rawBuffer               []byte
+	ResfreshIntervalSeconds int32 `json:"resfresh_interval_seconds,omitempty" yaml:"resfresh_interval_seconds"`
+}
+
+func (r *ReadonlyMetricDataSourceConfig) Clone(dst *MetricDataSourceConfig) *MetricDataSourceConfig {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &MetricDataSourceConfig{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	dst.ResfreshIntervalSeconds = r.ResfreshIntervalSeconds
+	return dst
+}
+
+func (r *ReadonlyMetricDataSourceConfig) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.ResfreshIntervalSeconds = 0
+}
+
+func (r *ReadonlyMetricDataSourceConfig) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case MetricDataSourceConfigResfreshIntervalSecondsTag: // ResfreshIntervalSeconds
+			if wt == utils.WireTypeVarint {
+				r.ResfreshIntervalSeconds, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.ResfreshIntervalSeconds = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResfreshIntervalSeconds", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyMetricDataSourceConfig) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfMetricDataSourceConfigResfreshIntervalSeconds:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.ResfreshIntervalSeconds = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyMetricDataSourceConfig) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyMetricDataSourceConfig) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyMetricDataSourceConfig) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *MetricDataSourceConfig) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if m.ResfreshIntervalSeconds != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.ResfreshIntervalSeconds))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *MetricDataSourceConfig) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *MetricDataSourceConfig) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
 // MetricsExplorerConfigs field tag IDs.
 const (
-	MetricsExplorerConfigsAdminTag = 4
-	MetricsExplorerConfigsSaltTag  = 1
-	MetricsExplorerConfigsMysqlTag = 3
-	MetricsExplorerConfigsHttpTag  = 2
+	MetricsExplorerConfigsAdminTag            = 4
+	MetricsExplorerConfigsSaltTag             = 1
+	MetricsExplorerConfigsMysqlTag            = 3
+	MetricsExplorerConfigsHttpTag             = 2
+	MetricsExplorerConfigsMetricDataSourceTag = 5
 )
 
 // MetricsExplorerConfigs JSON field name string constants.
 const (
-	NameOfMetricsExplorerConfigsAdmin = "admin"
-	NameOfMetricsExplorerConfigsSalt  = "salt"
-	NameOfMetricsExplorerConfigsMysql = "mysql"
-	NameOfMetricsExplorerConfigsHttp  = "http"
+	NameOfMetricsExplorerConfigsAdmin            = "admin"
+	NameOfMetricsExplorerConfigsSalt             = "salt"
+	NameOfMetricsExplorerConfigsMysql            = "mysql"
+	NameOfMetricsExplorerConfigsHttp             = "http"
+	NameOfMetricsExplorerConfigsMetricDataSource = "metric_data_source"
 )
 
 // MetricsExplorerConfigs YAML field name string constants.
@@ -943,16 +1056,18 @@ const (
 	NameOfYamlFieldMetricsExplorerConfigsSalt = "salt"
 	NameOfYamlFieldMetricsExplorerConfigsMysql = "mysql"
 	NameOfYamlFieldMetricsExplorerConfigsHttp = "http"
+	NameOfYamlFieldMetricsExplorerConfigsMetricDataSource = "metric_data_source"
 )
 
 // MetricsExplorerConfigs writer struct.
 // Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
 type MetricsExplorerConfigs struct {
-	Admin AdminConfig  `json:"admin,omitempty" yaml:"admin"`
-	Salt  string       `json:"salt,omitempty" yaml:"salt"`
-	Mysql MysqlConfigs `json:"mysql,omitempty" yaml:"mysql"`
-	Http  HttpServer   `json:"http,omitempty" yaml:"http"`
-	arena []byte
+	Admin            AdminConfig            `json:"admin,omitempty" yaml:"admin"`
+	Salt             string                 `json:"salt,omitempty" yaml:"salt"`
+	Mysql            MysqlConfigs           `json:"mysql,omitempty" yaml:"mysql"`
+	Http             HttpServer             `json:"http,omitempty" yaml:"http"`
+	MetricDataSource MetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
+	arena            []byte
 }
 
 func (m *MetricsExplorerConfigs) Reset() {
@@ -962,6 +1077,7 @@ func (m *MetricsExplorerConfigs) Reset() {
 	m.Salt = ""
 	m.Mysql.Reset()
 	m.Http.Reset()
+	m.MetricDataSource.Reset()
 }
 
 func (m *MetricsExplorerConfigs) ProtobufSize() int {
@@ -988,10 +1104,24 @@ func (m *MetricsExplorerConfigs) ProtobufSize() int {
 			size += 1 /* TagSize(MetricsExplorerConfigsHttpTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
 		}
 	}
+	{
+		sub := m.MetricDataSource.ProtobufSize()
+		if sub > 0 {
+			size += 1 /* TagSize(MetricsExplorerConfigsMetricDataSourceTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+	}
 	return size
 }
 
 func (m *MetricsExplorerConfigs) ToProtobufByAppend(in []byte) []byte {
+	{
+		sub := m.MetricDataSource.ProtobufSize()
+		if sub > 0 {
+			in = utils.AppendTag(in, MetricsExplorerConfigsMetricDataSourceTag, utils.WireTypeLenDelim)
+			in = utils.AppendVarint(in, uint64(sub))
+			in = m.MetricDataSource.ToProtobuf(in)
+		}
+	}
 	{
 		sub := m.Http.ProtobufSize()
 		if sub > 0 {
@@ -1022,7 +1152,6 @@ func (m *MetricsExplorerConfigs) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *MetricsExplorerConfigs) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -1062,6 +1191,14 @@ func (m *MetricsExplorerConfigs) ToJSON(dst []byte) []byte {
 	dst = append(dst, NameOfMetricsExplorerConfigsHttp...)
 	dst = append(dst, '"', ':')
 	dst = m.Http.ToJSON(dst)
+	if !_jsonFirstField {
+		dst = append(dst, ',')
+	}
+	_jsonFirstField = false
+	dst = append(dst, '"')
+	dst = append(dst, NameOfMetricsExplorerConfigsMetricDataSource...)
+	dst = append(dst, '"', ':')
+	dst = m.MetricDataSource.ToJSON(dst)
 	dst = append(dst, '}')
 	return dst
 }
@@ -1070,11 +1207,13 @@ func (m *MetricsExplorerConfigs) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMetricsExplorerConfigs struct {
-	Salt      string               `json:"salt,omitempty" yaml:"salt"`
-	Admin     ReadonlyAdminConfig  `json:"admin,omitempty" yaml:"admin"`
-	Mysql     ReadonlyMysqlConfigs `json:"mysql,omitempty" yaml:"mysql"`
-	rawBuffer []byte
-	Http      ReadonlyHttpServer `json:"http,omitempty" yaml:"http"`
+	parser                          fastjson.Parser
+	Salt             string               `json:"salt,omitempty" yaml:"salt"`
+	Admin            ReadonlyAdminConfig  `json:"admin,omitempty" yaml:"admin"`
+	Mysql            ReadonlyMysqlConfigs `json:"mysql,omitempty" yaml:"mysql"`
+	rawBuffer        []byte
+	Http             ReadonlyHttpServer             `json:"http,omitempty" yaml:"http"`
+	MetricDataSource ReadonlyMetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
 }
 
 func (r *ReadonlyMetricsExplorerConfigs) Clone(dst *MetricsExplorerConfigs) *MetricsExplorerConfigs {
@@ -1099,15 +1238,18 @@ func (r *ReadonlyMetricsExplorerConfigs) Clone(dst *MetricsExplorerConfigs) *Met
 	}
 	r.Mysql.Clone(&dst.Mysql)
 	r.Http.Clone(&dst.Http)
+	r.MetricDataSource.Clone(&dst.MetricDataSource)
 	return dst
 }
 
 func (r *ReadonlyMetricsExplorerConfigs) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Admin.Reset()
 	r.Salt = ""
 	r.Mysql.Reset()
 	r.Http.Reset()
+	r.MetricDataSource.Reset()
 }
 
 func (r *ReadonlyMetricsExplorerConfigs) FromProtobuf(in []byte) error {
@@ -1120,40 +1262,6 @@ func (r *ReadonlyMetricsExplorerConfigs) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case MetricsExplorerConfigsAdminTag: // Admin
 			if wt != utils.WireTypeLenDelim {
@@ -1199,6 +1307,18 @@ func (r *ReadonlyMetricsExplorerConfigs) FromProtobuf(in []byte) error {
 			if err = r.Http.FromProtobuf(subData); err != nil {
 				return err
 			}
+		case MetricsExplorerConfigsMetricDataSourceTag: // MetricDataSource
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field MetricDataSource", wt)
+			}
+			var subData []byte
+			subData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			if err = r.MetricDataSource.FromProtobuf(subData); err != nil {
+				return err
+			}
 		default:
 			var err2 error
 			in, err2 = utils.SkipField(wt, in)
@@ -1209,7 +1329,6 @@ func (r *ReadonlyMetricsExplorerConfigs) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyMetricsExplorerConfigs) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1253,16 +1372,23 @@ func (r *ReadonlyMetricsExplorerConfigs) fromJSONValue(obj *fastjson.Object, par
 			if _e2 := r.Http.fromJSONValue(_subObj, parser); _e2 != nil {
 				visitErr = _e2
 			}
+		case NameOfMetricsExplorerConfigsMetricDataSource:
+			_subObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if _e2 := r.MetricDataSource.fromJSONValue(_subObj, parser); _e2 != nil {
+				visitErr = _e2
+			}
 		}
 	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
 	return visitErr
 }
 
-func (r *ReadonlyMetricsExplorerConfigs) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMetricsExplorerConfigs) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1284,14 +1410,14 @@ func (r *ReadonlyMetricsExplorerConfigs) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyMetricsExplorerConfigs) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMetricsExplorerConfigs) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1335,6 +1461,15 @@ func (m *MetricsExplorerConfigs) marshalToSizedBufferVT(dAtA []byte) int {
 			i = utils.EncodeVarint(dAtA, i, uint64(size))
 			i--
 		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+		}
+	}
+	{
+		size := m.MetricDataSource.marshalToSizedBufferVT(dAtA[:i])
+		if size > 0 {
+			i -= size
+			i = utils.EncodeVarint(dAtA, i, uint64(size))
+			i--
+		dAtA[i] = 42 /*field=5, wireType=LenDelim, (5<<3)|2 (42)*/
 		}
 	}
 	return len(dAtA) - i
@@ -1414,7 +1549,6 @@ func (m *Configs) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *Configs) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -1435,6 +1569,7 @@ func (m *Configs) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyConfigs struct {
+	parser                          fastjson.Parser
 	rawBuffer       []byte
 	MetricsExplorer ReadonlyMetricsExplorerConfigs `json:"metrics_explorer,omitempty" yaml:"metrics_explorer"`
 }
@@ -1457,6 +1592,7 @@ func (r *ReadonlyConfigs) Clone(dst *Configs) *Configs {
 
 func (r *ReadonlyConfigs) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.MetricsExplorer.Reset()
 }
 
@@ -1470,40 +1606,6 @@ func (r *ReadonlyConfigs) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ConfigsMetricsExplorerTag: // MetricsExplorer
 			if wt != utils.WireTypeLenDelim {
@@ -1527,7 +1629,6 @@ func (r *ReadonlyConfigs) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyConfigs) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1550,11 +1651,9 @@ func (r *ReadonlyConfigs) fromJSONValue(obj *fastjson.Object, parser *fastjson.P
 	return visitErr
 }
 
-func (r *ReadonlyConfigs) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyConfigs) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1576,14 +1675,14 @@ func (r *ReadonlyConfigs) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyConfigs) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyConfigs) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill

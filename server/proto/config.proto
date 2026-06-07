@@ -25,6 +25,11 @@ message AdminConfig {
     string passwd = 2;
 }
 
+message MetricDataSourceConfig {
+    // @yamlName=resfresh_interval_seconds
+    int32 resfresh_interval_seconds = 1;
+}
+
 message MetricsExplorerConfigs {
   // @yamlName=salt
   string salt = 1;
@@ -37,6 +42,9 @@ message MetricsExplorerConfigs {
 
   // @yamlName=admin
   AdminConfig admin = 4;
+
+  // @yamlName=metric_data_source
+  MetricDataSourceConfig metric_data_source = 5;
 }
 
 // 定义配置文件

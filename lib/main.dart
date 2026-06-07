@@ -4,12 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'generated/api.pb.dart';
-import 'add_datasource.dart';
-import 'add_menu.dart';
-import 'add_user.dart';
-import 'list_datasource.dart';
-import 'list_menu.dart';
-import 'list_user.dart';
+import 'menu.dart';
+import 'session.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,27 +32,6 @@ class MyApp extends StatelessWidget {
       home: const GlobalConfigPage(),
     );
   }
-}
-
-// ─── Session (shared across all authenticated API calls) ──────────────────────
-
-class AppSession {
-  final String apiPath;
-  final String sessionToken;
-  final String userName;
-  final String salt;
-
-  const AppSession({
-    required this.apiPath,
-    required this.sessionToken,
-    required this.userName,
-    required this.salt,
-  });
-
-  Map<String, String> get headers => {
-        'Content-Type': 'application/protobuf',
-        'X-Session': sessionToken,
-      };
 }
 
 // ─── Global config ────────────────────────────────────────────────────────────
@@ -299,24 +274,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// ─── Tree node data model ─────────────────────────────────────────────────────
-
-class TreeNode {
-  final String id;
-  final String label;
-  final String link;
-  final bool expanded;
-  final List<TreeNode> children;
-
-  const TreeNode({
-    required this.id,
-    required this.label,
-    this.link = '',
-    this.expanded = true,
-    this.children = const [],
-  });
-}
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 class MainPage extends StatefulWidget {
@@ -331,7 +288,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   double? _sidebarWidth;
   bool _sidebarVisible = true;
-  String? _selectedNodeId;
+  String? _selectedNodeId;   // unique menu id for sidebar highlight
+  String? _selectedNodeLink; // link for ContentArea routing
   List<TreeNode> _menuTree = [];
   bool _menuLoading = true;
 
@@ -367,16 +325,43 @@ class _MainPageState extends State<MainPage> {
     setState(() => _menuLoading = false);
   }
 
-  List<TreeNode> _convertMenuTree(List<MenuTreeNode> nodes) {
-    return nodes
-        .map((n) => TreeNode(
-              id: n.menuId.toString(),
-              label: n.menuName,
-              link: n.link,
-              expanded: n.expanded,
-              children: _convertMenuTree(n.children),
-            ))
-        .toList();
+  List<TreeNode> _convertMenuTree(
+    List<MenuTreeNode> nodes, {
+    String? parentLink,
+    bool sortByName = false,
+  }) {
+    final result = nodes.map((n) {
+      final link = _resolveLink(n, parentLink);
+      final flags = n.bitFlags.toInt();
+      final childSortByName = sortByName || (flags & 2) != 0;
+      return TreeNode(
+        id: n.menuId.toString(),
+        label: n.menuName,
+        link: link,
+        bitFlags: flags,
+        children: _convertMenuTree(n.children, parentLink: n.link, sortByName: childSortByName),
+      );
+    }).toList();
+    if (sortByName) {
+      result.sort((a, b) => a.label.compareTo(b.label));
+    }
+    return result;
+  }
+
+  // For leaf children of a datasource node (JSON link parent), inject "type"
+  // into their link so ContentArea can route to the correct panel.
+  String _resolveLink(MenuTreeNode n, String? parentLink) {
+    if (parentLink == null || !parentLink.startsWith('{') || n.children.isNotEmpty) {
+      return n.link;
+    }
+    try {
+      final parentMap = jsonDecode(parentLink) as Map<String, dynamic>;
+      final enriched = Map<String, dynamic>.from(parentMap);
+      enriched['type'] = n.menuName;
+      return jsonEncode(enriched);
+    } catch (_) {
+      return n.link;
+    }
   }
 
   @override
@@ -421,7 +406,16 @@ class _MainPageState extends State<MainPage> {
                 _CollapsedStrip(
                   onTap: () => setState(() => _sidebarVisible = true),
                 ),
-              Expanded(child: _buildContentArea()),
+              Expanded(
+                child: ContentArea(
+                  selectedNodeId: _selectedNodeLink,
+                  session: widget.session,
+                  onNavigate: (link) => setState(() {
+                    _selectedNodeId = null;
+                    _selectedNodeLink = link;
+                  }),
+                ),
+              ),
             ],
           );
         },
@@ -485,11 +479,13 @@ class _MainPageState extends State<MainPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: _menuTree
-                          .map((n) => _SidebarTreeNode(
+                          .map((n) => SidebarTreeNode(
                                 node: n,
                                 selectedId: _selectedNodeId,
-                                onSelected: (link) =>
-                                    setState(() => _selectedNodeId = link),
+                                onSelected: (id, link) => setState(() {
+                                  _selectedNodeId = id;
+                                  _selectedNodeLink = link;
+                                }),
                                 depth: 0,
                               ))
                           .toList(),
@@ -501,49 +497,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _buildContentArea() {
-    if (_selectedNodeId == null) {
-      return const Center(
-        child: Text(
-          'Select an item from the menu',
-          style: TextStyle(color: Colors.grey, fontSize: 16),
-        ),
-      );
-    }
-    if (_selectedNodeId == 'user') {
-      return ListUserPage(
-        session: widget.session,
-        onAddUser: () => setState(() => _selectedNodeId = 'add_user'),
-      );
-    }
-    if (_selectedNodeId == 'add_user') {
-      return AddUserPage(session: widget.session);
-    }
-    if (_selectedNodeId == 'data_source') {
-      return ListDatasourcePage(
-        session: widget.session,
-        onAddDatasource: () => setState(() => _selectedNodeId = 'add_datasource'),
-      );
-    }
-    if (_selectedNodeId == 'add_datasource') {
-      return AddDatasourcePage(session: widget.session);
-    }
-    if (_selectedNodeId == 'menus') {
-      return ListMenuPage(
-        session: widget.session,
-        onAddMenu: () => setState(() => _selectedNodeId = 'add_menu'),
-      );
-    }
-    if (_selectedNodeId == 'add_menu') {
-      return AddMenuPage(session: widget.session);
-    }
-    return Center(
-      child: Text(
-        'Content: $_selectedNodeId',
-        style: const TextStyle(fontSize: 18),
-      ),
-    );
-  }
 }
 
 // ─── Animated resize divider ──────────────────────────────────────────────────
@@ -630,183 +583,6 @@ class _CollapsedStripState extends State<_CollapsedStrip> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ─── Animated sidebar tree node ───────────────────────────────────────────────
-
-class _SidebarTreeNode extends StatefulWidget {
-  final TreeNode node;
-  final String? selectedId;
-  final void Function(String id) onSelected;
-  final int depth;
-
-  const _SidebarTreeNode({
-    required this.node,
-    required this.selectedId,
-    required this.onSelected,
-    required this.depth,
-  });
-
-  @override
-  State<_SidebarTreeNode> createState() => _SidebarTreeNodeState();
-}
-
-class _SidebarTreeNodeState extends State<_SidebarTreeNode>
-    with SingleTickerProviderStateMixin {
-  bool _isExpanded = true;
-  bool _isHovered = false;
-
-  late final AnimationController _expandController;
-  late final Animation<double> _expandAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _isExpanded = widget.node.expanded;
-    _expandController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-      value: widget.node.expanded ? 1.0 : 0.0,
-    );
-    _expandAnimation = CurvedAnimation(
-      parent: _expandController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _expandController.dispose();
-    super.dispose();
-  }
-
-  void _toggle() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _expandController.forward();
-      } else {
-        _expandController.reverse();
-      }
-    });
-  }
-
-  bool _containsSelected(TreeNode node, String? selectedId) {
-    if (selectedId == null) return false;
-    if (node.link.isNotEmpty && node.link == selectedId) return true;
-    for (final child in node.children) {
-      if (_containsSelected(child, selectedId)) return true;
-    }
-    return false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isLeaf = widget.node.link.isNotEmpty;
-    final isSelected = isLeaf && widget.node.link == widget.selectedId;
-    final hasSelectedChild =
-        !isLeaf && _containsSelected(widget.node, widget.selectedId);
-    final leftPadding = 12.0 + widget.depth * 16.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: (_) => setState(() => _isHovered = true),
-          onExit: (_) => setState(() => _isHovered = false),
-          child: GestureDetector(
-            onTap: isLeaf ? () => widget.onSelected(widget.node.link) : _toggle,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: EdgeInsets.only(
-                left: leftPadding,
-                right: 12,
-                top: 7,
-                bottom: 7,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF5C6BC0).withValues(alpha: 0.12)
-                    : _isHovered
-                        ? Colors.grey.withValues(alpha: 0.12)
-                        : Colors.transparent,
-                border: isSelected
-                    ? const Border(
-                        left: BorderSide(color: Color(0xFF5C6BC0), width: 3),
-                      )
-                    : const Border(
-                        left: BorderSide(color: Colors.transparent, width: 3),
-                      ),
-              ),
-              child: Row(
-                children: [
-                  if (!isLeaf) ...[
-                    AnimatedRotation(
-                      turns: _isExpanded ? 0.25 : 0,
-                      duration: const Duration(milliseconds: 180),
-                      child: Icon(
-                        Icons.chevron_right,
-                        size: 16,
-                        color: hasSelectedChild
-                            ? const Color(0xFF5C6BC0)
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                  ] else
-                    const SizedBox(width: 20),
-                  Icon(
-                    isLeaf ? Icons.article_outlined : Icons.folder_outlined,
-                    size: 15,
-                    color: isSelected
-                        ? const Color(0xFF5C6BC0)
-                        : hasSelectedChild
-                            ? const Color(0xFF5C6BC0).withValues(alpha: 0.7)
-                            : Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      widget.node.label,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        color: isSelected
-                            ? const Color(0xFF3949AB)
-                            : hasSelectedChild
-                                ? const Color(0xFF5C6BC0)
-                                : const Color(0xFF333333),
-                        fontWeight: (isSelected || (hasSelectedChild && !isLeaf))
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (!isLeaf)
-          SizeTransition(
-            sizeFactor: _expandAnimation,
-            alignment: Alignment.topCenter,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: widget.node.children
-                  .map((c) => _SidebarTreeNode(
-                        node: c,
-                        selectedId: widget.selectedId,
-                        onSelected: widget.onSelected,
-                        depth: widget.depth + 1,
-                      ))
-                  .toList(),
-            ),
-          ),
-      ],
     );
   }
 }

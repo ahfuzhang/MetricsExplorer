@@ -26,6 +26,15 @@ var _ = fastfloat.ParseBestEffort
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
+type MetricType int32
+
+const (
+	Unknown     MetricType = 0
+	Counter     MetricType = 1
+	Staticvalue MetricType = 2
+	Histogram   MetricType = 3
+)
+
 // ─── Writer structs ──────────────────────────────────────────────────────────
 
 // GetGlobalConfigsResponse field tag IDs.
@@ -102,7 +111,6 @@ func (m *GetGlobalConfigsResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *GetGlobalConfigsResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -160,6 +168,7 @@ func (m *GetGlobalConfigsResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetGlobalConfigsResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	Salt      string `json:"salt,omitempty"`
 	APIPath   string `json:"api_path,omitempty"`
@@ -206,6 +215,7 @@ func (r *ReadonlyGetGlobalConfigsResponse) Clone(dst *GetGlobalConfigsResponse) 
 
 func (r *ReadonlyGetGlobalConfigsResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Salt = ""
 	r.APIPath = ""
@@ -222,40 +232,6 @@ func (r *ReadonlyGetGlobalConfigsResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetGlobalConfigsResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -304,7 +280,6 @@ func (r *ReadonlyGetGlobalConfigsResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyGetGlobalConfigsResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -349,11 +324,9 @@ func (r *ReadonlyGetGlobalConfigsResponse) fromJSONValue(obj *fastjson.Object, p
 	return visitErr
 }
 
-func (r *ReadonlyGetGlobalConfigsResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetGlobalConfigsResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -375,14 +348,14 @@ func (r *ReadonlyGetGlobalConfigsResponse) FromProtobufWithCopy(in []byte) error
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetGlobalConfigsResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetGlobalConfigsResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -497,7 +470,6 @@ func (m *LoginRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *LoginRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -533,6 +505,7 @@ func (m *LoginRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyLoginRequest struct {
+	parser                          fastjson.Parser
 	UserName  string `json:"user_name,omitempty"`
 	Passwd    string `json:"passwd,omitempty"`
 	rawBuffer []byte
@@ -569,6 +542,7 @@ func (r *ReadonlyLoginRequest) Clone(dst *LoginRequest) *LoginRequest {
 
 func (r *ReadonlyLoginRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.UserName = ""
 	r.Passwd = ""
 }
@@ -583,40 +557,6 @@ func (r *ReadonlyLoginRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case LoginRequestUserNameTag: // UserName
 			if wt != utils.WireTypeLenDelim {
@@ -644,7 +584,6 @@ func (r *ReadonlyLoginRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyLoginRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -674,11 +613,9 @@ func (r *ReadonlyLoginRequest) fromJSONValue(obj *fastjson.Object, parser *fastj
 	return visitErr
 }
 
-func (r *ReadonlyLoginRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoginRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -700,14 +637,14 @@ func (r *ReadonlyLoginRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyLoginRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoginRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -821,7 +758,6 @@ func (m *LoginResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *LoginResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -867,6 +803,7 @@ func (m *LoginResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyLoginResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
@@ -905,6 +842,7 @@ func (r *ReadonlyLoginResponse) Clone(dst *LoginResponse) *LoginResponse {
 
 func (r *ReadonlyLoginResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Session = ""
 	r.Code = 0
@@ -920,40 +858,6 @@ func (r *ReadonlyLoginResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case LoginResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -994,7 +898,6 @@ func (r *ReadonlyLoginResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyLoginResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1031,11 +934,9 @@ func (r *ReadonlyLoginResponse) fromJSONValue(obj *fastjson.Object, parser *fast
 	return visitErr
 }
 
-func (r *ReadonlyLoginResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoginResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1057,14 +958,14 @@ func (r *ReadonlyLoginResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyLoginResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoginResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1184,7 +1085,6 @@ func (m *AddUserRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddUserRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -1232,6 +1132,7 @@ func (m *AddUserRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddUserRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	UserName  string `json:"user_name,omitempty"`
 	Sha256    string `json:"sha256,omitempty"`
@@ -1276,6 +1177,7 @@ func (r *ReadonlyAddUserRequest) Clone(dst *AddUserRequest) *AddUserRequest {
 
 func (r *ReadonlyAddUserRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.UserName = ""
 	r.Sha256 = ""
@@ -1291,40 +1193,6 @@ func (r *ReadonlyAddUserRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddUserRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -1360,7 +1228,6 @@ func (r *ReadonlyAddUserRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddUserRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1398,11 +1265,9 @@ func (r *ReadonlyAddUserRequest) fromJSONValue(obj *fastjson.Object, parser *fas
 	return visitErr
 }
 
-func (r *ReadonlyAddUserRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddUserRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1424,14 +1289,14 @@ func (r *ReadonlyAddUserRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddUserRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddUserRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1540,7 +1405,6 @@ func (m *AddUserResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddUserResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -1574,6 +1438,7 @@ func (m *AddUserResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddUserResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -1604,6 +1469,7 @@ func (r *ReadonlyAddUserResponse) Clone(dst *AddUserResponse) *AddUserResponse {
 
 func (r *ReadonlyAddUserResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -1618,40 +1484,6 @@ func (r *ReadonlyAddUserResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddUserResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -1684,7 +1516,6 @@ func (r *ReadonlyAddUserResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddUserResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1713,11 +1544,9 @@ func (r *ReadonlyAddUserResponse) fromJSONValue(obj *fastjson.Object, parser *fa
 	return visitErr
 }
 
-func (r *ReadonlyAddUserResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddUserResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1739,14 +1568,14 @@ func (r *ReadonlyAddUserResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddUserResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddUserResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1835,7 +1664,6 @@ func (m *ListUserRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ListUserRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -1859,6 +1687,7 @@ func (m *ListUserRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyListUserRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 }
@@ -1887,6 +1716,7 @@ func (r *ReadonlyListUserRequest) Clone(dst *ListUserRequest) *ListUserRequest {
 
 func (r *ReadonlyListUserRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 }
 
@@ -1900,40 +1730,6 @@ func (r *ReadonlyListUserRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ListUserRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -1953,7 +1749,6 @@ func (r *ReadonlyListUserRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyListUserRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -1975,11 +1770,9 @@ func (r *ReadonlyListUserRequest) fromJSONValue(obj *fastjson.Object, parser *fa
 	return visitErr
 }
 
-func (r *ReadonlyListUserRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListUserRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -2001,14 +1794,14 @@ func (r *ReadonlyListUserRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyListUserRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListUserRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -2103,7 +1896,6 @@ func (m *User) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *User) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -2143,6 +1935,7 @@ func (m *User) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyUser struct {
+	parser                          fastjson.Parser
 	UserName  string `json:"user_name,omitempty"`
 	rawBuffer []byte
 	UserId    uint64 `json:"user_id,omitempty"`
@@ -2173,6 +1966,7 @@ func (r *ReadonlyUser) Clone(dst *User) *User {
 
 func (r *ReadonlyUser) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.UserName = ""
 	r.UserId = 0
 }
@@ -2187,40 +1981,6 @@ func (r *ReadonlyUser) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case UserUserNameTag: // UserName
 			if wt != utils.WireTypeLenDelim {
@@ -2251,7 +2011,6 @@ func (r *ReadonlyUser) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyUser) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -2297,11 +2056,9 @@ func (r *ReadonlyUser) fromJSONValue(obj *fastjson.Object, parser *fastjson.Pars
 	return visitErr
 }
 
-func (r *ReadonlyUser) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyUser) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -2323,14 +2080,14 @@ func (r *ReadonlyUser) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyUser) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyUser) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -2448,7 +2205,6 @@ func (m *ListUserResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ListUserResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -2501,6 +2257,7 @@ func (m *ListUserResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyListUserResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Users     []ReadonlyUser `json:"users,omitempty"`
@@ -2544,6 +2301,7 @@ func (r *ReadonlyListUserResponse) Clone(dst *ListUserResponse) *ListUserRespons
 
 func (r *ReadonlyListUserResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Users = r.Users[:0]
 	r.Code = 0
@@ -2559,40 +2317,6 @@ func (r *ReadonlyListUserResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ListUserResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -2605,6 +2329,10 @@ func (r *ReadonlyListUserResponse) FromProtobuf(in []byte) error {
 		case ListUserResponseUsersTag: // Users
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field Users", wt)
+			}
+            if cap(r.Users) < 64 {
+				temp := make([]ReadonlyUser, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Users = append(temp, r.Users...)
 			}
 			var subData []byte
 			subData, in, err = utils.ConsumeBytes(in)
@@ -2639,7 +2367,6 @@ func (r *ReadonlyListUserResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyListUserResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -2692,11 +2419,9 @@ func (r *ReadonlyListUserResponse) fromJSONValue(obj *fastjson.Object, parser *f
 	return visitErr
 }
 
-func (r *ReadonlyListUserResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListUserResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -2718,14 +2443,14 @@ func (r *ReadonlyListUserResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyListUserResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListUserResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -2832,7 +2557,6 @@ func (m *RemoveUserRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveUserRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -2872,6 +2596,7 @@ func (m *RemoveUserRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveUserRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 	UserId    uint64 `json:"user_id,omitempty"`
@@ -2902,6 +2627,7 @@ func (r *ReadonlyRemoveUserRequest) Clone(dst *RemoveUserRequest) *RemoveUserReq
 
 func (r *ReadonlyRemoveUserRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.UserId = 0
 }
@@ -2916,40 +2642,6 @@ func (r *ReadonlyRemoveUserRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveUserRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -2980,7 +2672,6 @@ func (r *ReadonlyRemoveUserRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveUserRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -3026,11 +2717,9 @@ func (r *ReadonlyRemoveUserRequest) fromJSONValue(obj *fastjson.Object, parser *
 	return visitErr
 }
 
-func (r *ReadonlyRemoveUserRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveUserRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -3052,14 +2741,14 @@ func (r *ReadonlyRemoveUserRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveUserRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveUserRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -3159,7 +2848,6 @@ func (m *RemoveUserResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveUserResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -3193,6 +2881,7 @@ func (m *RemoveUserResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveUserResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -3223,6 +2912,7 @@ func (r *ReadonlyRemoveUserResponse) Clone(dst *RemoveUserResponse) *RemoveUserR
 
 func (r *ReadonlyRemoveUserResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -3237,40 +2927,6 @@ func (r *ReadonlyRemoveUserResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveUserResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -3303,7 +2959,6 @@ func (r *ReadonlyRemoveUserResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveUserResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -3332,11 +2987,9 @@ func (r *ReadonlyRemoveUserResponse) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyRemoveUserResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveUserResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -3358,14 +3011,14 @@ func (r *ReadonlyRemoveUserResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveUserResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveUserResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -3477,7 +3130,6 @@ func (m *VictoriaMetricsDatasource) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *VictoriaMetricsDatasource) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -3529,6 +3181,7 @@ func (m *VictoriaMetricsDatasource) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyVictoriaMetricsDatasource struct {
+	parser                          fastjson.Parser
 	DatasourceName string `json:"datasource_name,omitempty"`
 	Addr           string `json:"addr,omitempty"`
 	rawBuffer      []byte
@@ -3567,6 +3220,7 @@ func (r *ReadonlyVictoriaMetricsDatasource) Clone(dst *VictoriaMetricsDatasource
 
 func (r *ReadonlyVictoriaMetricsDatasource) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.DatasourceName = ""
 	r.Addr = ""
 	r.VmDatasourceId = 0
@@ -3582,40 +3236,6 @@ func (r *ReadonlyVictoriaMetricsDatasource) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case VictoriaMetricsDatasourceDatasourceNameTag: // DatasourceName
 			if wt != utils.WireTypeLenDelim {
@@ -3654,7 +3274,6 @@ func (r *ReadonlyVictoriaMetricsDatasource) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyVictoriaMetricsDatasource) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -3708,11 +3327,9 @@ func (r *ReadonlyVictoriaMetricsDatasource) fromJSONValue(obj *fastjson.Object, 
 	return visitErr
 }
 
-func (r *ReadonlyVictoriaMetricsDatasource) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyVictoriaMetricsDatasource) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -3734,14 +3351,14 @@ func (r *ReadonlyVictoriaMetricsDatasource) FromProtobufWithCopy(in []byte) erro
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyVictoriaMetricsDatasource) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyVictoriaMetricsDatasource) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -3837,7 +3454,6 @@ func (m *ListDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ListDatasourceRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -3861,6 +3477,7 @@ func (m *ListDatasourceRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyListDatasourceRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 }
@@ -3889,6 +3506,7 @@ func (r *ReadonlyListDatasourceRequest) Clone(dst *ListDatasourceRequest) *ListD
 
 func (r *ReadonlyListDatasourceRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 }
 
@@ -3902,40 +3520,6 @@ func (r *ReadonlyListDatasourceRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ListDatasourceRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -3955,7 +3539,6 @@ func (r *ReadonlyListDatasourceRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyListDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -3977,11 +3560,9 @@ func (r *ReadonlyListDatasourceRequest) fromJSONValue(obj *fastjson.Object, pars
 	return visitErr
 }
 
-func (r *ReadonlyListDatasourceRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListDatasourceRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -4003,14 +3584,14 @@ func (r *ReadonlyListDatasourceRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyListDatasourceRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListDatasourceRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -4123,7 +3704,6 @@ func (m *ListDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ListDatasourceResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -4176,6 +3756,7 @@ func (m *ListDatasourceResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyListDatasourceResponse struct {
+	parser                          fastjson.Parser
 	Message     string `json:"message,omitempty"`
 	rawBuffer   []byte
 	Datasources []ReadonlyVictoriaMetricsDatasource `json:"datasources,omitempty"`
@@ -4219,6 +3800,7 @@ func (r *ReadonlyListDatasourceResponse) Clone(dst *ListDatasourceResponse) *Lis
 
 func (r *ReadonlyListDatasourceResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Datasources = r.Datasources[:0]
 	r.Code = 0
@@ -4234,40 +3816,6 @@ func (r *ReadonlyListDatasourceResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ListDatasourceResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -4280,6 +3828,10 @@ func (r *ReadonlyListDatasourceResponse) FromProtobuf(in []byte) error {
 		case ListDatasourceResponseDatasourcesTag: // Datasources
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field Datasources", wt)
+			}
+            if cap(r.Datasources) < 64 {
+				temp := make([]ReadonlyVictoriaMetricsDatasource, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Datasources = append(temp, r.Datasources...)
 			}
 			var subData []byte
 			subData, in, err = utils.ConsumeBytes(in)
@@ -4314,7 +3866,6 @@ func (r *ReadonlyListDatasourceResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyListDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -4367,11 +3918,9 @@ func (r *ReadonlyListDatasourceResponse) fromJSONValue(obj *fastjson.Object, par
 	return visitErr
 }
 
-func (r *ReadonlyListDatasourceResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListDatasourceResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -4393,14 +3942,14 @@ func (r *ReadonlyListDatasourceResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyListDatasourceResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyListDatasourceResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -4520,7 +4069,6 @@ func (m *AddDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddDatasourceRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -4568,6 +4116,7 @@ func (m *AddDatasourceRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddDatasourceRequest struct {
+	parser                          fastjson.Parser
 	Session        string `json:"session,omitempty"`
 	DatasourceName string `json:"datasource_name,omitempty"`
 	Addr           string `json:"addr,omitempty"`
@@ -4612,6 +4161,7 @@ func (r *ReadonlyAddDatasourceRequest) Clone(dst *AddDatasourceRequest) *AddData
 
 func (r *ReadonlyAddDatasourceRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.DatasourceName = ""
 	r.Addr = ""
@@ -4627,40 +4177,6 @@ func (r *ReadonlyAddDatasourceRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddDatasourceRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -4696,7 +4212,6 @@ func (r *ReadonlyAddDatasourceRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -4734,11 +4249,9 @@ func (r *ReadonlyAddDatasourceRequest) fromJSONValue(obj *fastjson.Object, parse
 	return visitErr
 }
 
-func (r *ReadonlyAddDatasourceRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddDatasourceRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -4760,14 +4273,14 @@ func (r *ReadonlyAddDatasourceRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddDatasourceRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddDatasourceRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -4876,7 +4389,6 @@ func (m *AddDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddDatasourceResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -4910,6 +4422,7 @@ func (m *AddDatasourceResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddDatasourceResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -4940,6 +4453,7 @@ func (r *ReadonlyAddDatasourceResponse) Clone(dst *AddDatasourceResponse) *AddDa
 
 func (r *ReadonlyAddDatasourceResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -4954,40 +4468,6 @@ func (r *ReadonlyAddDatasourceResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddDatasourceResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -5020,7 +4500,6 @@ func (r *ReadonlyAddDatasourceResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -5049,11 +4528,9 @@ func (r *ReadonlyAddDatasourceResponse) fromJSONValue(obj *fastjson.Object, pars
 	return visitErr
 }
 
-func (r *ReadonlyAddDatasourceResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddDatasourceResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -5075,14 +4552,14 @@ func (r *ReadonlyAddDatasourceResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddDatasourceResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddDatasourceResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -5182,7 +4659,6 @@ func (m *RemoveDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveDatasourceRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -5222,6 +4698,7 @@ func (m *RemoveDatasourceRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveDatasourceRequest struct {
+	parser                          fastjson.Parser
 	Session        string `json:"session,omitempty"`
 	rawBuffer      []byte
 	VmDatasourceId uint64 `json:"vm_datasource_id,omitempty"`
@@ -5252,6 +4729,7 @@ func (r *ReadonlyRemoveDatasourceRequest) Clone(dst *RemoveDatasourceRequest) *R
 
 func (r *ReadonlyRemoveDatasourceRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.VmDatasourceId = 0
 }
@@ -5266,40 +4744,6 @@ func (r *ReadonlyRemoveDatasourceRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveDatasourceRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -5330,7 +4774,6 @@ func (r *ReadonlyRemoveDatasourceRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -5376,11 +4819,9 @@ func (r *ReadonlyRemoveDatasourceRequest) fromJSONValue(obj *fastjson.Object, pa
 	return visitErr
 }
 
-func (r *ReadonlyRemoveDatasourceRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveDatasourceRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -5402,14 +4843,14 @@ func (r *ReadonlyRemoveDatasourceRequest) FromProtobufWithCopy(in []byte) error 
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveDatasourceRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveDatasourceRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -5509,7 +4950,6 @@ func (m *RemoveDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveDatasourceResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -5543,6 +4983,7 @@ func (m *RemoveDatasourceResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveDatasourceResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -5573,6 +5014,7 @@ func (r *ReadonlyRemoveDatasourceResponse) Clone(dst *RemoveDatasourceResponse) 
 
 func (r *ReadonlyRemoveDatasourceResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -5587,40 +5029,6 @@ func (r *ReadonlyRemoveDatasourceResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveDatasourceResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -5653,7 +5061,6 @@ func (r *ReadonlyRemoveDatasourceResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -5682,11 +5089,9 @@ func (r *ReadonlyRemoveDatasourceResponse) fromJSONValue(obj *fastjson.Object, p
 	return visitErr
 }
 
-func (r *ReadonlyRemoveDatasourceResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveDatasourceResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -5708,14 +5113,14 @@ func (r *ReadonlyRemoveDatasourceResponse) FromProtobufWithCopy(in []byte) error
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveDatasourceResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveDatasourceResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -5816,7 +5221,6 @@ func (m *GetLabelsByDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *GetLabelsByDatasourceRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -5852,6 +5256,7 @@ func (m *GetLabelsByDatasourceRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetLabelsByDatasourceRequest struct {
+	parser                          fastjson.Parser
 	Session          string `json:"session,omitempty"`
 	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
 	rawBuffer        []byte
@@ -5888,6 +5293,7 @@ func (r *ReadonlyGetLabelsByDatasourceRequest) Clone(dst *GetLabelsByDatasourceR
 
 func (r *ReadonlyGetLabelsByDatasourceRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.VmDatasourceName = ""
 }
@@ -5902,40 +5308,6 @@ func (r *ReadonlyGetLabelsByDatasourceRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetLabelsByDatasourceRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -5963,7 +5335,6 @@ func (r *ReadonlyGetLabelsByDatasourceRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyGetLabelsByDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -5993,11 +5364,9 @@ func (r *ReadonlyGetLabelsByDatasourceRequest) fromJSONValue(obj *fastjson.Objec
 	return visitErr
 }
 
-func (r *ReadonlyGetLabelsByDatasourceRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetLabelsByDatasourceRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -6019,14 +5388,14 @@ func (r *ReadonlyGetLabelsByDatasourceRequest) FromProtobufWithCopy(in []byte) e
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetLabelsByDatasourceRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetLabelsByDatasourceRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -6078,46 +5447,320 @@ func (m *GetLabelsByDatasourceRequest) ToProtobufVT(dst []byte) []byte {
 func (m *GetLabelsByDatasourceRequest) ToProtobuf(dst []byte) []byte {
 	return m.ToProtobufVT(dst)
 }
+// LabelValues field tag IDs.
+const (
+	LabelValuesValuesTag = 1
+)
+
+// LabelValues JSON field name string constants.
+const (
+	NameOfLabelValuesValues = "values"
+)
+
+// LabelValues writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type LabelValues struct {
+	Values []string `json:"values,omitempty"`
+	arena  []byte
+}
+
+func (m *LabelValues) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Values = m.Values[:0]
+}
+
+func (m *LabelValues) ProtobufSize() int {
+	size := 0
+	for _, v := range m.Values {
+		n := len(v)
+		size += 1 /* TagSize(LabelValuesValuesTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *LabelValues) ToProtobufByAppend(in []byte) []byte {
+	for _, v := range m.Values {
+		in = utils.AppendTag(in, LabelValuesValuesTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(v), len(v)))
+	}
+	return in
+}
+func (m *LabelValues) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Values) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfLabelValuesValues...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Values {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, ']')
+		}
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyLabelValues readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyLabelValues struct {
+	parser                          fastjson.Parser
+	rawBuffer []byte
+	Values    []string `json:"values,omitempty"`
+}
+
+func (r *ReadonlyLabelValues) Clone(dst *LabelValues) *LabelValues {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &LabelValues{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Values) > 0 {
+		_total := 0
+		for _, _s := range r.Values {
+			_total += len(_s)
+		}
+		if cap(dst.arena)-len(dst.arena) < _total {
+			_nc := cap(dst.arena)*2 + _total
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		if cap(dst.Values) >= len(r.Values) {
+			dst.Values = dst.Values[:len(r.Values)]
+		} else {
+			dst.Values = make([]string, len(r.Values))
+		}
+		for _i, _s := range r.Values {
+			_loc := len(dst.arena)
+			dst.arena = append(dst.arena, _s...)
+			dst.Values[_i] = unsafe.String(&dst.arena[_loc], len(_s))
+		}
+	} else {
+		dst.Values = dst.Values[:0]
+	}
+	return dst
+}
+
+func (r *ReadonlyLabelValues) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Values = r.Values[:0]
+}
+
+func (r *ReadonlyLabelValues) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case LabelValuesValuesTag: // Values
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Values", wt)
+			}
+            if cap(r.Values) < 64 {
+				temp := make([]string, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Values = append(temp, r.Values...)
+			}
+			var sv string
+			sv, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+			r.Values = append(r.Values, sv)
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyLabelValues) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfLabelValuesValues:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Values) < len(_arr) {
+				r.Values = make([]string, 0, len(_arr))
+			} else {
+				r.Values = r.Values[:0]
+			}
+			for _, _item := range _arr {
+				_ = _item.Type(parser)
+				_b, _ei := _item.StringBytes()
+				if _ei != nil {
+					visitErr = _ei
+					return
+				}
+				r.Values = append(r.Values, unsafe.String(unsafe.SliceData(_b), len(_b)))
+			}
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyLabelValues) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyLabelValues) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyLabelValues) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *LabelValues) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for iNdEx := len(m.Values) - 1; iNdEx >= 0; iNdEx-- {
+		s := m.Values[iNdEx]
+		i -= len(s)
+		copy(dAtA[i:], s)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(s)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *LabelValues) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *LabelValues) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
 // GetLabelsByDatasourceResponse field tag IDs.
 const (
-	GetLabelsByDatasourceResponseMessageTag = 2
 	GetLabelsByDatasourceResponseLabelsTag  = 3
+	GetLabelsByDatasourceResponseMessageTag = 2
 	GetLabelsByDatasourceResponseCodeTag    = 1
 )
 
 // GetLabelsByDatasourceResponse JSON field name string constants.
 const (
-	NameOfGetLabelsByDatasourceResponseMessage = "message"
 	NameOfGetLabelsByDatasourceResponseLabels  = "labels"
+	NameOfGetLabelsByDatasourceResponseMessage = "message"
 	NameOfGetLabelsByDatasourceResponseCode    = "code"
 )
 
 // GetLabelsByDatasourceResponse writer struct.
 // Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
 type GetLabelsByDatasourceResponse struct {
-	Message string   `json:"message,omitempty"`
-	Labels  []string `json:"labels,omitempty"`
-	Code    int32    `json:"code,omitempty"`
+	Labels  map[string]*LabelValues `json:"labels,omitempty"`
+	Message string                  `json:"message,omitempty"`
+	Code    int32                   `json:"code,omitempty"`
 	arena   []byte
 }
 
 func (m *GetLabelsByDatasourceResponse) Reset() {
 	clear(m.arena) // pointer might be cause not GC correctly
 	m.arena = m.arena[:0]
+	clear(m.Labels)
 	m.Message = ""
-	m.Labels = m.Labels[:0]
 	m.Code = 0
 }
 
 func (m *GetLabelsByDatasourceResponse) ProtobufSize() int {
 	size := 0
+	for k, v := range m.Labels {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			sub := v.ProtobufSize()
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+		size += 1 /* TagSize(GetLabelsByDatasourceResponseLabelsTag, LenDelim=2) */ + (bits.Len64((uint64(entrySize))|1) + 6) / 7 + entrySize
+	}
 	if m.Message != "" {
 		n := len(m.Message)
 		size += 1 /* TagSize(GetLabelsByDatasourceResponseMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
-	}
-	for _, v := range m.Labels {
-		n := len(v)
-		size += 1 /* TagSize(GetLabelsByDatasourceResponseLabelsTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
 	}
 	if m.Code != 0 {
 		size += 1 /* TagSize(GetLabelsByDatasourceResponseCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
@@ -6130,20 +5773,57 @@ func (m *GetLabelsByDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
 		in = utils.AppendTag(in, GetLabelsByDatasourceResponseCodeTag, utils.WireTypeVarint)
 		in = utils.AppendVarint(in, uint64(m.Code))
 	}
-	for _, v := range m.Labels {
-		in = utils.AppendTag(in, GetLabelsByDatasourceResponseLabelsTag, utils.WireTypeLenDelim)
-		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(v), len(v)))
-	}
 	if m.Message != "" {
 		in = utils.AppendTag(in, GetLabelsByDatasourceResponseMessageTag, utils.WireTypeLenDelim)
 		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
 	}
+	for k, v := range m.Labels {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		valMsgSize := v.ProtobufSize()
+		entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(valMsgSize))|1) + 6) / 7 + valMsgSize
+		in = utils.AppendTag(in, GetLabelsByDatasourceResponseLabelsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(entrySize))
+		in = utils.AppendTag(in, 1, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(k)))
+		in = append(in, k...)
+		in = utils.AppendTag(in, 2, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(valMsgSize))
+		in = v.ToProtobuf(in)
+	}
 	return in
 }
-
 func (m *GetLabelsByDatasourceResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
+	if len(m.Labels) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetLabelsByDatasourceResponseLabels...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '{')
+			_jsonFirst := true
+			for _k, _v := range m.Labels {
+				if !_jsonFirst {
+					dst = append(dst, ',')
+				}
+				_jsonFirst = false
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_k, dst)
+				dst = append(dst, '"')
+				dst = append(dst, ':')
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, '}')
+		}
+	}
 	if len(m.Message) > 0 {
 		if !_jsonFirstField {
 			dst = append(dst, ',')
@@ -6155,27 +5835,6 @@ func (m *GetLabelsByDatasourceResponse) ToJSON(dst []byte) []byte {
 		dst = append(dst, '"')
 		dst = utils.EncodeJSONString(m.Message, dst)
 		dst = append(dst, '"')
-	}
-	if len(m.Labels) > 0 {
-		if !_jsonFirstField {
-			dst = append(dst, ',')
-		}
-		_jsonFirstField = false
-		dst = append(dst, '"')
-		dst = append(dst, NameOfGetLabelsByDatasourceResponseLabels...)
-		dst = append(dst, '"', ':')
-		{
-			dst = append(dst, '[')
-			for _i, _v := range m.Labels {
-				if _i > 0 {
-					dst = append(dst, ',')
-				}
-				dst = append(dst, '"')
-				dst = utils.EncodeJSONString(_v, dst)
-				dst = append(dst, '"')
-			}
-			dst = append(dst, ']')
-		}
 	}
 	if m.Code != 0 {
 		if !_jsonFirstField {
@@ -6195,10 +5854,12 @@ func (m *GetLabelsByDatasourceResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetLabelsByDatasourceResponse struct {
-	Message   string `json:"message,omitempty"`
-	rawBuffer []byte
-	Labels    []string `json:"labels,omitempty"`
-	Code      int32    `json:"code,omitempty"`
+	parser                          fastjson.Parser
+	Labels     map[string]*ReadonlyLabelValues `json:"labels,omitempty"`
+	_LabelsArr []ReadonlyLabelValues
+	Message    string `json:"message,omitempty"`
+	rawBuffer  []byte
+	Code       int32 `json:"code,omitempty"`
 }
 
 func (r *ReadonlyGetLabelsByDatasourceResponse) Clone(dst *GetLabelsByDatasourceResponse) *GetLabelsByDatasourceResponse {
@@ -6213,6 +5874,23 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) Clone(dst *GetLabelsByDatasource
 	} else {
 		dst.arena = dst.arena[:0]
 	}
+	if len(r.Labels) > 0 {
+		if dst.Labels == nil {
+			dst.Labels = make(map[string]*LabelValues, len(r.Labels))
+		} else {
+			clear(dst.Labels)
+		}
+		for _rk, _rv := range r.Labels {
+			{
+				_kloc := len(dst.arena)
+				dst.arena = append(dst.arena, _rk...)
+				_nk := unsafe.String(&dst.arena[_kloc], len(_rk))
+				_nv := new(LabelValues)
+				_rv.Clone(_nv)
+				dst.Labels[_nk] = _nv
+			}
+		}
+	}
 	if len(r.Message) > 0 {
 		_loc := len(dst.arena)
 		dst.arena = append(dst.arena, r.Message...)
@@ -6220,38 +5898,17 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) Clone(dst *GetLabelsByDatasource
 	} else {
 		dst.Message = ""
 	}
-	if len(r.Labels) > 0 {
-		_total := 0
-		for _, _s := range r.Labels {
-			_total += len(_s)
-		}
-		if cap(dst.arena)-len(dst.arena) < _total {
-			_nc := cap(dst.arena)*2 + _total
-			_na := make([]byte, len(dst.arena), _nc)
-			copy(_na, dst.arena)
-			dst.arena = _na
-		}
-		if cap(dst.Labels) >= len(r.Labels) {
-			dst.Labels = dst.Labels[:len(r.Labels)]
-		} else {
-			dst.Labels = make([]string, len(r.Labels))
-		}
-		for _i, _s := range r.Labels {
-			_loc := len(dst.arena)
-			dst.arena = append(dst.arena, _s...)
-			dst.Labels[_i] = unsafe.String(&dst.arena[_loc], len(_s))
-		}
-	} else {
-		dst.Labels = dst.Labels[:0]
-	}
 	dst.Code = r.Code
 	return dst
 }
 
 func (r *ReadonlyGetLabelsByDatasourceResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
+	clear(r.Labels)
+	clear(r._LabelsArr)
+	r._LabelsArr = r._LabelsArr[:0]
 	r.Message = ""
-	r.Labels = r.Labels[:0]
 	r.Code = 0
 }
 
@@ -6265,41 +5922,56 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
+		case GetLabelsByDatasourceResponseLabelsTag: // Labels
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Labels", wt)
+			}
+			var entryData []byte
+			entryData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			// todo: 提前 count 元素个数
+			//  _mapKeyCount := utils.CountMapKey(entryData)  // 这个没有用，这个值一定是 1
+			var mKey string
+			if cap(r._LabelsArr) < 16 {
+				r._LabelsArr = append(make([]ReadonlyLabelValues, 0, 16), r._LabelsArr...)
+			}
+			if cap(r._LabelsArr) == len(r._LabelsArr) {
+				r._LabelsArr = append(r._LabelsArr, ReadonlyLabelValues{})
+			} else {
+				r._LabelsArr = r._LabelsArr[:len(r._LabelsArr)+1]
+			}
+			_mValIdx := len(r._LabelsArr) - 1
+			for len(entryData) > 0 {
+				var efn int
+				var ewt utils.WireType
+				efn, ewt, entryData, err = utils.ConsumeTag(entryData)
+				if err != nil {
+					return err
+				}
+				switch efn {
+				case 1:
+					mKey, entryData, err = utils.ReadString(entryData)
+				case 2:
+					var _subBytes []byte
+					_subBytes, entryData, err = utils.ConsumeBytes(entryData)
+					if err != nil {
+						break
+					}
+					err = r._LabelsArr[_mValIdx].FromProtobuf(_subBytes)
+				default:
+					entryData, err = utils.SkipField(ewt, entryData)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			if r.Labels == nil {
+				r.Labels = make(map[string]*ReadonlyLabelValues, 64)
+			}
+			r.Labels[mKey] = &r._LabelsArr[_mValIdx]
 		case GetLabelsByDatasourceResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
@@ -6308,16 +5980,6 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) FromProtobuf(in []byte) error {
 			if err != nil {
 				return err
 			}
-		case GetLabelsByDatasourceResponseLabelsTag: // Labels
-			if wt != utils.WireTypeLenDelim {
-				return fmt.Errorf("proto: wrong wireType = %d for field Labels", wt)
-			}
-			var sv string
-			sv, in, err = utils.ReadString(in)
-			if err != nil {
-				return err
-			}
-			r.Labels = append(r.Labels, sv)
 		case GetLabelsByDatasourceResponseCodeTag: // Code
 			if wt == utils.WireTypeVarint {
 				r.Code, in, err = utils.ReadInt32(in)
@@ -6341,7 +6003,6 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyGetLabelsByDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -6350,6 +6011,45 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) fromJSONValue(obj *fastjson.Obje
 		}
 		k1 := unsafe.String(unsafe.SliceData(k), len(k))
 		switch k1 {
+		case NameOfGetLabelsByDatasourceResponseLabels:
+			_mapObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if r.Labels == nil {
+				r.Labels = make(map[string]*ReadonlyLabelValues, _mapObj.Len())
+			}
+			if r._LabelsArr == nil {
+				r._LabelsArr = make([]ReadonlyLabelValues, 0, _mapObj.Len())
+			} else {
+				if cap(r._LabelsArr) >= _mapObj.Len() {
+					r._LabelsArr = r._LabelsArr[:0]
+				} else {
+					r._LabelsArr = make([]ReadonlyLabelValues, 0, _mapObj.Len())
+				}
+			}
+			_mapObj.Visit(func(mk []byte, mv *fastjson.Value) {
+				if visitErr != nil {
+					return
+				}
+				var mKey string
+				mKey = unsafe.String(unsafe.SliceData(mk), len(mk))
+				// r._LabelsArr = append(r._LabelsArr, ReadonlyLabelValues{})
+				r._LabelsArr = r._LabelsArr[:len(r._LabelsArr)+1]
+				_mValIdx := len(r._LabelsArr) - 1
+				sub := &r._LabelsArr[_mValIdx]
+				_subObj, _eo := mv.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := sub.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.Labels[mKey] = sub
+			}, parser, false)
 		case NameOfGetLabelsByDatasourceResponseMessage:
 			_ = v.Type(parser)
 			_b, _e := v.StringBytes()
@@ -6358,26 +6058,6 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) fromJSONValue(obj *fastjson.Obje
 				return
 			}
 			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
-		case NameOfGetLabelsByDatasourceResponseLabels:
-			_arr, _e := v.Array()
-			if _e != nil {
-				visitErr = _e
-				return
-			}
-			if cap(r.Labels) < len(_arr) {
-				r.Labels = make([]string, 0, len(_arr))
-			} else {
-				r.Labels = r.Labels[:0]
-			}
-			for _, _item := range _arr {
-				_ = _item.Type(parser)
-				_b, _ei := _item.StringBytes()
-				if _ei != nil {
-					visitErr = _ei
-					return
-				}
-				r.Labels = append(r.Labels, unsafe.String(unsafe.SliceData(_b), len(_b)))
-			}
 		case NameOfGetLabelsByDatasourceResponseCode:
 			_iv, _e := v.Int64()
 			if _e != nil {
@@ -6390,11 +6070,9 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) fromJSONValue(obj *fastjson.Obje
 	return visitErr
 }
 
-func (r *ReadonlyGetLabelsByDatasourceResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetLabelsByDatasourceResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -6416,14 +6094,14 @@ func (r *ReadonlyGetLabelsByDatasourceResponse) FromProtobufWithCopy(in []byte) 
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetLabelsByDatasourceResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetLabelsByDatasourceResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -6435,20 +6113,30 @@ func (m *GetLabelsByDatasourceResponse) marshalToSizedBufferVT(dAtA []byte) int 
 	}
 	i := len(dAtA)
 	_ = i
+	for k := range m.Labels {
+		v := m.Labels[k]
+		baseI := i
+		size := v.marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 18 /*(2<<3)|2=18, field=2, wireType=LenDelim*/
+		i -= len(k)
+		copy(dAtA[i:], k)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(k)))
+		i--
+		dAtA[i] = 10 /*(1<<3)|2=10, field=1, wireType=LenDelim*/
+		// write outer map entry length + field tag
+		i = utils.EncodeVarint(dAtA, i, uint64(baseI-i))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
 	if len(m.Message) > 0 {
 		i -= len(m.Message)
 		copy(dAtA[i:], m.Message)
 		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
 		i--
 		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
-	}
-	for iNdEx := len(m.Labels) - 1; iNdEx >= 0; iNdEx-- {
-		s := m.Labels[iNdEx]
-		i -= len(s)
-		copy(dAtA[i:], s)
-		i = utils.EncodeVarint(dAtA, i, uint64(len(s)))
-		i--
-		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
 	}
 	if m.Code != 0 {
 		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
@@ -6479,7 +6167,7 @@ func (m *GetLabelsByDatasourceResponse) ToProtobufVT(dst []byte) []byte {
 }
 
 func (m *GetLabelsByDatasourceResponse) ToProtobuf(dst []byte) []byte {
-	return m.ToProtobufVT(dst)
+	return m.ToProtobufByAppend(dst)
 }
 // GetMetricNamesByDatasourceRequest field tag IDs.
 const (
@@ -6532,7 +6220,6 @@ func (m *GetMetricNamesByDatasourceRequest) ToProtobufByAppend(in []byte) []byte
 	}
 	return in
 }
-
 func (m *GetMetricNamesByDatasourceRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -6568,6 +6255,7 @@ func (m *GetMetricNamesByDatasourceRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetMetricNamesByDatasourceRequest struct {
+	parser                          fastjson.Parser
 	Session          string `json:"session,omitempty"`
 	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
 	rawBuffer        []byte
@@ -6604,6 +6292,7 @@ func (r *ReadonlyGetMetricNamesByDatasourceRequest) Clone(dst *GetMetricNamesByD
 
 func (r *ReadonlyGetMetricNamesByDatasourceRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.VmDatasourceName = ""
 }
@@ -6618,40 +6307,6 @@ func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromProtobuf(in []byte) erro
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetMetricNamesByDatasourceRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -6679,7 +6334,6 @@ func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromProtobuf(in []byte) erro
 	}
 	return nil
 }
-
 func (r *ReadonlyGetMetricNamesByDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -6709,11 +6363,9 @@ func (r *ReadonlyGetMetricNamesByDatasourceRequest) fromJSONValue(obj *fastjson.
 	return visitErr
 }
 
-func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -6735,14 +6387,14 @@ func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromProtobufWithCopy(in []by
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMetricNamesByDatasourceRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -6856,7 +6508,6 @@ func (m *GetMetricNamesByDatasourceResponse) ToProtobufByAppend(in []byte) []byt
 	}
 	return in
 }
-
 func (m *GetMetricNamesByDatasourceResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -6911,6 +6562,7 @@ func (m *GetMetricNamesByDatasourceResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetMetricNamesByDatasourceResponse struct {
+	parser                          fastjson.Parser
 	Message     string `json:"message,omitempty"`
 	rawBuffer   []byte
 	MetricNames []string `json:"metric_names,omitempty"`
@@ -6966,6 +6618,7 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) Clone(dst *GetMetricNamesBy
 
 func (r *ReadonlyGetMetricNamesByDatasourceResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.MetricNames = r.MetricNames[:0]
 	r.Code = 0
@@ -6981,40 +6634,6 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromProtobuf(in []byte) err
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetMetricNamesByDatasourceResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -7027,6 +6646,10 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromProtobuf(in []byte) err
 		case GetMetricNamesByDatasourceResponseMetricNamesTag: // MetricNames
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field MetricNames", wt)
+			}
+            if cap(r.MetricNames) < 64 {
+				temp := make([]string, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.MetricNames = append(temp, r.MetricNames...)
 			}
 			var sv string
 			sv, in, err = utils.ReadString(in)
@@ -7057,7 +6680,6 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromProtobuf(in []byte) err
 	}
 	return nil
 }
-
 func (r *ReadonlyGetMetricNamesByDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -7106,11 +6728,9 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) fromJSONValue(obj *fastjson
 	return visitErr
 }
 
-func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -7132,14 +6752,14 @@ func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromProtobufWithCopy(in []b
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMetricNamesByDatasourceResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -7197,6 +6817,3688 @@ func (m *GetMetricNamesByDatasourceResponse) ToProtobufVT(dst []byte) []byte {
 func (m *GetMetricNamesByDatasourceResponse) ToProtobuf(dst []byte) []byte {
 	return m.ToProtobufVT(dst)
 }
+// GetSeriesByDatasourceRequest field tag IDs.
+const (
+	GetSeriesByDatasourceRequestSessionTag          = 1
+	GetSeriesByDatasourceRequestVmDatasourceNameTag = 2
+	GetSeriesByDatasourceRequestMetricNameTag       = 3
+)
+
+// GetSeriesByDatasourceRequest JSON field name string constants.
+const (
+	NameOfGetSeriesByDatasourceRequestSession          = "session"
+	NameOfGetSeriesByDatasourceRequestVmDatasourceName = "vm_datasource_name"
+	NameOfGetSeriesByDatasourceRequestMetricName       = "metric_name"
+)
+
+// GetSeriesByDatasourceRequest writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetSeriesByDatasourceRequest struct {
+	Session          string `json:"session,omitempty"`
+	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
+	MetricName       string `json:"metric_name,omitempty"`
+	arena            []byte
+}
+
+func (m *GetSeriesByDatasourceRequest) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Session = ""
+	m.VmDatasourceName = ""
+	m.MetricName = ""
+}
+
+func (m *GetSeriesByDatasourceRequest) ProtobufSize() int {
+	size := 0
+	if m.Session != "" {
+		n := len(m.Session)
+		size += 1 /* TagSize(GetSeriesByDatasourceRequestSessionTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.VmDatasourceName != "" {
+		n := len(m.VmDatasourceName)
+		size += 1 /* TagSize(GetSeriesByDatasourceRequestVmDatasourceNameTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.MetricName != "" {
+		n := len(m.MetricName)
+		size += 1 /* TagSize(GetSeriesByDatasourceRequestMetricNameTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *GetSeriesByDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
+	if m.MetricName != "" {
+		in = utils.AppendTag(in, GetSeriesByDatasourceRequestMetricNameTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.MetricName), len(m.MetricName)))
+	}
+	if m.VmDatasourceName != "" {
+		in = utils.AppendTag(in, GetSeriesByDatasourceRequestVmDatasourceNameTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.VmDatasourceName), len(m.VmDatasourceName)))
+	}
+	if m.Session != "" {
+		in = utils.AppendTag(in, GetSeriesByDatasourceRequestSessionTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Session), len(m.Session)))
+	}
+	return in
+}
+func (m *GetSeriesByDatasourceRequest) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Session) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceRequestSession...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Session, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.VmDatasourceName) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceRequestVmDatasourceName...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.VmDatasourceName, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.MetricName) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceRequestMetricName...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.MetricName, dst)
+		dst = append(dst, '"')
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetSeriesByDatasourceRequest readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetSeriesByDatasourceRequest struct {
+	parser                          fastjson.Parser
+	Session          string `json:"session,omitempty"`
+	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
+	MetricName       string `json:"metric_name,omitempty"`
+	rawBuffer        []byte
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) Clone(dst *GetSeriesByDatasourceRequest) *GetSeriesByDatasourceRequest {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetSeriesByDatasourceRequest{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Session) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Session...)
+		dst.Session = unsafe.String(&dst.arena[_loc], len(r.Session))
+	} else {
+		dst.Session = ""
+	}
+	if len(r.VmDatasourceName) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.VmDatasourceName...)
+		dst.VmDatasourceName = unsafe.String(&dst.arena[_loc], len(r.VmDatasourceName))
+	} else {
+		dst.VmDatasourceName = ""
+	}
+	if len(r.MetricName) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.MetricName...)
+		dst.MetricName = unsafe.String(&dst.arena[_loc], len(r.MetricName))
+	} else {
+		dst.MetricName = ""
+	}
+	return dst
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Session = ""
+	r.VmDatasourceName = ""
+	r.MetricName = ""
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetSeriesByDatasourceRequestSessionTag: // Session
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Session", wt)
+			}
+			r.Session, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetSeriesByDatasourceRequestVmDatasourceNameTag: // VmDatasourceName
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field VmDatasourceName", wt)
+			}
+			r.VmDatasourceName, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetSeriesByDatasourceRequestMetricNameTag: // MetricName
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field MetricName", wt)
+			}
+			r.MetricName, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetSeriesByDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetSeriesByDatasourceRequestSession:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Session = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetSeriesByDatasourceRequestVmDatasourceName:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.VmDatasourceName = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetSeriesByDatasourceRequestMetricName:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.MetricName = unsafe.String(unsafe.SliceData(_b), len(_b))
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetSeriesByDatasourceRequest) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetSeriesByDatasourceRequest) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Session) > 0 {
+		i -= len(m.Session)
+		copy(dAtA[i:], m.Session)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Session)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	if len(m.VmDatasourceName) > 0 {
+		i -= len(m.VmDatasourceName)
+		copy(dAtA[i:], m.VmDatasourceName)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.VmDatasourceName)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if len(m.MetricName) > 0 {
+		i -= len(m.MetricName)
+		copy(dAtA[i:], m.MetricName)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.MetricName)))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetSeriesByDatasourceRequest) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetSeriesByDatasourceRequest) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// TagValues field tag IDs.
+const (
+	TagValuesValuesTag    = 1
+	TagValuesShowTimesTag = 2
+)
+
+// TagValues JSON field name string constants.
+const (
+	NameOfTagValuesValues    = "values"
+	NameOfTagValuesShowTimes = "show_times"
+)
+
+// TagValues writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type TagValues struct {
+	Values    []string `json:"values,omitempty"`
+	ShowTimes []int32  `json:"show_times,omitempty"`
+	arena     []byte
+}
+
+func (m *TagValues) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Values = m.Values[:0]
+	m.ShowTimes = m.ShowTimes[:0]
+}
+
+func (m *TagValues) ProtobufSize() int {
+	size := 0
+	for _, v := range m.Values {
+		n := len(v)
+		size += 1 /* TagSize(TagValuesValuesTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if len(m.ShowTimes) > 0 {
+		packed := 0
+		for _, v := range m.ShowTimes {
+			packed += (bits.Len64((uint64(v))|1) + 6) / 7
+		}
+		size += 1 /* TagSize(TagValuesShowTimesTag, LenDelim=2) */ + (bits.Len64((uint64(packed))|1) + 6) / 7 + packed
+	}
+	return size
+}
+
+func (m *TagValues) ToProtobufByAppend(in []byte) []byte {
+	if len(m.ShowTimes) > 0 {
+		packedSize := 0
+		for _, v := range m.ShowTimes {
+			packedSize += (bits.Len64((uint64(v))|1) + 6) / 7
+		}
+		in = utils.AppendTag(in, TagValuesShowTimesTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(packedSize))
+		for _, v := range m.ShowTimes {
+			in = utils.AppendVarint(in, uint64(v))
+		}
+	}
+	for _, v := range m.Values {
+		in = utils.AppendTag(in, TagValuesValuesTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(v), len(v)))
+	}
+	return in
+}
+func (m *TagValues) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Values) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfTagValuesValues...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Values {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if len(m.ShowTimes) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfTagValuesShowTimes...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.ShowTimes {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = strconv.AppendInt(dst, int64(_v), 10)
+			}
+			dst = append(dst, ']')
+		}
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyTagValues readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyTagValues struct {
+	parser                          fastjson.Parser
+	rawBuffer []byte
+	Values    []string `json:"values,omitempty"`
+	ShowTimes []int32  `json:"show_times,omitempty"`
+}
+
+func (r *ReadonlyTagValues) Clone(dst *TagValues) *TagValues {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &TagValues{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Values) > 0 {
+		_total := 0
+		for _, _s := range r.Values {
+			_total += len(_s)
+		}
+		if cap(dst.arena)-len(dst.arena) < _total {
+			_nc := cap(dst.arena)*2 + _total
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		if cap(dst.Values) >= len(r.Values) {
+			dst.Values = dst.Values[:len(r.Values)]
+		} else {
+			dst.Values = make([]string, len(r.Values))
+		}
+		for _i, _s := range r.Values {
+			_loc := len(dst.arena)
+			dst.arena = append(dst.arena, _s...)
+			dst.Values[_i] = unsafe.String(&dst.arena[_loc], len(_s))
+		}
+	} else {
+		dst.Values = dst.Values[:0]
+	}
+	if len(r.ShowTimes) > 0 {
+		if _rem := len(dst.arena) & 3; _rem != 0 {
+			dst.arena = append(dst.arena, _alignZeroPad[:4-_rem]...)
+		}
+		_nb := len(r.ShowTimes) * 4
+		if cap(dst.arena)-len(dst.arena) < _nb {
+			_nc := cap(dst.arena)*2 + _nb
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		_loc := len(dst.arena)
+		dst.arena = dst.arena[:_loc+_nb]
+		copy(dst.arena[_loc:], unsafe.Slice((*byte)(unsafe.Pointer(&r.ShowTimes[0])), _nb))
+		_n := len(r.ShowTimes)
+		dst.ShowTimes = unsafe.Slice((*int32)(unsafe.Pointer(&dst.arena[_loc])), _n)
+	} else {
+		dst.ShowTimes = dst.ShowTimes[:0]
+	}
+	return dst
+}
+
+func (r *ReadonlyTagValues) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Values = r.Values[:0]
+	r.ShowTimes = r.ShowTimes[:0]
+}
+
+func (r *ReadonlyTagValues) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case TagValuesValuesTag: // Values
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Values", wt)
+			}
+            if cap(r.Values) < 64 {
+				temp := make([]string, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Values = append(temp, r.Values...)
+			}
+			var sv string
+			sv, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+			r.Values = append(r.Values, sv)
+		case TagValuesShowTimesTag: // ShowTimes
+            if cap(r.ShowTimes) < 64 {
+				temp := make([]int32, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.ShowTimes = append(temp, r.ShowTimes...)
+			}
+			var packedData []byte
+			packedData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			for len(packedData) > 0 {
+				var pv int32
+				pv, packedData, err = utils.ReadInt32(packedData)
+				if err != nil {
+					return err
+				}
+				r.ShowTimes = append(r.ShowTimes, pv)
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyTagValues) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfTagValuesValues:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Values) < len(_arr) {
+				r.Values = make([]string, 0, len(_arr))
+			} else {
+				r.Values = r.Values[:0]
+			}
+			for _, _item := range _arr {
+				_ = _item.Type(parser)
+				_b, _ei := _item.StringBytes()
+				if _ei != nil {
+					visitErr = _ei
+					return
+				}
+				r.Values = append(r.Values, unsafe.String(unsafe.SliceData(_b), len(_b)))
+			}
+		case NameOfTagValuesShowTimes:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.ShowTimes) < len(_arr) {
+				r.ShowTimes = make([]int32, 0, len(_arr))
+			} else {
+				r.ShowTimes = r.ShowTimes[:0]
+			}
+			for _, _item := range _arr {
+				_iv, _ei := _item.Int64()
+				if _ei != nil {
+					visitErr = _ei
+					return
+				}
+				r.ShowTimes = append(r.ShowTimes, int32(_iv))
+			}
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyTagValues) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyTagValues) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyTagValues) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *TagValues) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for iNdEx := len(m.Values) - 1; iNdEx >= 0; iNdEx-- {
+		s := m.Values[iNdEx]
+		i -= len(s)
+		copy(dAtA[i:], s)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(s)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	if len(m.ShowTimes) > 0 {
+		pksize := 0
+		for _, v := range m.ShowTimes {
+			pksize += ((bits.Len64(uint64(v)|1) + 6) / 7)
+		}
+		i -= pksize
+		j := i
+		for _, v := range m.ShowTimes {
+			uv := uint64(v)
+			for uv >= 0x80 { dAtA[j] = byte(uv)|0x80; uv >>= 7; j++ }
+			dAtA[j] = byte(uv); j++
+		}
+		i = utils.EncodeVarint(dAtA, i, uint64(pksize))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *TagValues) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *TagValues) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// MetricTags field tag IDs.
+const (
+	MetricTagsTagsTag = 1
+)
+
+// MetricTags JSON field name string constants.
+const (
+	NameOfMetricTagsTags = "tags"
+)
+
+// MetricTags writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type MetricTags struct {
+	Tags  map[string]string `json:"tags,omitempty"`
+	arena []byte
+}
+
+func (m *MetricTags) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	clear(m.Tags)
+}
+
+func (m *MetricTags) ProtobufSize() int {
+	size := 0
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			vn := len(v)
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(vn))|1) + 6) / 7 + vn
+		}
+		size += 1 /* TagSize(MetricTagsTagsTag, LenDelim=2) */ + (bits.Len64((uint64(entrySize))|1) + 6) / 7 + entrySize
+	}
+	return size
+}
+
+func (m *MetricTags) ToProtobufByAppend(in []byte) []byte {
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			vn := len(v)
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(vn))|1) + 6) / 7 + vn
+		}
+		in = utils.AppendTag(in, MetricTagsTagsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(entrySize))
+		in = utils.AppendTag(in, 1, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(k)))
+		in = append(in, k...)
+		in = utils.AppendTag(in, 2, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(v)))
+		in = append(in, v...)
+	}
+	return in
+}
+func (m *MetricTags) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Tags) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfMetricTagsTags...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '{')
+			_jsonFirst := true
+			for _k, _v := range m.Tags {
+				if !_jsonFirst {
+					dst = append(dst, ',')
+				}
+				_jsonFirst = false
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_k, dst)
+				dst = append(dst, '"')
+				dst = append(dst, ':')
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, '}')
+		}
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyMetricTags readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyMetricTags struct {
+	parser                          fastjson.Parser
+	Tags      map[string]string `json:"tags,omitempty"`
+	rawBuffer []byte
+}
+
+func (r *ReadonlyMetricTags) Clone(dst *MetricTags) *MetricTags {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &MetricTags{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Tags) > 0 {
+		if dst.Tags == nil {
+			dst.Tags = make(map[string]string, len(r.Tags))
+		} else {
+			clear(dst.Tags)
+		}
+		for _rk, _rv := range r.Tags {
+			{
+				_kloc := len(dst.arena)
+				dst.arena = append(dst.arena, _rk...)
+				_nk := unsafe.String(&dst.arena[_kloc], len(_rk))
+				if len(_rv) > 0 {
+					_vloc := len(dst.arena)
+					dst.arena = append(dst.arena, _rv...)
+					dst.Tags[_nk] = unsafe.String(&dst.arena[_vloc], len(_rv))
+				} else {
+					dst.Tags[_nk] = ""
+				}
+			}
+		}
+	}
+	return dst
+}
+
+func (r *ReadonlyMetricTags) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	clear(r.Tags)
+}
+
+func (r *ReadonlyMetricTags) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case MetricTagsTagsTag: // Tags
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tags", wt)
+			}
+			var entryData []byte
+			entryData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			// todo: 提前 count 元素个数
+			//  _mapKeyCount := utils.CountMapKey(entryData)  // 这个没有用，这个值一定是 1
+			var mKey string
+			var mVal string
+			for len(entryData) > 0 {
+				var efn int
+				var ewt utils.WireType
+				efn, ewt, entryData, err = utils.ConsumeTag(entryData)
+				if err != nil {
+					return err
+				}
+				switch efn {
+				case 1:
+					mKey, entryData, err = utils.ReadString(entryData)
+				case 2:
+					mVal, entryData, err = utils.ReadString(entryData)
+				default:
+					entryData, err = utils.SkipField(ewt, entryData)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]string, 64)
+			}
+			r.Tags[mKey] = mVal
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyMetricTags) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfMetricTagsTags:
+			_mapObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]string, _mapObj.Len())
+			}
+			_mapObj.Visit(func(mk []byte, mv *fastjson.Value) {
+				if visitErr != nil {
+					return
+				}
+				var mKey string
+				mKey = unsafe.String(unsafe.SliceData(mk), len(mk))
+				var mVal string
+				_ = mv.Type(parser)
+				_b, _ev := mv.StringBytes()
+				if _ev != nil {
+					visitErr = _ev
+					return
+				}
+				mVal = unsafe.String(unsafe.SliceData(_b), len(_b))
+				r.Tags[mKey] = mVal
+			}, parser, false)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyMetricTags) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyMetricTags) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyMetricTags) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *MetricTags) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for k := range m.Tags {
+		v := m.Tags[k]
+		baseI := i
+		i -= len(v)
+		copy(dAtA[i:], v)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(v)))
+		i--
+		dAtA[i] = 18 /*(2<<3)|2=18, field=2, wireType=LenDelim*/
+		i -= len(k)
+		copy(dAtA[i:], k)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(k)))
+		i--
+		dAtA[i] = 10 /*(1<<3)|2=10, field=1, wireType=LenDelim*/
+		// write outer map entry length + field tag
+		i = utils.EncodeVarint(dAtA, i, uint64(baseI-i))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *MetricTags) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *MetricTags) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
+// GetSeriesByDatasourceResponse field tag IDs.
+const (
+	GetSeriesByDatasourceResponseTagsTag    = 4
+	GetSeriesByDatasourceResponseTsTag      = 5
+	GetSeriesByDatasourceResponseMessageTag = 2
+	GetSeriesByDatasourceResponseCodeTag    = 1
+)
+
+// GetSeriesByDatasourceResponse JSON field name string constants.
+const (
+	NameOfGetSeriesByDatasourceResponseTags    = "tags"
+	NameOfGetSeriesByDatasourceResponseTs      = "ts"
+	NameOfGetSeriesByDatasourceResponseMessage = "message"
+	NameOfGetSeriesByDatasourceResponseCode    = "code"
+)
+
+// GetSeriesByDatasourceResponse writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetSeriesByDatasourceResponse struct {
+	//repeated string series = 3;
+	Tags    map[string]*TagValues `json:"tags,omitempty"`
+	Ts      []MetricTags          `json:"ts,omitempty"`
+	Message string                `json:"message,omitempty"`
+	Code    int32                 `json:"code,omitempty"`
+	arena   []byte
+}
+
+func (m *GetSeriesByDatasourceResponse) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	clear(m.Tags)
+	m.Ts = m.Ts[:0]
+	m.Message = ""
+	m.Code = 0
+}
+
+func (m *GetSeriesByDatasourceResponse) ProtobufSize() int {
+	size := 0
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			sub := v.ProtobufSize()
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+		size += 1 /* TagSize(GetSeriesByDatasourceResponseTagsTag, LenDelim=2) */ + (bits.Len64((uint64(entrySize))|1) + 6) / 7 + entrySize
+	}
+	for i := range m.Ts {
+		sub := m.Ts[i].ProtobufSize()
+		if sub > 0 {
+			size += 1 /* TagSize(GetSeriesByDatasourceResponseTsTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+	}
+	if m.Message != "" {
+		n := len(m.Message)
+		size += 1 /* TagSize(GetSeriesByDatasourceResponseMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Code != 0 {
+		size += 1 /* TagSize(GetSeriesByDatasourceResponseCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *GetSeriesByDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
+	if m.Code != 0 {
+		in = utils.AppendTag(in, GetSeriesByDatasourceResponseCodeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.Code))
+	}
+	if m.Message != "" {
+		in = utils.AppendTag(in, GetSeriesByDatasourceResponseMessageTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
+	}
+	for i := range m.Ts {
+		sub := m.Ts[i].ProtobufSize()
+		if sub > 0 {
+			in = utils.AppendTag(in, GetSeriesByDatasourceResponseTsTag, utils.WireTypeLenDelim)
+			in = utils.AppendVarint(in, uint64(sub))
+			in = m.Ts[i].ToProtobuf(in)
+		}
+	}
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		valMsgSize := v.ProtobufSize()
+		entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(valMsgSize))|1) + 6) / 7 + valMsgSize
+		in = utils.AppendTag(in, GetSeriesByDatasourceResponseTagsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(entrySize))
+		in = utils.AppendTag(in, 1, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(k)))
+		in = append(in, k...)
+		in = utils.AppendTag(in, 2, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(valMsgSize))
+		in = v.ToProtobuf(in)
+	}
+	return in
+}
+func (m *GetSeriesByDatasourceResponse) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Tags) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceResponseTags...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '{')
+			_jsonFirst := true
+			for _k, _v := range m.Tags {
+				if !_jsonFirst {
+					dst = append(dst, ',')
+				}
+				_jsonFirst = false
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_k, dst)
+				dst = append(dst, '"')
+				dst = append(dst, ':')
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, '}')
+		}
+	}
+	if len(m.Ts) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceResponseTs...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Ts {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if len(m.Message) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceResponseMessage...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Message, dst)
+		dst = append(dst, '"')
+	}
+	if m.Code != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetSeriesByDatasourceResponseCode...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.Code), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetSeriesByDatasourceResponse readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetSeriesByDatasourceResponse struct {
+	parser                          fastjson.Parser
+	//repeated string series = 3;
+	Tags      map[string]*ReadonlyTagValues `json:"tags,omitempty"`
+	_TagsArr  []ReadonlyTagValues
+	Message   string               `json:"message,omitempty"`
+	Ts        []ReadonlyMetricTags `json:"ts,omitempty"`
+	rawBuffer []byte
+	Code      int32 `json:"code,omitempty"`
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) Clone(dst *GetSeriesByDatasourceResponse) *GetSeriesByDatasourceResponse {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetSeriesByDatasourceResponse{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Tags) > 0 {
+		if dst.Tags == nil {
+			dst.Tags = make(map[string]*TagValues, len(r.Tags))
+		} else {
+			clear(dst.Tags)
+		}
+		for _rk, _rv := range r.Tags {
+			{
+				_kloc := len(dst.arena)
+				dst.arena = append(dst.arena, _rk...)
+				_nk := unsafe.String(&dst.arena[_kloc], len(_rk))
+				_nv := new(TagValues)
+				_rv.Clone(_nv)
+				dst.Tags[_nk] = _nv
+			}
+		}
+	}
+	if len(r.Ts) > 0 {
+		if cap(dst.Ts) >= len(r.Ts) {
+			dst.Ts = dst.Ts[:len(r.Ts)]
+		} else {
+			dst.Ts = make([]MetricTags, len(r.Ts))
+		}
+		for _i := range r.Ts {
+			r.Ts[_i].Clone(&dst.Ts[_i])
+		}
+	} else {
+		dst.Ts = dst.Ts[:0]
+	}
+	if len(r.Message) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Message...)
+		dst.Message = unsafe.String(&dst.arena[_loc], len(r.Message))
+	} else {
+		dst.Message = ""
+	}
+	dst.Code = r.Code
+	return dst
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	clear(r.Tags)
+	clear(r._TagsArr)
+	r._TagsArr = r._TagsArr[:0]
+	r.Ts = r.Ts[:0]
+	r.Message = ""
+	r.Code = 0
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetSeriesByDatasourceResponseTagsTag: // Tags
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tags", wt)
+			}
+			var entryData []byte
+			entryData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			// todo: 提前 count 元素个数
+			//  _mapKeyCount := utils.CountMapKey(entryData)  // 这个没有用，这个值一定是 1
+			var mKey string
+			if cap(r._TagsArr) < 16 {
+				r._TagsArr = append(make([]ReadonlyTagValues, 0, 16), r._TagsArr...)
+			}
+			if cap(r._TagsArr) == len(r._TagsArr) {
+				r._TagsArr = append(r._TagsArr, ReadonlyTagValues{})
+			} else {
+				r._TagsArr = r._TagsArr[:len(r._TagsArr)+1]
+			}
+			_mValIdx := len(r._TagsArr) - 1
+			for len(entryData) > 0 {
+				var efn int
+				var ewt utils.WireType
+				efn, ewt, entryData, err = utils.ConsumeTag(entryData)
+				if err != nil {
+					return err
+				}
+				switch efn {
+				case 1:
+					mKey, entryData, err = utils.ReadString(entryData)
+				case 2:
+					var _subBytes []byte
+					_subBytes, entryData, err = utils.ConsumeBytes(entryData)
+					if err != nil {
+						break
+					}
+					err = r._TagsArr[_mValIdx].FromProtobuf(_subBytes)
+				default:
+					entryData, err = utils.SkipField(ewt, entryData)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]*ReadonlyTagValues, 64)
+			}
+			r.Tags[mKey] = &r._TagsArr[_mValIdx]
+		case GetSeriesByDatasourceResponseTsTag: // Ts
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ts", wt)
+			}
+            if cap(r.Ts) < 64 {
+				temp := make([]ReadonlyMetricTags, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Ts = append(temp, r.Ts...)
+			}
+			var subData []byte
+			subData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			var elem ReadonlyMetricTags
+			if err = elem.FromProtobuf(subData); err != nil {
+				return err
+			}
+			r.Ts = append(r.Ts, elem)
+		case GetSeriesByDatasourceResponseMessageTag: // Message
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
+			}
+			r.Message, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetSeriesByDatasourceResponseCodeTag: // Code
+			if wt == utils.WireTypeVarint {
+				r.Code, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.Code = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetSeriesByDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetSeriesByDatasourceResponseTags:
+			_mapObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]*ReadonlyTagValues, _mapObj.Len())
+			}
+			if r._TagsArr == nil {
+				r._TagsArr = make([]ReadonlyTagValues, 0, _mapObj.Len())
+			} else {
+				if cap(r._TagsArr) >= _mapObj.Len() {
+					r._TagsArr = r._TagsArr[:0]
+				} else {
+					r._TagsArr = make([]ReadonlyTagValues, 0, _mapObj.Len())
+				}
+			}
+			_mapObj.Visit(func(mk []byte, mv *fastjson.Value) {
+				if visitErr != nil {
+					return
+				}
+				var mKey string
+				mKey = unsafe.String(unsafe.SliceData(mk), len(mk))
+				// r._TagsArr = append(r._TagsArr, ReadonlyTagValues{})
+				r._TagsArr = r._TagsArr[:len(r._TagsArr)+1]
+				_mValIdx := len(r._TagsArr) - 1
+				sub := &r._TagsArr[_mValIdx]
+				_subObj, _eo := mv.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := sub.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.Tags[mKey] = sub
+			}, parser, false)
+		case NameOfGetSeriesByDatasourceResponseTs:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Ts) < len(_arr) {
+				r.Ts = make([]ReadonlyMetricTags, 0, len(_arr))
+			} else {
+				r.Ts = r.Ts[:0]
+			}
+			for _, _item := range _arr {
+				var _elem ReadonlyMetricTags
+				_subObj, _eo := _item.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := _elem.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.Ts = append(r.Ts, _elem)
+			}
+		case NameOfGetSeriesByDatasourceResponseMessage:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetSeriesByDatasourceResponseCode:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Code = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetSeriesByDatasourceResponse) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetSeriesByDatasourceResponse) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for k := range m.Tags {
+		v := m.Tags[k]
+		baseI := i
+		size := v.marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 18 /*(2<<3)|2=18, field=2, wireType=LenDelim*/
+		i -= len(k)
+		copy(dAtA[i:], k)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(k)))
+		i--
+		dAtA[i] = 10 /*(1<<3)|2=10, field=1, wireType=LenDelim*/
+		// write outer map entry length + field tag
+		i = utils.EncodeVarint(dAtA, i, uint64(baseI-i))
+		i--
+		dAtA[i] = 34 /*field=4, wireType=LenDelim, (4<<3)|2 (34)*/
+	}
+	for iNdEx := len(m.Ts) - 1; iNdEx >= 0; iNdEx-- {
+		size := m.Ts[iNdEx].marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 42 /*field=5, wireType=LenDelim, (5<<3)|2 (42)*/
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if m.Code != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetSeriesByDatasourceResponse) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetSeriesByDatasourceResponse) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
+// GetRangeByDatasourceRequest field tag IDs.
+const (
+	GetRangeByDatasourceRequestSessionTag          = 1
+	GetRangeByDatasourceRequestVmDatasourceNameTag = 2
+	GetRangeByDatasourceRequestStartTag            = 4
+	GetRangeByDatasourceRequestEndTag              = 5
+	GetRangeByDatasourceRequestStepTag             = 6
+	GetRangeByDatasourceRequestTimeoutTag          = 7
+	GetRangeByDatasourceRequestQueriesTag          = 3
+)
+
+// GetRangeByDatasourceRequest JSON field name string constants.
+const (
+	NameOfGetRangeByDatasourceRequestSession          = "session"
+	NameOfGetRangeByDatasourceRequestVmDatasourceName = "vm_datasource_name"
+	NameOfGetRangeByDatasourceRequestStart            = "start"
+	NameOfGetRangeByDatasourceRequestEnd              = "end"
+	NameOfGetRangeByDatasourceRequestStep             = "step"
+	NameOfGetRangeByDatasourceRequestTimeout          = "timeout"
+	NameOfGetRangeByDatasourceRequestQueries          = "queries"
+)
+
+// GetRangeByDatasourceRequest writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetRangeByDatasourceRequest struct {
+	Session          string   `json:"session,omitempty"`
+	VmDatasourceName string   `json:"vm_datasource_name,omitempty"`
+	Start            string   `json:"start,omitempty"`
+	End              string   `json:"end,omitempty"`
+	Step             string   `json:"step,omitempty"`
+	Timeout          string   `json:"timeout,omitempty"`
+	Queries          []string `json:"queries,omitempty"`
+	arena            []byte
+}
+
+func (m *GetRangeByDatasourceRequest) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Session = ""
+	m.VmDatasourceName = ""
+	m.Start = ""
+	m.End = ""
+	m.Step = ""
+	m.Timeout = ""
+	m.Queries = m.Queries[:0]
+}
+
+func (m *GetRangeByDatasourceRequest) ProtobufSize() int {
+	size := 0
+	if m.Session != "" {
+		n := len(m.Session)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestSessionTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.VmDatasourceName != "" {
+		n := len(m.VmDatasourceName)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestVmDatasourceNameTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Start != "" {
+		n := len(m.Start)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestStartTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.End != "" {
+		n := len(m.End)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestEndTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Step != "" {
+		n := len(m.Step)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestStepTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Timeout != "" {
+		n := len(m.Timeout)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestTimeoutTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	for _, v := range m.Queries {
+		n := len(v)
+		size += 1 /* TagSize(GetRangeByDatasourceRequestQueriesTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *GetRangeByDatasourceRequest) ToProtobufByAppend(in []byte) []byte {
+	for _, v := range m.Queries {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestQueriesTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(v), len(v)))
+	}
+	if m.Timeout != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestTimeoutTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Timeout), len(m.Timeout)))
+	}
+	if m.Step != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestStepTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Step), len(m.Step)))
+	}
+	if m.End != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestEndTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.End), len(m.End)))
+	}
+	if m.Start != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestStartTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Start), len(m.Start)))
+	}
+	if m.VmDatasourceName != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestVmDatasourceNameTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.VmDatasourceName), len(m.VmDatasourceName)))
+	}
+	if m.Session != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceRequestSessionTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Session), len(m.Session)))
+	}
+	return in
+}
+func (m *GetRangeByDatasourceRequest) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Session) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestSession...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Session, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.VmDatasourceName) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestVmDatasourceName...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.VmDatasourceName, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Start) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestStart...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Start, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.End) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestEnd...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.End, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Step) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestStep...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Step, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Timeout) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestTimeout...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Timeout, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Queries) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceRequestQueries...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Queries {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, ']')
+		}
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetRangeByDatasourceRequest readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetRangeByDatasourceRequest struct {
+	parser                          fastjson.Parser
+	Session          string `json:"session,omitempty"`
+	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
+	Start            string `json:"start,omitempty"`
+	End              string `json:"end,omitempty"`
+	Step             string `json:"step,omitempty"`
+	Timeout          string `json:"timeout,omitempty"`
+	rawBuffer        []byte
+	Queries          []string `json:"queries,omitempty"`
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) Clone(dst *GetRangeByDatasourceRequest) *GetRangeByDatasourceRequest {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetRangeByDatasourceRequest{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Session) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Session...)
+		dst.Session = unsafe.String(&dst.arena[_loc], len(r.Session))
+	} else {
+		dst.Session = ""
+	}
+	if len(r.VmDatasourceName) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.VmDatasourceName...)
+		dst.VmDatasourceName = unsafe.String(&dst.arena[_loc], len(r.VmDatasourceName))
+	} else {
+		dst.VmDatasourceName = ""
+	}
+	if len(r.Start) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Start...)
+		dst.Start = unsafe.String(&dst.arena[_loc], len(r.Start))
+	} else {
+		dst.Start = ""
+	}
+	if len(r.End) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.End...)
+		dst.End = unsafe.String(&dst.arena[_loc], len(r.End))
+	} else {
+		dst.End = ""
+	}
+	if len(r.Step) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Step...)
+		dst.Step = unsafe.String(&dst.arena[_loc], len(r.Step))
+	} else {
+		dst.Step = ""
+	}
+	if len(r.Timeout) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Timeout...)
+		dst.Timeout = unsafe.String(&dst.arena[_loc], len(r.Timeout))
+	} else {
+		dst.Timeout = ""
+	}
+	if len(r.Queries) > 0 {
+		_total := 0
+		for _, _s := range r.Queries {
+			_total += len(_s)
+		}
+		if cap(dst.arena)-len(dst.arena) < _total {
+			_nc := cap(dst.arena)*2 + _total
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		if cap(dst.Queries) >= len(r.Queries) {
+			dst.Queries = dst.Queries[:len(r.Queries)]
+		} else {
+			dst.Queries = make([]string, len(r.Queries))
+		}
+		for _i, _s := range r.Queries {
+			_loc := len(dst.arena)
+			dst.arena = append(dst.arena, _s...)
+			dst.Queries[_i] = unsafe.String(&dst.arena[_loc], len(_s))
+		}
+	} else {
+		dst.Queries = dst.Queries[:0]
+	}
+	return dst
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Session = ""
+	r.VmDatasourceName = ""
+	r.Start = ""
+	r.End = ""
+	r.Step = ""
+	r.Timeout = ""
+	r.Queries = r.Queries[:0]
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetRangeByDatasourceRequestSessionTag: // Session
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Session", wt)
+			}
+			r.Session, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestVmDatasourceNameTag: // VmDatasourceName
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field VmDatasourceName", wt)
+			}
+			r.VmDatasourceName, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestStartTag: // Start
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Start", wt)
+			}
+			r.Start, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestEndTag: // End
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field End", wt)
+			}
+			r.End, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestStepTag: // Step
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Step", wt)
+			}
+			r.Step, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestTimeoutTag: // Timeout
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Timeout", wt)
+			}
+			r.Timeout, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceRequestQueriesTag: // Queries
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Queries", wt)
+			}
+            if cap(r.Queries) < 64 {
+				temp := make([]string, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Queries = append(temp, r.Queries...)
+			}
+			var sv string
+			sv, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+			r.Queries = append(r.Queries, sv)
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetRangeByDatasourceRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetRangeByDatasourceRequestSession:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Session = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestVmDatasourceName:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.VmDatasourceName = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestStart:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Start = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestEnd:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.End = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestStep:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Step = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestTimeout:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Timeout = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceRequestQueries:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Queries) < len(_arr) {
+				r.Queries = make([]string, 0, len(_arr))
+			} else {
+				r.Queries = r.Queries[:0]
+			}
+			for _, _item := range _arr {
+				_ = _item.Type(parser)
+				_b, _ei := _item.StringBytes()
+				if _ei != nil {
+					visitErr = _ei
+					return
+				}
+				r.Queries = append(r.Queries, unsafe.String(unsafe.SliceData(_b), len(_b)))
+			}
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetRangeByDatasourceRequest) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetRangeByDatasourceRequest) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Session) > 0 {
+		i -= len(m.Session)
+		copy(dAtA[i:], m.Session)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Session)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	if len(m.VmDatasourceName) > 0 {
+		i -= len(m.VmDatasourceName)
+		copy(dAtA[i:], m.VmDatasourceName)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.VmDatasourceName)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if len(m.Start) > 0 {
+		i -= len(m.Start)
+		copy(dAtA[i:], m.Start)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Start)))
+		i--
+		dAtA[i] = 34 /*field=4, wireType=LenDelim, (4<<3)|2 (34)*/
+	}
+	if len(m.End) > 0 {
+		i -= len(m.End)
+		copy(dAtA[i:], m.End)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.End)))
+		i--
+		dAtA[i] = 42 /*field=5, wireType=LenDelim, (5<<3)|2 (42)*/
+	}
+	if len(m.Step) > 0 {
+		i -= len(m.Step)
+		copy(dAtA[i:], m.Step)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Step)))
+		i--
+		dAtA[i] = 50 /*field=6, wireType=LenDelim, (6<<3)|2 (50)*/
+	}
+	if len(m.Timeout) > 0 {
+		i -= len(m.Timeout)
+		copy(dAtA[i:], m.Timeout)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Timeout)))
+		i--
+		dAtA[i] = 58 /*field=7, wireType=LenDelim, (7<<3)|2 (58)*/
+	}
+	for iNdEx := len(m.Queries) - 1; iNdEx >= 0; iNdEx-- {
+		s := m.Queries[iNdEx]
+		i -= len(s)
+		copy(dAtA[i:], s)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(s)))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetRangeByDatasourceRequest) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetRangeByDatasourceRequest) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// RangeData field tag IDs.
+const (
+	RangeDataTagsTag       = 3
+	RangeDataPointsTag     = 4
+	RangeDataConstValueTag = 5
+	RangeDataMetricTypeTag = 6
+)
+
+// RangeData JSON field name string constants.
+const (
+	NameOfRangeDataTags       = "tags"
+	NameOfRangeDataPoints     = "points"
+	NameOfRangeDataConstValue = "const_value"
+	NameOfRangeDataMetricType = "metric_type"
+)
+
+// RangeData writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type RangeData struct {
+	Tags       map[string]string `json:"tags,omitempty"`
+	Points     []float64         `json:"points,omitempty"`
+	ConstValue float64           `json:"const_value,omitempty"`
+	MetricType MetricType        `json:"metric_type,omitempty"`
+	arena      []byte
+}
+
+func (m *RangeData) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	clear(m.Tags)
+	m.Points = m.Points[:0]
+	m.ConstValue = 0
+	m.MetricType = 0
+}
+
+func (m *RangeData) ProtobufSize() int {
+	size := 0
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			vn := len(v)
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(vn))|1) + 6) / 7 + vn
+		}
+		size += 1 /* TagSize(RangeDataTagsTag, LenDelim=2) */ + (bits.Len64((uint64(entrySize))|1) + 6) / 7 + entrySize
+	}
+	if len(m.Points) > 0 {
+		packed := 0
+		for _, v := range m.Points {
+			_ = v; packed += 8
+		}
+		size += 1 /* TagSize(RangeDataPointsTag, LenDelim=2) */ + (bits.Len64((uint64(packed))|1) + 6) / 7 + packed
+	}
+	if m.ConstValue != 0 {
+		size += 1 /* TagSize(RangeDataConstValueTag, 64bit=1) */ + 8
+	}
+	if m.MetricType != 0 {
+		size += 1 /* TagSize(RangeDataMetricTypeTag, Varint=0) */ + (bits.Len64((uint64(m.MetricType))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *RangeData) ToProtobufByAppend(in []byte) []byte {
+	if m.MetricType != 0 {
+		in = utils.AppendTag(in, RangeDataMetricTypeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.MetricType))
+	}
+	if m.ConstValue != 0 {
+		in = utils.AppendTag(in, RangeDataConstValueTag, utils.WireType64bit)
+		in = utils.AppendFixed64(in, math.Float64bits(m.ConstValue))
+	}
+	if len(m.Points) > 0 {
+		packedSize := 0
+		for _, v := range m.Points {
+			_ = v; packedSize += 8
+		}
+		in = utils.AppendTag(in, RangeDataPointsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(packedSize))
+		for _, v := range m.Points {
+			in = utils.AppendFixed64(in, math.Float64bits(v))
+		}
+	}
+	for k, v := range m.Tags {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			vn := len(v)
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(vn))|1) + 6) / 7 + vn
+		}
+		in = utils.AppendTag(in, RangeDataTagsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(entrySize))
+		in = utils.AppendTag(in, 1, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(k)))
+		in = append(in, k...)
+		in = utils.AppendTag(in, 2, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(v)))
+		in = append(in, v...)
+	}
+	return in
+}
+func (m *RangeData) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Tags) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfRangeDataTags...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '{')
+			_jsonFirst := true
+			for _k, _v := range m.Tags {
+				if !_jsonFirst {
+					dst = append(dst, ',')
+				}
+				_jsonFirst = false
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_k, dst)
+				dst = append(dst, '"')
+				dst = append(dst, ':')
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, '}')
+		}
+	}
+	if len(m.Points) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfRangeDataPoints...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Points {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				{
+					_fv := _v
+					_iv := int64(_fv)
+					if math.Round(_fv) == _fv && float64(_iv) == _fv {
+						dst = strconv.AppendInt(dst, _iv, 10)
+					} else {
+						dst = strconv.AppendFloat(dst, _fv, 'f', -1, 64)
+					}
+				}
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if m.ConstValue != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfRangeDataConstValue...)
+		dst = append(dst, '"', ':')
+		{
+			_fv := m.ConstValue
+			_iv := int64(_fv)
+			if math.Round(_fv) == _fv && float64(_iv) == _fv {
+				dst = strconv.AppendInt(dst, _iv, 10)
+			} else {
+				dst = strconv.AppendFloat(dst, _fv, 'f', -1, 64)
+			}
+		}
+	}
+	if m.MetricType != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfRangeDataMetricType...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.MetricType), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyRangeData readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyRangeData struct {
+	parser                          fastjson.Parser
+	Tags       map[string]string `json:"tags,omitempty"`
+	rawBuffer  []byte
+	Points     []float64  `json:"points,omitempty"`
+	ConstValue float64    `json:"const_value,omitempty"`
+	MetricType MetricType `json:"metric_type,omitempty"`
+}
+
+func (r *ReadonlyRangeData) Clone(dst *RangeData) *RangeData {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &RangeData{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Tags) > 0 {
+		if dst.Tags == nil {
+			dst.Tags = make(map[string]string, len(r.Tags))
+		} else {
+			clear(dst.Tags)
+		}
+		for _rk, _rv := range r.Tags {
+			{
+				_kloc := len(dst.arena)
+				dst.arena = append(dst.arena, _rk...)
+				_nk := unsafe.String(&dst.arena[_kloc], len(_rk))
+				if len(_rv) > 0 {
+					_vloc := len(dst.arena)
+					dst.arena = append(dst.arena, _rv...)
+					dst.Tags[_nk] = unsafe.String(&dst.arena[_vloc], len(_rv))
+				} else {
+					dst.Tags[_nk] = ""
+				}
+			}
+		}
+	}
+	if len(r.Points) > 0 {
+		if _rem := len(dst.arena) & 7; _rem != 0 {
+			dst.arena = append(dst.arena, _alignZeroPad[:8-_rem]...)
+		}
+		_nb := len(r.Points) * 8
+		if cap(dst.arena)-len(dst.arena) < _nb {
+			_nc := cap(dst.arena)*2 + _nb
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		_loc := len(dst.arena)
+		dst.arena = dst.arena[:_loc+_nb]
+		copy(dst.arena[_loc:], unsafe.Slice((*byte)(unsafe.Pointer(&r.Points[0])), _nb))
+		_n := len(r.Points)
+		dst.Points = unsafe.Slice((*float64)(unsafe.Pointer(&dst.arena[_loc])), _n)
+	} else {
+		dst.Points = dst.Points[:0]
+	}
+	dst.ConstValue = r.ConstValue
+	dst.MetricType = r.MetricType
+	return dst
+}
+
+func (r *ReadonlyRangeData) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	clear(r.Tags)
+	r.Points = r.Points[:0]
+	r.ConstValue = 0
+	r.MetricType = 0
+}
+
+func (r *ReadonlyRangeData) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case RangeDataTagsTag: // Tags
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tags", wt)
+			}
+			var entryData []byte
+			entryData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			// todo: 提前 count 元素个数
+			//  _mapKeyCount := utils.CountMapKey(entryData)  // 这个没有用，这个值一定是 1
+			var mKey string
+			var mVal string
+			for len(entryData) > 0 {
+				var efn int
+				var ewt utils.WireType
+				efn, ewt, entryData, err = utils.ConsumeTag(entryData)
+				if err != nil {
+					return err
+				}
+				switch efn {
+				case 1:
+					mKey, entryData, err = utils.ReadString(entryData)
+				case 2:
+					mVal, entryData, err = utils.ReadString(entryData)
+				default:
+					entryData, err = utils.SkipField(ewt, entryData)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]string, 64)
+			}
+			r.Tags[mKey] = mVal
+		case RangeDataPointsTag: // Points
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Points", wt)
+			}
+            if cap(r.Points) < 64 {
+				temp := make([]float64, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Points = append(temp, r.Points...)
+			}
+			var packedData []byte
+			packedData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			for len(packedData) > 0 {
+				var pv float64
+				pv, packedData, err = utils.ReadDouble(packedData)
+				if err != nil {
+					return err
+				}
+				r.Points = append(r.Points, pv)
+			}
+		case RangeDataConstValueTag: // ConstValue
+			if wt != utils.WireType64bit {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConstValue", wt)
+			}
+			r.ConstValue, in, err = utils.ReadDouble(in)
+			if err != nil {
+				return err
+			}
+		case RangeDataMetricTypeTag: // MetricType
+			if wt != utils.WireTypeVarint {
+				return fmt.Errorf("proto: wrong wireType = %d for field MetricType", wt)
+			}
+			var ev int32
+			ev, in, err = utils.ReadInt32(in)
+			if err != nil {
+				return err
+			}
+			r.MetricType = MetricType(ev)
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyRangeData) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfRangeDataTags:
+			_mapObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if r.Tags == nil {
+				r.Tags = make(map[string]string, _mapObj.Len())
+			}
+			_mapObj.Visit(func(mk []byte, mv *fastjson.Value) {
+				if visitErr != nil {
+					return
+				}
+				var mKey string
+				mKey = unsafe.String(unsafe.SliceData(mk), len(mk))
+				var mVal string
+				_ = mv.Type(parser)
+				_b, _ev := mv.StringBytes()
+				if _ev != nil {
+					visitErr = _ev
+					return
+				}
+				mVal = unsafe.String(unsafe.SliceData(_b), len(_b))
+				r.Tags[mKey] = mVal
+			}, parser, false)
+		case NameOfRangeDataPoints:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Points) < len(_arr) {
+				r.Points = make([]float64, 0, len(_arr))
+			} else {
+				r.Points = r.Points[:0]
+			}
+			for _, _item := range _arr {
+				var _fv float64
+				if _item.Type(parser) == fastjson.TypeString {
+					_sb, _ei := _item.StringBytes()
+					if _ei != nil {
+						visitErr = _ei
+						return
+					}
+					var _ei2 error
+					_fv, _ei2 = fastfloat.Parse(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
+					if _ei2 != nil {
+						visitErr = _ei2
+						return
+					}
+				} else {
+					var _ei error
+					_fv, _ei = _item.Float64()
+					if _ei != nil {
+						visitErr = _ei
+						return
+					}
+				}
+				r.Points = append(r.Points, float64(_fv))
+			}
+		case NameOfRangeDataConstValue:
+			var _fv float64
+			if v.Type(parser) == fastjson.TypeString {
+				_sb, _e := v.StringBytes()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
+				var _e2 error
+				_fv, _e2 = fastfloat.Parse(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
+				if _e2 != nil {
+					visitErr = _e2
+					return
+				}
+			} else {
+				var _e error
+				_fv, _e = v.Float64()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
+			}
+			r.ConstValue = float64(_fv)
+		case NameOfRangeDataMetricType:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.MetricType = MetricType(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyRangeData) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyRangeData) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyRangeData) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *RangeData) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for k := range m.Tags {
+		v := m.Tags[k]
+		baseI := i
+		i -= len(v)
+		copy(dAtA[i:], v)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(v)))
+		i--
+		dAtA[i] = 18 /*(2<<3)|2=18, field=2, wireType=LenDelim*/
+		i -= len(k)
+		copy(dAtA[i:], k)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(k)))
+		i--
+		dAtA[i] = 10 /*(1<<3)|2=10, field=1, wireType=LenDelim*/
+		// write outer map entry length + field tag
+		i = utils.EncodeVarint(dAtA, i, uint64(baseI-i))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	if len(m.Points) > 0 {
+		pksize := 0
+		for _, v := range m.Points {
+			_ = v; pksize += 8
+		}
+		i -= pksize
+		j := i
+		for _, v := range m.Points {
+			_dv := math.Float64bits(v)
+			dAtA[j+7] = uint8(_dv >> 56)
+			dAtA[j+6] = uint8(_dv >> 48)
+			dAtA[j+5] = uint8(_dv >> 40)
+			dAtA[j+4] = uint8(_dv >> 32)
+			dAtA[j+3] = uint8(_dv >> 24)
+			dAtA[j+2] = uint8(_dv >> 16)
+			dAtA[j+1] = uint8(_dv >> 8)
+			dAtA[j+0] = uint8(_dv)
+			j += 8
+		}
+		i = utils.EncodeVarint(dAtA, i, uint64(pksize))
+		i--
+		dAtA[i] = 34 /*field=4, wireType=LenDelim, (4<<3)|2 (34)*/
+	}
+	if m.ConstValue != 0 {
+		i -= 8
+		_dv := math.Float64bits(m.ConstValue)
+		dAtA[i+7] = uint8(_dv >> 56)
+		dAtA[i+6] = uint8(_dv >> 48)
+		dAtA[i+5] = uint8(_dv >> 40)
+		dAtA[i+4] = uint8(_dv >> 32)
+		dAtA[i+3] = uint8(_dv >> 24)
+		dAtA[i+2] = uint8(_dv >> 16)
+		dAtA[i+1] = uint8(_dv >> 8)
+		dAtA[i+0] = uint8(_dv)
+		i--
+		dAtA[i] = 41 /*field=5, wireType=64bit, (5<<3)|1 (41)*/
+	}
+	if m.MetricType != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.MetricType))
+		i--
+		dAtA[i] = 48 /*field=6, wireType=Varint, (6<<3)|0 (48)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *RangeData) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *RangeData) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
+// QueryResult field tag IDs.
+const (
+	QueryResultMessageTag = 2
+	QueryResultDatasTag   = 3
+	QueryResultCodeTag    = 1
+)
+
+// QueryResult JSON field name string constants.
+const (
+	NameOfQueryResultMessage = "message"
+	NameOfQueryResultDatas   = "datas"
+	NameOfQueryResultCode    = "code"
+)
+
+// QueryResult writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type QueryResult struct {
+	Message string      `json:"message,omitempty"`
+	Datas   []RangeData `json:"datas,omitempty"`
+	Code    int32       `json:"code,omitempty"`
+	arena   []byte
+}
+
+func (m *QueryResult) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Message = ""
+	m.Datas = m.Datas[:0]
+	m.Code = 0
+}
+
+func (m *QueryResult) ProtobufSize() int {
+	size := 0
+	if m.Message != "" {
+		n := len(m.Message)
+		size += 1 /* TagSize(QueryResultMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	for i := range m.Datas {
+		sub := m.Datas[i].ProtobufSize()
+		if sub > 0 {
+			size += 1 /* TagSize(QueryResultDatasTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+	}
+	if m.Code != 0 {
+		size += 1 /* TagSize(QueryResultCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *QueryResult) ToProtobufByAppend(in []byte) []byte {
+	if m.Code != 0 {
+		in = utils.AppendTag(in, QueryResultCodeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.Code))
+	}
+	for i := range m.Datas {
+		sub := m.Datas[i].ProtobufSize()
+		if sub > 0 {
+			in = utils.AppendTag(in, QueryResultDatasTag, utils.WireTypeLenDelim)
+			in = utils.AppendVarint(in, uint64(sub))
+			in = m.Datas[i].ToProtobuf(in)
+		}
+	}
+	if m.Message != "" {
+		in = utils.AppendTag(in, QueryResultMessageTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
+	}
+	return in
+}
+func (m *QueryResult) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Message) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfQueryResultMessage...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Message, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Datas) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfQueryResultDatas...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Datas {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if m.Code != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfQueryResultCode...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.Code), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyQueryResult readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyQueryResult struct {
+	parser                          fastjson.Parser
+	Message   string `json:"message,omitempty"`
+	rawBuffer []byte
+	Datas     []ReadonlyRangeData `json:"datas,omitempty"`
+	Code      int32               `json:"code,omitempty"`
+}
+
+func (r *ReadonlyQueryResult) Clone(dst *QueryResult) *QueryResult {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &QueryResult{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Message) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Message...)
+		dst.Message = unsafe.String(&dst.arena[_loc], len(r.Message))
+	} else {
+		dst.Message = ""
+	}
+	if len(r.Datas) > 0 {
+		if cap(dst.Datas) >= len(r.Datas) {
+			dst.Datas = dst.Datas[:len(r.Datas)]
+		} else {
+			dst.Datas = make([]RangeData, len(r.Datas))
+		}
+		for _i := range r.Datas {
+			r.Datas[_i].Clone(&dst.Datas[_i])
+		}
+	} else {
+		dst.Datas = dst.Datas[:0]
+	}
+	dst.Code = r.Code
+	return dst
+}
+
+func (r *ReadonlyQueryResult) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Message = ""
+	r.Datas = r.Datas[:0]
+	r.Code = 0
+}
+
+func (r *ReadonlyQueryResult) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case QueryResultMessageTag: // Message
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
+			}
+			r.Message, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case QueryResultDatasTag: // Datas
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Datas", wt)
+			}
+            if cap(r.Datas) < 64 {
+				temp := make([]ReadonlyRangeData, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Datas = append(temp, r.Datas...)
+			}
+			var subData []byte
+			subData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			var elem ReadonlyRangeData
+			if err = elem.FromProtobuf(subData); err != nil {
+				return err
+			}
+			r.Datas = append(r.Datas, elem)
+		case QueryResultCodeTag: // Code
+			if wt == utils.WireTypeVarint {
+				r.Code, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.Code = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyQueryResult) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfQueryResultMessage:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfQueryResultDatas:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Datas) < len(_arr) {
+				r.Datas = make([]ReadonlyRangeData, 0, len(_arr))
+			} else {
+				r.Datas = r.Datas[:0]
+			}
+			for _, _item := range _arr {
+				var _elem ReadonlyRangeData
+				_subObj, _eo := _item.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := _elem.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.Datas = append(r.Datas, _elem)
+			}
+		case NameOfQueryResultCode:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Code = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyQueryResult) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyQueryResult) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyQueryResult) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *QueryResult) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	for iNdEx := len(m.Datas) - 1; iNdEx >= 0; iNdEx-- {
+		size := m.Datas[iNdEx].marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	if m.Code != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *QueryResult) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *QueryResult) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
+// GetRangeByDatasourceResponse field tag IDs.
+const (
+	GetRangeByDatasourceResponseMessageTag       = 2
+	GetRangeByDatasourceResponseTimestampsTag    = 4
+	GetRangeByDatasourceResponseQueriesResultTag = 3
+	GetRangeByDatasourceResponseCodeTag          = 1
+)
+
+// GetRangeByDatasourceResponse JSON field name string constants.
+const (
+	NameOfGetRangeByDatasourceResponseMessage       = "message"
+	NameOfGetRangeByDatasourceResponseTimestamps    = "timestamps"
+	NameOfGetRangeByDatasourceResponseQueriesResult = "queries_result"
+	NameOfGetRangeByDatasourceResponseCode          = "code"
+)
+
+// GetRangeByDatasourceResponse writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetRangeByDatasourceResponse struct {
+	Message       string        `json:"message,omitempty"`
+	Timestamps    []int64       `json:"timestamps,omitempty"`
+	QueriesResult []QueryResult `json:"queries_result,omitempty"`
+	Code          int32         `json:"code,omitempty"`
+	arena         []byte
+}
+
+func (m *GetRangeByDatasourceResponse) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Message = ""
+	m.Timestamps = m.Timestamps[:0]
+	m.QueriesResult = m.QueriesResult[:0]
+	m.Code = 0
+}
+
+func (m *GetRangeByDatasourceResponse) ProtobufSize() int {
+	size := 0
+	if m.Message != "" {
+		n := len(m.Message)
+		size += 1 /* TagSize(GetRangeByDatasourceResponseMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if len(m.Timestamps) > 0 {
+		packed := 0
+		for _, v := range m.Timestamps {
+			packed += (bits.Len64((uint64(v))|1) + 6) / 7
+		}
+		size += 1 /* TagSize(GetRangeByDatasourceResponseTimestampsTag, LenDelim=2) */ + (bits.Len64((uint64(packed))|1) + 6) / 7 + packed
+	}
+	for i := range m.QueriesResult {
+		sub := m.QueriesResult[i].ProtobufSize()
+		if sub > 0 {
+			size += 1 /* TagSize(GetRangeByDatasourceResponseQueriesResultTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+	}
+	if m.Code != 0 {
+		size += 1 /* TagSize(GetRangeByDatasourceResponseCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *GetRangeByDatasourceResponse) ToProtobufByAppend(in []byte) []byte {
+	if m.Code != 0 {
+		in = utils.AppendTag(in, GetRangeByDatasourceResponseCodeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.Code))
+	}
+	for i := range m.QueriesResult {
+		sub := m.QueriesResult[i].ProtobufSize()
+		if sub > 0 {
+			in = utils.AppendTag(in, GetRangeByDatasourceResponseQueriesResultTag, utils.WireTypeLenDelim)
+			in = utils.AppendVarint(in, uint64(sub))
+			in = m.QueriesResult[i].ToProtobuf(in)
+		}
+	}
+	if len(m.Timestamps) > 0 {
+		packedSize := 0
+		for _, v := range m.Timestamps {
+			packedSize += (bits.Len64((uint64(v))|1) + 6) / 7
+		}
+		in = utils.AppendTag(in, GetRangeByDatasourceResponseTimestampsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(packedSize))
+		for _, v := range m.Timestamps {
+			in = utils.AppendVarint(in, uint64(v))
+		}
+	}
+	if m.Message != "" {
+		in = utils.AppendTag(in, GetRangeByDatasourceResponseMessageTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
+	}
+	return in
+}
+func (m *GetRangeByDatasourceResponse) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Message) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceResponseMessage...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Message, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.Timestamps) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceResponseTimestamps...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.Timestamps {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				if int64(_v) > 9007199254740991 || int64(_v) < -9007199254740991 {
+					dst = append(dst, '"')
+					dst = strconv.AppendInt(dst, int64(_v), 10)
+					dst = append(dst, '"')
+				} else {
+					dst = strconv.AppendInt(dst, int64(_v), 10)
+				}
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if len(m.QueriesResult) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceResponseQueriesResult...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.QueriesResult {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, ']')
+		}
+	}
+	if m.Code != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetRangeByDatasourceResponseCode...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.Code), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetRangeByDatasourceResponse readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetRangeByDatasourceResponse struct {
+	parser                          fastjson.Parser
+	Message       string `json:"message,omitempty"`
+	rawBuffer     []byte
+	Timestamps    []int64               `json:"timestamps,omitempty"`
+	QueriesResult []ReadonlyQueryResult `json:"queries_result,omitempty"`
+	Code          int32                 `json:"code,omitempty"`
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) Clone(dst *GetRangeByDatasourceResponse) *GetRangeByDatasourceResponse {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetRangeByDatasourceResponse{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Message) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Message...)
+		dst.Message = unsafe.String(&dst.arena[_loc], len(r.Message))
+	} else {
+		dst.Message = ""
+	}
+	if len(r.Timestamps) > 0 {
+		if _rem := len(dst.arena) & 7; _rem != 0 {
+			dst.arena = append(dst.arena, _alignZeroPad[:8-_rem]...)
+		}
+		_nb := len(r.Timestamps) * 8
+		if cap(dst.arena)-len(dst.arena) < _nb {
+			_nc := cap(dst.arena)*2 + _nb
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		_loc := len(dst.arena)
+		dst.arena = dst.arena[:_loc+_nb]
+		copy(dst.arena[_loc:], unsafe.Slice((*byte)(unsafe.Pointer(&r.Timestamps[0])), _nb))
+		_n := len(r.Timestamps)
+		dst.Timestamps = unsafe.Slice((*int64)(unsafe.Pointer(&dst.arena[_loc])), _n)
+	} else {
+		dst.Timestamps = dst.Timestamps[:0]
+	}
+	if len(r.QueriesResult) > 0 {
+		if cap(dst.QueriesResult) >= len(r.QueriesResult) {
+			dst.QueriesResult = dst.QueriesResult[:len(r.QueriesResult)]
+		} else {
+			dst.QueriesResult = make([]QueryResult, len(r.QueriesResult))
+		}
+		for _i := range r.QueriesResult {
+			r.QueriesResult[_i].Clone(&dst.QueriesResult[_i])
+		}
+	} else {
+		dst.QueriesResult = dst.QueriesResult[:0]
+	}
+	dst.Code = r.Code
+	return dst
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Message = ""
+	r.Timestamps = r.Timestamps[:0]
+	r.QueriesResult = r.QueriesResult[:0]
+	r.Code = 0
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetRangeByDatasourceResponseMessageTag: // Message
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
+			}
+			r.Message, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetRangeByDatasourceResponseTimestampsTag: // Timestamps
+            if cap(r.Timestamps) < 64 {
+				temp := make([]int64, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Timestamps = append(temp, r.Timestamps...)
+			}
+			var packedData []byte
+			packedData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			for len(packedData) > 0 {
+				var pv int64
+				pv, packedData, err = utils.ReadInt64(packedData)
+				if err != nil {
+					return err
+				}
+				r.Timestamps = append(r.Timestamps, pv)
+			}
+		case GetRangeByDatasourceResponseQueriesResultTag: // QueriesResult
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field QueriesResult", wt)
+			}
+            if cap(r.QueriesResult) < 64 {
+				temp := make([]ReadonlyQueryResult, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.QueriesResult = append(temp, r.QueriesResult...)
+			}
+			var subData []byte
+			subData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			var elem ReadonlyQueryResult
+			if err = elem.FromProtobuf(subData); err != nil {
+				return err
+			}
+			r.QueriesResult = append(r.QueriesResult, elem)
+		case GetRangeByDatasourceResponseCodeTag: // Code
+			if wt == utils.WireTypeVarint {
+				r.Code, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.Code = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetRangeByDatasourceResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetRangeByDatasourceResponseMessage:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetRangeByDatasourceResponseTimestamps:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.Timestamps) < len(_arr) {
+				r.Timestamps = make([]int64, 0, len(_arr))
+			} else {
+				r.Timestamps = r.Timestamps[:0]
+			}
+			for _, _item := range _arr {
+				var _iv int64
+				if _item.Type(parser) == fastjson.TypeString {
+					_sb, _ei := _item.StringBytes()
+					if _ei != nil {
+						visitErr = _ei
+						return
+					}
+					var _ei2 error
+					// _iv, _ei2 = strconv.ParseInt(unsafe.String(unsafe.SliceData(_sb), len(_sb)), 10, 64)
+					_iv, _ei2 = fastfloat.ParseInt64(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
+					if _ei2 != nil {
+						visitErr = _ei2
+						return
+					}
+				} else {
+					var _ei error
+					_iv, _ei = _item.Int64()
+					if _ei != nil {
+						visitErr = _ei
+						return
+					}
+				}
+				r.Timestamps = append(r.Timestamps, int64(_iv))
+			}
+		case NameOfGetRangeByDatasourceResponseQueriesResult:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.QueriesResult) < len(_arr) {
+				r.QueriesResult = make([]ReadonlyQueryResult, 0, len(_arr))
+			} else {
+				r.QueriesResult = r.QueriesResult[:0]
+			}
+			for _, _item := range _arr {
+				var _elem ReadonlyQueryResult
+				_subObj, _eo := _item.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := _elem.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.QueriesResult = append(r.QueriesResult, _elem)
+			}
+		case NameOfGetRangeByDatasourceResponseCode:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Code = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetRangeByDatasourceResponse) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetRangeByDatasourceResponse) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if len(m.Timestamps) > 0 {
+		pksize := 0
+		for _, v := range m.Timestamps {
+			pksize += ((bits.Len64(uint64(v)|1) + 6) / 7)
+		}
+		i -= pksize
+		j := i
+		for _, v := range m.Timestamps {
+			uv := uint64(v)
+			for uv >= 0x80 { dAtA[j] = byte(uv)|0x80; uv >>= 7; j++ }
+			dAtA[j] = byte(uv); j++
+		}
+		i = utils.EncodeVarint(dAtA, i, uint64(pksize))
+		i--
+		dAtA[i] = 34 /*field=4, wireType=LenDelim, (4<<3)|2 (34)*/
+	}
+	for iNdEx := len(m.QueriesResult) - 1; iNdEx >= 0; iNdEx-- {
+		size := m.QueriesResult[iNdEx].marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	if m.Code != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetRangeByDatasourceResponse) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetRangeByDatasourceResponse) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
 // GetMenuListRequest field tag IDs.
 const (
 	GetMenuListRequestSessionTag = 1
@@ -7236,7 +10538,6 @@ func (m *GetMenuListRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *GetMenuListRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -7260,6 +10561,7 @@ func (m *GetMenuListRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetMenuListRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 }
@@ -7288,6 +10590,7 @@ func (r *ReadonlyGetMenuListRequest) Clone(dst *GetMenuListRequest) *GetMenuList
 
 func (r *ReadonlyGetMenuListRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 }
 
@@ -7301,40 +10604,6 @@ func (r *ReadonlyGetMenuListRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetMenuListRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -7354,7 +10623,6 @@ func (r *ReadonlyGetMenuListRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyGetMenuListRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -7376,11 +10644,9 @@ func (r *ReadonlyGetMenuListRequest) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyGetMenuListRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMenuListRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -7402,14 +10668,14 @@ func (r *ReadonlyGetMenuListRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetMenuListRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMenuListRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -7561,7 +10827,6 @@ func (m *Menu) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *Menu) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -7673,6 +10938,7 @@ func (m *Menu) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMenu struct {
+	parser                          fastjson.Parser
 	MenuName  string `json:"menu_name,omitempty"`
 	Link      string `json:"link,omitempty"`
 	Target    string `json:"target,omitempty"`
@@ -7725,6 +10991,7 @@ func (r *ReadonlyMenu) Clone(dst *Menu) *Menu {
 
 func (r *ReadonlyMenu) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.MenuName = ""
 	r.Link = ""
 	r.Target = ""
@@ -7744,40 +11011,6 @@ func (r *ReadonlyMenu) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case MenuMenuNameTag: // MenuName
 			if wt != utils.WireTypeLenDelim {
@@ -7857,7 +11090,6 @@ func (r *ReadonlyMenu) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyMenu) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -7991,11 +11223,9 @@ func (r *ReadonlyMenu) fromJSONValue(obj *fastjson.Object, parser *fastjson.Pars
 	return visitErr
 }
 
-func (r *ReadonlyMenu) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMenu) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -8017,14 +11247,14 @@ func (r *ReadonlyMenu) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyMenu) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMenu) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -8171,7 +11401,6 @@ func (m *GetMenuListResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *GetMenuListResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -8224,6 +11453,7 @@ func (m *GetMenuListResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyGetMenuListResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Menus     []ReadonlyMenu `json:"menus,omitempty"`
@@ -8267,6 +11497,7 @@ func (r *ReadonlyGetMenuListResponse) Clone(dst *GetMenuListResponse) *GetMenuLi
 
 func (r *ReadonlyGetMenuListResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Menus = r.Menus[:0]
 	r.Code = 0
@@ -8282,40 +11513,6 @@ func (r *ReadonlyGetMenuListResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case GetMenuListResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -8328,6 +11525,10 @@ func (r *ReadonlyGetMenuListResponse) FromProtobuf(in []byte) error {
 		case GetMenuListResponseMenusTag: // Menus
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field Menus", wt)
+			}
+            if cap(r.Menus) < 64 {
+				temp := make([]ReadonlyMenu, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Menus = append(temp, r.Menus...)
 			}
 			var subData []byte
 			subData, in, err = utils.ConsumeBytes(in)
@@ -8362,7 +11563,6 @@ func (r *ReadonlyGetMenuListResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyGetMenuListResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -8415,11 +11615,9 @@ func (r *ReadonlyGetMenuListResponse) fromJSONValue(obj *fastjson.Object, parser
 	return visitErr
 }
 
-func (r *ReadonlyGetMenuListResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMenuListResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -8441,14 +11639,14 @@ func (r *ReadonlyGetMenuListResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyGetMenuListResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyGetMenuListResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -8562,7 +11760,6 @@ func (m *AddMenuRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddMenuRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -8594,6 +11791,7 @@ func (m *AddMenuRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddMenuRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 	Menu      ReadonlyMenu `json:"menu,omitempty"`
@@ -8624,6 +11822,7 @@ func (r *ReadonlyAddMenuRequest) Clone(dst *AddMenuRequest) *AddMenuRequest {
 
 func (r *ReadonlyAddMenuRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.Menu.Reset()
 }
@@ -8638,40 +11837,6 @@ func (r *ReadonlyAddMenuRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddMenuRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -8703,7 +11868,6 @@ func (r *ReadonlyAddMenuRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddMenuRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -8734,11 +11898,9 @@ func (r *ReadonlyAddMenuRequest) fromJSONValue(obj *fastjson.Object, parser *fas
 	return visitErr
 }
 
-func (r *ReadonlyAddMenuRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddMenuRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -8760,14 +11922,14 @@ func (r *ReadonlyAddMenuRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddMenuRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddMenuRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -8871,7 +12033,6 @@ func (m *AddMenuResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *AddMenuResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -8905,6 +12066,7 @@ func (m *AddMenuResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyAddMenuResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -8935,6 +12097,7 @@ func (r *ReadonlyAddMenuResponse) Clone(dst *AddMenuResponse) *AddMenuResponse {
 
 func (r *ReadonlyAddMenuResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -8949,40 +12112,6 @@ func (r *ReadonlyAddMenuResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case AddMenuResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -9015,7 +12144,6 @@ func (r *ReadonlyAddMenuResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyAddMenuResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -9044,11 +12172,9 @@ func (r *ReadonlyAddMenuResponse) fromJSONValue(obj *fastjson.Object, parser *fa
 	return visitErr
 }
 
-func (r *ReadonlyAddMenuResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddMenuResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -9070,14 +12196,14 @@ func (r *ReadonlyAddMenuResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyAddMenuResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyAddMenuResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -9177,7 +12303,6 @@ func (m *RemoveMenuRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveMenuRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -9217,6 +12342,7 @@ func (m *RemoveMenuRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveMenuRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 	MenuId    uint64 `json:"menu_id,omitempty"`
@@ -9247,6 +12373,7 @@ func (r *ReadonlyRemoveMenuRequest) Clone(dst *RemoveMenuRequest) *RemoveMenuReq
 
 func (r *ReadonlyRemoveMenuRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.MenuId = 0
 }
@@ -9261,40 +12388,6 @@ func (r *ReadonlyRemoveMenuRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveMenuRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -9325,7 +12418,6 @@ func (r *ReadonlyRemoveMenuRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveMenuRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -9371,11 +12463,9 @@ func (r *ReadonlyRemoveMenuRequest) fromJSONValue(obj *fastjson.Object, parser *
 	return visitErr
 }
 
-func (r *ReadonlyRemoveMenuRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveMenuRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -9397,14 +12487,14 @@ func (r *ReadonlyRemoveMenuRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveMenuRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveMenuRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -9504,7 +12594,6 @@ func (m *RemoveMenuResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *RemoveMenuResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -9538,6 +12627,7 @@ func (m *RemoveMenuResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRemoveMenuResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -9568,6 +12658,7 @@ func (r *ReadonlyRemoveMenuResponse) Clone(dst *RemoveMenuResponse) *RemoveMenuR
 
 func (r *ReadonlyRemoveMenuResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -9582,40 +12673,6 @@ func (r *ReadonlyRemoveMenuResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case RemoveMenuResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -9648,7 +12705,6 @@ func (r *ReadonlyRemoveMenuResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyRemoveMenuResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -9677,11 +12733,9 @@ func (r *ReadonlyRemoveMenuResponse) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyRemoveMenuResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveMenuResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -9703,14 +12757,14 @@ func (r *ReadonlyRemoveMenuResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRemoveMenuResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyRemoveMenuResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -9817,7 +12871,6 @@ func (m *ModifyMenuRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ModifyMenuRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -9849,6 +12902,7 @@ func (m *ModifyMenuRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyModifyMenuRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 	Menu      ReadonlyMenu `json:"menu,omitempty"`
@@ -9879,6 +12933,7 @@ func (r *ReadonlyModifyMenuRequest) Clone(dst *ModifyMenuRequest) *ModifyMenuReq
 
 func (r *ReadonlyModifyMenuRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 	r.Menu.Reset()
 }
@@ -9893,40 +12948,6 @@ func (r *ReadonlyModifyMenuRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ModifyMenuRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -9958,7 +12979,6 @@ func (r *ReadonlyModifyMenuRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyModifyMenuRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -9989,11 +13009,9 @@ func (r *ReadonlyModifyMenuRequest) fromJSONValue(obj *fastjson.Object, parser *
 	return visitErr
 }
 
-func (r *ReadonlyModifyMenuRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyModifyMenuRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -10015,14 +13033,14 @@ func (r *ReadonlyModifyMenuRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyModifyMenuRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyModifyMenuRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -10126,7 +13144,6 @@ func (m *ModifyMenuResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *ModifyMenuResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -10160,6 +13177,7 @@ func (m *ModifyMenuResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyModifyMenuResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Code      int32 `json:"code,omitempty"`
@@ -10190,6 +13208,7 @@ func (r *ReadonlyModifyMenuResponse) Clone(dst *ModifyMenuResponse) *ModifyMenuR
 
 func (r *ReadonlyModifyMenuResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Code = 0
 }
@@ -10204,40 +13223,6 @@ func (r *ReadonlyModifyMenuResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case ModifyMenuResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -10270,7 +13255,6 @@ func (r *ReadonlyModifyMenuResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyModifyMenuResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -10299,11 +13283,9 @@ func (r *ReadonlyModifyMenuResponse) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyModifyMenuResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyModifyMenuResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -10325,14 +13307,14 @@ func (r *ReadonlyModifyMenuResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyModifyMenuResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyModifyMenuResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -10421,7 +13403,6 @@ func (m *LoadMenuTreeRequest) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *LoadMenuTreeRequest) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -10445,6 +13426,7 @@ func (m *LoadMenuTreeRequest) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyLoadMenuTreeRequest struct {
+	parser                          fastjson.Parser
 	Session   string `json:"session,omitempty"`
 	rawBuffer []byte
 }
@@ -10473,6 +13455,7 @@ func (r *ReadonlyLoadMenuTreeRequest) Clone(dst *LoadMenuTreeRequest) *LoadMenuT
 
 func (r *ReadonlyLoadMenuTreeRequest) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Session = ""
 }
 
@@ -10486,40 +13469,6 @@ func (r *ReadonlyLoadMenuTreeRequest) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case LoadMenuTreeRequestSessionTag: // Session
 			if wt != utils.WireTypeLenDelim {
@@ -10539,7 +13488,6 @@ func (r *ReadonlyLoadMenuTreeRequest) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyLoadMenuTreeRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -10561,11 +13509,9 @@ func (r *ReadonlyLoadMenuTreeRequest) fromJSONValue(obj *fastjson.Object, parser
 	return visitErr
 }
 
-func (r *ReadonlyLoadMenuTreeRequest) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoadMenuTreeRequest) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -10587,14 +13533,14 @@ func (r *ReadonlyLoadMenuTreeRequest) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyLoadMenuTreeRequest) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoadMenuTreeRequest) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -10646,7 +13592,7 @@ const (
 	MenuTreeNodeTargetTag   = 4
 	MenuTreeNodeChildrenTag = 6
 	MenuTreeNodeMenuIdTag   = 1
-	MenuTreeNodeExpandedTag = 5
+	MenuTreeNodeBitFlagsTag = 5
 )
 
 // MenuTreeNode JSON field name string constants.
@@ -10656,7 +13602,7 @@ const (
 	NameOfMenuTreeNodeTarget   = "target"
 	NameOfMenuTreeNodeChildren = "children"
 	NameOfMenuTreeNodeMenuId   = "menu_id"
-	NameOfMenuTreeNodeExpanded = "expanded"
+	NameOfMenuTreeNodeBitFlags = "bit_flags"
 )
 
 // MenuTreeNode writer struct.
@@ -10667,7 +13613,7 @@ type MenuTreeNode struct {
 	Target   string         `json:"target,omitempty"`
 	Children []MenuTreeNode `json:"children,omitempty"`
 	MenuId   uint64         `json:"menu_id,omitempty"`
-	Expanded bool           `json:"expanded,omitempty"`
+	BitFlags uint64         `json:"bit_flags,omitempty"`
 	arena    []byte
 }
 
@@ -10679,7 +13625,7 @@ func (m *MenuTreeNode) Reset() {
 	m.Target = ""
 	m.Children = m.Children[:0]
 	m.MenuId = 0
-	m.Expanded = false
+	m.BitFlags = 0
 }
 
 func (m *MenuTreeNode) ProtobufSize() int {
@@ -10705,16 +13651,16 @@ func (m *MenuTreeNode) ProtobufSize() int {
 	if m.MenuId != 0 {
 		size += 1 /* TagSize(MenuTreeNodeMenuIdTag, Varint=0) */ + (bits.Len64((uint64(m.MenuId))|1) + 6) / 7
 	}
-	if m.Expanded {
-		size += 1 /* TagSize(MenuTreeNodeExpandedTag, Varint=0) */ + 1
+	if m.BitFlags != 0 {
+		size += 1 /* TagSize(MenuTreeNodeBitFlagsTag, Varint=0) */ + (bits.Len64((uint64(m.BitFlags))|1) + 6) / 7
 	}
 	return size
 }
 
 func (m *MenuTreeNode) ToProtobufByAppend(in []byte) []byte {
-	if m.Expanded {
-		in = utils.AppendTag(in, MenuTreeNodeExpandedTag, utils.WireTypeVarint)
-		in = append(in, 1)
+	if m.BitFlags != 0 {
+		in = utils.AppendTag(in, MenuTreeNodeBitFlagsTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.BitFlags))
 	}
 	if m.MenuId != 0 {
 		in = utils.AppendTag(in, MenuTreeNodeMenuIdTag, utils.WireTypeVarint)
@@ -10742,7 +13688,6 @@ func (m *MenuTreeNode) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *MenuTreeNode) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -10817,15 +13762,21 @@ func (m *MenuTreeNode) ToJSON(dst []byte) []byte {
 			dst = strconv.AppendUint(dst, uint64(m.MenuId), 10)
 		}
 	}
-	if m.Expanded {
+	if m.BitFlags != 0 {
 		if !_jsonFirstField {
 			dst = append(dst, ',')
 		}
 		_jsonFirstField = false
 		dst = append(dst, '"')
-		dst = append(dst, NameOfMenuTreeNodeExpanded...)
+		dst = append(dst, NameOfMenuTreeNodeBitFlags...)
 		dst = append(dst, '"', ':')
-		dst = append(dst, "true"...)
+		if uint64(m.BitFlags) > 9007199254740991 {
+			dst = append(dst, '"')
+			dst = strconv.AppendUint(dst, uint64(m.BitFlags), 10)
+			dst = append(dst, '"')
+		} else {
+			dst = strconv.AppendUint(dst, uint64(m.BitFlags), 10)
+		}
 	}
 	dst = append(dst, '}')
 	return dst
@@ -10835,13 +13786,14 @@ func (m *MenuTreeNode) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMenuTreeNode struct {
+	parser                          fastjson.Parser
 	MenuName  string `json:"menu_name,omitempty"`
 	Link      string `json:"link,omitempty"`
 	Target    string `json:"target,omitempty"`
 	rawBuffer []byte
 	Children  []ReadonlyMenuTreeNode `json:"children,omitempty"`
 	MenuId    uint64                 `json:"menu_id,omitempty"`
-	Expanded  bool                   `json:"expanded,omitempty"`
+	BitFlags  uint64                 `json:"bit_flags,omitempty"`
 }
 
 func (r *ReadonlyMenuTreeNode) Clone(dst *MenuTreeNode) *MenuTreeNode {
@@ -10890,18 +13842,19 @@ func (r *ReadonlyMenuTreeNode) Clone(dst *MenuTreeNode) *MenuTreeNode {
 		dst.Children = dst.Children[:0]
 	}
 	dst.MenuId = r.MenuId
-	dst.Expanded = r.Expanded
+	dst.BitFlags = r.BitFlags
 	return dst
 }
 
 func (r *ReadonlyMenuTreeNode) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.MenuName = ""
 	r.Link = ""
 	r.Target = ""
 	r.Children = r.Children[:0]
 	r.MenuId = 0
-	r.Expanded = false
+	r.BitFlags = 0
 }
 
 func (r *ReadonlyMenuTreeNode) FromProtobuf(in []byte) error {
@@ -10914,40 +13867,6 @@ func (r *ReadonlyMenuTreeNode) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case MenuTreeNodeMenuNameTag: // MenuName
 			if wt != utils.WireTypeLenDelim {
@@ -10977,6 +13896,10 @@ func (r *ReadonlyMenuTreeNode) FromProtobuf(in []byte) error {
 			if wt != utils.WireTypeLenDelim {
 				return fmt.Errorf("proto: wrong wireType = %d for field Children", wt)
 			}
+            if cap(r.Children) < 64 {
+				temp := make([]ReadonlyMenuTreeNode, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.Children = append(temp, r.Children...)
+			}
 			var subData []byte
 			subData, in, err = utils.ConsumeBytes(in)
 			if err != nil {
@@ -10998,11 +13921,14 @@ func (r *ReadonlyMenuTreeNode) FromProtobuf(in []byte) error {
 			if err != nil {
 				return err
 			}
-		case MenuTreeNodeExpandedTag: // Expanded
-			if wt != utils.WireTypeVarint {
-				return fmt.Errorf("proto: wrong wireType = %d for field Expanded", wt)
+		case MenuTreeNodeBitFlagsTag: // BitFlags
+			if wt == utils.WireTypeVarint {
+				r.BitFlags, in, err = utils.ReadUint64(in)
+			} else if wt == utils.WireType64bit {
+				r.BitFlags, in, err = utils.ReadFixed64(in)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field BitFlags", wt)
 			}
-			r.Expanded, in, err = utils.ReadBool(in)
 			if err != nil {
 				return err
 			}
@@ -11016,7 +13942,6 @@ func (r *ReadonlyMenuTreeNode) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyMenuTreeNode) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -11097,23 +14022,38 @@ func (r *ReadonlyMenuTreeNode) fromJSONValue(obj *fastjson.Object, parser *fastj
 				}
 			}
 			r.MenuId = uint64(_uv)
-		case NameOfMenuTreeNodeExpanded:
-			_bv, _e := v.Bool()
-			if _e != nil {
-				visitErr = _e
-				return
+		case NameOfMenuTreeNodeBitFlags:
+			var _uv uint64
+			if v.Type(parser) == fastjson.TypeString {
+				_sb, _e := v.StringBytes()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
+				var _e2 error
+				// _uv, _e2 = strconv.ParseUint(unsafe.String(unsafe.SliceData(_sb), len(_sb)), 10, 64)
+				_uv, _e2 = fastfloat.ParseUint64(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
+				if _e2 != nil {
+					visitErr = _e2
+					return
+				}
+			} else {
+				var _e error
+				_uv, _e = v.Uint64()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
 			}
-			r.Expanded = _bv
+			r.BitFlags = uint64(_uv)
 		}
 	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
 	return visitErr
 }
 
-func (r *ReadonlyMenuTreeNode) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMenuTreeNode) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -11135,14 +14075,14 @@ func (r *ReadonlyMenuTreeNode) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyMenuTreeNode) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyMenuTreeNode) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -11187,9 +14127,8 @@ func (m *MenuTreeNode) marshalToSizedBufferVT(dAtA []byte) int {
 		i--
 		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
 	}
-	if m.Expanded {
-		i--
-		if m.Expanded { dAtA[i] = 1 } else { dAtA[i] = 0 }
+	if m.BitFlags != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.BitFlags))
 		i--
 		dAtA[i] = 40 /*field=5, wireType=Varint, (5<<3)|0 (40)*/
 	}
@@ -11287,7 +14226,6 @@ func (m *LoadMenuTreeResponse) ToProtobufByAppend(in []byte) []byte {
 	}
 	return in
 }
-
 func (m *LoadMenuTreeResponse) ToJSON(dst []byte) []byte {
 	dst = append(dst, '{')
 	_jsonFirstField := true
@@ -11329,6 +14267,7 @@ func (m *LoadMenuTreeResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyLoadMenuTreeResponse struct {
+	parser                          fastjson.Parser
 	Message   string `json:"message,omitempty"`
 	rawBuffer []byte
 	Menus     ReadonlyMenuTreeNode `json:"menus,omitempty"`
@@ -11361,6 +14300,7 @@ func (r *ReadonlyLoadMenuTreeResponse) Clone(dst *LoadMenuTreeResponse) *LoadMen
 
 func (r *ReadonlyLoadMenuTreeResponse) Reset() {
 	r.rawBuffer = nil
+	r.parser.Reset()
 	r.Message = ""
 	r.Menus.Reset()
 	r.Code = 0
@@ -11376,40 +14316,6 @@ func (r *ReadonlyLoadMenuTreeResponse) FromProtobuf(in []byte) error {
 		if err != nil {
 			return err
 		}
-		// c1 := in[0]
-		// wt = utils.WireType(c1 & 0x7)
-		// if c1 < 0x80 {
-		// 	fieldNum = int(c1) >> 3
-		// 	in = in[1:]
-		// } else if len(in) > 1 && in[1] < 0x80 {
-		// 	fieldNum = ((int(c1) >> 3) & 15) | (int(in[1]) << 4)
-		// 	in = in[2:]
-		// } else {
-		// 	var x uint64
-		// 	var s uint
-		// 	var found bool
-		// 	for i, c := range in {
-		// 		if i == 10 {
-		// 			return fmt.Errorf("varint overflow")
-		// 		}
-		// 		if c < 0x80 {
-		// 			x |= uint64(c) << s
-		// 			found = true
-		// 			in = in[i+1:]
-		// 			break
-		// 		}
-		// 		x |= uint64(c&0x7f) << s
-		// 		s += 7
-		// 	}
-		// 	if !found {
-		// 		return fmt.Errorf("unexpected EOF reading varint")
-		// 	}
-		// 	fieldNum = int(x >> 3)
-		// 	// fieldNum, _, in, err = utils.ConsumeTag(in)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// }
 		switch fieldNum {
 		case LoadMenuTreeResponseMessageTag: // Message
 			if wt != utils.WireTypeLenDelim {
@@ -11454,7 +14360,6 @@ func (r *ReadonlyLoadMenuTreeResponse) FromProtobuf(in []byte) error {
 	}
 	return nil
 }
-
 func (r *ReadonlyLoadMenuTreeResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
 	var visitErr error
 	obj.Visit(func(k []byte, v *fastjson.Value) {
@@ -11492,11 +14397,9 @@ func (r *ReadonlyLoadMenuTreeResponse) fromJSONValue(obj *fastjson.Object, parse
 	return visitErr
 }
 
-func (r *ReadonlyLoadMenuTreeResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoadMenuTreeResponse) FromJSON(src []byte) error {
 	r.rawBuffer = src
-	if parser == nil {
-		parser = &fastjson.Parser{}
-	}
+	parser := &r.parser
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -11518,14 +14421,14 @@ func (r *ReadonlyLoadMenuTreeResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyLoadMenuTreeResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
+func (r *ReadonlyLoadMenuTreeResponse) FromJSONWithCopy(in []byte) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer, parser)
+	return r.FromJSON(r.rawBuffer)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill

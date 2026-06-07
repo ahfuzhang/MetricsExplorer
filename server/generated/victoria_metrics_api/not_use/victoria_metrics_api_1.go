@@ -127,7 +127,6 @@ func (m *QueryLabelResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyQueryLabelResponse struct {
-	parser                          fastjson.Parser
 	Status    string `json:"status,omitempty"`
 	rawBuffer []byte
 	Data      []string `json:"data,omitempty"`
@@ -181,7 +180,6 @@ func (r *ReadonlyQueryLabelResponse) Clone(dst *QueryLabelResponse) *QueryLabelR
 
 func (r *ReadonlyQueryLabelResponse) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.Status = ""
 	r.Data = r.Data[:0]
 }
@@ -270,9 +268,11 @@ func (r *ReadonlyQueryLabelResponse) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyQueryLabelResponse) FromJSON(src []byte) error {
+func (r *ReadonlyQueryLabelResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -294,14 +294,14 @@ func (r *ReadonlyQueryLabelResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyQueryLabelResponse) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyQueryLabelResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -440,7 +440,6 @@ func (m *TimeSeries) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyTimeSeries struct {
-	parser                          fastjson.Parser
 	Labels    map[string]string `json:"labels,omitempty"`
 	rawBuffer []byte
 }
@@ -483,7 +482,6 @@ func (r *ReadonlyTimeSeries) Clone(dst *TimeSeries) *TimeSeries {
 
 func (r *ReadonlyTimeSeries) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	clear(r.Labels)
 }
 
@@ -568,9 +566,11 @@ func (r *ReadonlyTimeSeries) fromJSONValue(obj *fastjson.Object, parser *fastjso
 	return visitErr
 }
 
-func (r *ReadonlyTimeSeries) FromJSON(src []byte) error {
+func (r *ReadonlyTimeSeries) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -592,14 +592,14 @@ func (r *ReadonlyTimeSeries) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyTimeSeries) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyTimeSeries) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -777,7 +777,6 @@ func (m *QuerySeriesResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyQuerySeriesResponse struct {
-	parser                          fastjson.Parser
 	Status    string               `json:"status,omitempty"`
 	Data      []ReadonlyTimeSeries `json:"data,omitempty"`
 	rawBuffer []byte
@@ -821,7 +820,6 @@ func (r *ReadonlyQuerySeriesResponse) Clone(dst *QuerySeriesResponse) *QuerySeri
 
 func (r *ReadonlyQuerySeriesResponse) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.Data = r.Data[:0]
 	r.Status = ""
 	r.IsPartial = false
@@ -934,9 +932,11 @@ func (r *ReadonlyQuerySeriesResponse) fromJSONValue(obj *fastjson.Object, parser
 	return visitErr
 }
 
-func (r *ReadonlyQuerySeriesResponse) FromJSON(src []byte) error {
+func (r *ReadonlyQuerySeriesResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -958,14 +958,14 @@ func (r *ReadonlyQuerySeriesResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyQuerySeriesResponse) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyQuerySeriesResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1115,7 +1115,6 @@ func (m *Stats) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyStats struct {
-	parser                          fastjson.Parser
 	rawBuffer         []byte
 	SeriesFetched     int64 `json:"seriesFetched,omitempty"`
 	ExecutionTimeMsec int64 `json:"executionTimeMsec,omitempty"`
@@ -1140,7 +1139,6 @@ func (r *ReadonlyStats) Clone(dst *Stats) *Stats {
 
 func (r *ReadonlyStats) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.SeriesFetched = 0
 	r.ExecutionTimeMsec = 0
 }
@@ -1253,9 +1251,11 @@ func (r *ReadonlyStats) fromJSONValue(obj *fastjson.Object, parser *fastjson.Par
 	return visitErr
 }
 
-func (r *ReadonlyStats) FromJSON(src []byte) error {
+func (r *ReadonlyStats) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1277,14 +1277,14 @@ func (r *ReadonlyStats) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyStats) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyStats) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1405,7 +1405,6 @@ func (m *Series) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlySeries struct {
-	parser                          fastjson.Parser
 	rawBuffer []byte
 	Values    []float64 `json:"values,omitempty"`
 }
@@ -1446,7 +1445,6 @@ func (r *ReadonlySeries) Clone(dst *Series) *Series {
 
 func (r *ReadonlySeries) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.Values = r.Values[:0]
 }
 
@@ -1501,14 +1499,14 @@ func (r *ReadonlySeries) fromJSONArray(arr []*fastjson.Value, parser *fastjson.P
 	for _, _item := range arr {
 		var _fv float64
 		if _item.Type(parser) == fastjson.TypeString {
-			_sb, _ei := _item.StringBytes()
-			if _ei != nil {
-				return _ei
+			_sb, _e := _item.StringBytes()
+			if _e != nil {
+				return _e
 			}
-			var _ei2 error
-			_fv, _ei2 = fastfloat.Parse(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
-			if _ei2 != nil {
-				return _ei2
+			var _e2 error
+			_fv, _e2 = strconv.ParseFloat(unsafe.String(unsafe.SliceData(_sb), len(_sb)), 64)
+			if _e2 != nil {
+				return _e2
 			}
 		} else {
 			var _ei error
@@ -1517,14 +1515,16 @@ func (r *ReadonlySeries) fromJSONArray(arr []*fastjson.Value, parser *fastjson.P
 				return _ei
 			}
 		}
-		r.Values = append(r.Values, float64(_fv))
+		r.Values = append(r.Values, _fv)
 	}
 	return nil
 }
 
-func (r *ReadonlySeries) FromJSON(src []byte) error {
+func (r *ReadonlySeries) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1546,14 +1546,14 @@ func (r *ReadonlySeries) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlySeries) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlySeries) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -1751,7 +1751,6 @@ func (m *MetricData) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMetricData struct {
-	parser                          fastjson.Parser
 	Metric    map[string]string `json:"metric,omitempty"`
 	Values    []ReadonlySeries  `json:"values,omitempty"`
 	rawBuffer []byte
@@ -1807,7 +1806,6 @@ func (r *ReadonlyMetricData) Clone(dst *MetricData) *MetricData {
 
 func (r *ReadonlyMetricData) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	clear(r.Metric)
 	r.Values = r.Values[:0]
 }
@@ -1949,9 +1947,11 @@ func (r *ReadonlyMetricData) fromJSONValue(obj *fastjson.Object, parser *fastjso
 	return visitErr
 }
 
-func (r *ReadonlyMetricData) FromJSON(src []byte) error {
+func (r *ReadonlyMetricData) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -1973,14 +1973,14 @@ func (r *ReadonlyMetricData) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyMetricData) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyMetricData) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -2142,7 +2142,6 @@ func (m *TimeSeriesData) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyTimeSeriesData struct {
-	parser                          fastjson.Parser
 	ResultType string               `json:"resultType,omitempty"`
 	Result     []ReadonlyMetricData `json:"result,omitempty"`
 	rawBuffer  []byte
@@ -2184,7 +2183,6 @@ func (r *ReadonlyTimeSeriesData) Clone(dst *TimeSeriesData) *TimeSeriesData {
 
 func (r *ReadonlyTimeSeriesData) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.ResultType = ""
 	r.Result = r.Result[:0]
 }
@@ -2281,9 +2279,11 @@ func (r *ReadonlyTimeSeriesData) fromJSONValue(obj *fastjson.Object, parser *fas
 	return visitErr
 }
 
-func (r *ReadonlyTimeSeriesData) FromJSON(src []byte) error {
+func (r *ReadonlyTimeSeriesData) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -2305,14 +2305,14 @@ func (r *ReadonlyTimeSeriesData) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyTimeSeriesData) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyTimeSeriesData) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
@@ -2501,7 +2501,6 @@ func (m *RangeQueryResponse) ToJSON(dst []byte) []byte {
 // Fields (including rawBuffer) are sorted with the fieldalignment strategy for
 // minimal memory padding and minimal GC scan range.
 type ReadonlyRangeQueryResponse struct {
-	parser                          fastjson.Parser
 	Status    string                 `json:"status,omitempty"`
 	Data      ReadonlyTimeSeriesData `json:"data,omitempty"`
 	rawBuffer []byte
@@ -2536,7 +2535,6 @@ func (r *ReadonlyRangeQueryResponse) Clone(dst *RangeQueryResponse) *RangeQueryR
 
 func (r *ReadonlyRangeQueryResponse) Reset() {
 	r.rawBuffer = nil
-	r.parser.Reset()
 	r.Status = ""
 	r.Data.Reset()
 	r.Stats.Reset()
@@ -2650,9 +2648,11 @@ func (r *ReadonlyRangeQueryResponse) fromJSONValue(obj *fastjson.Object, parser 
 	return visitErr
 }
 
-func (r *ReadonlyRangeQueryResponse) FromJSON(src []byte) error {
+func (r *ReadonlyRangeQueryResponse) FromJSON(src []byte, parser *fastjson.Parser) error {
 	r.rawBuffer = src
-	parser := &r.parser
+	if parser == nil {
+		parser = &fastjson.Parser{}
+	}
 	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
 	if err != nil {
 		return err
@@ -2674,14 +2674,14 @@ func (r *ReadonlyRangeQueryResponse) FromProtobufWithCopy(in []byte) error {
 	return r.FromProtobuf(r.rawBuffer)
 }
 
-func (r *ReadonlyRangeQueryResponse) FromJSONWithCopy(in []byte) error {
+func (r *ReadonlyRangeQueryResponse) FromJSONWithCopy(in []byte, parser *fastjson.Parser) error {
 	if cap(r.rawBuffer) < len(in) {
 		r.rawBuffer = make([]byte, len(in))
 	} else {
 		r.rawBuffer = r.rawBuffer[:len(in)]
 	}
 	copy(r.rawBuffer, in)
-	return r.FromJSON(r.rawBuffer)
+	return r.FromJSON(r.rawBuffer, parser)
 }
 
 // marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill

@@ -56,15 +56,6 @@ func GetMetricNamesByDatasource() http.HandlerFunc {
 			respond(3, "datasource not available", nil)
 			return
 		}
-
-		metricNames := make([]string, 0, len(ds.MetricNames))
-		for name := range ds.MetricNames {
-			metricNames = append(metricNames, name)
-		}
-		// sort.Slice(metricNames, func(i, j int) bool {
-		// 	return strings.ToLower(metricNames[i]) < strings.ToLower(metricNames[j])
-		// })
-
-		respond(0, "success", metricNames)
+		respond(0, "success", ds.GetMetricNames())
 	}
 }

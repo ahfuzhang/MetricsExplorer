@@ -15,6 +15,22 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+@$core.Deprecated('Use metricTypeDescriptor instead')
+const MetricType$json = {
+  '1': 'MetricType',
+  '2': [
+    {'1': 'Unknown', '2': 0},
+    {'1': 'Counter', '2': 1},
+    {'1': 'StaticValue', '2': 2},
+    {'1': 'Histogram', '2': 3},
+  ],
+};
+
+/// Descriptor for `MetricType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List metricTypeDescriptor = $convert.base64Decode(
+    'CgpNZXRyaWNUeXBlEgsKB1Vua25vd24QABILCgdDb3VudGVyEAESDwoLU3RhdGljVmFsdWUQAh'
+    'INCglIaXN0b2dyYW0QAw==');
+
 @$core.Deprecated('Use getGlobalConfigsResponseDescriptor instead')
 const GetGlobalConfigsResponse$json = {
   '1': 'GetGlobalConfigsResponse',
@@ -298,21 +314,60 @@ final $typed_data.Uint8List getLabelsByDatasourceRequestDescriptor =
         'ChxHZXRMYWJlbHNCeURhdGFzb3VyY2VSZXF1ZXN0EhgKB3Nlc3Npb24YASABKAlSB3Nlc3Npb2'
         '4SLAoSdm1fZGF0YXNvdXJjZV9uYW1lGAIgASgJUhB2bURhdGFzb3VyY2VOYW1l');
 
+@$core.Deprecated('Use labelValuesDescriptor instead')
+const LabelValues$json = {
+  '1': 'LabelValues',
+  '2': [
+    {'1': 'values', '3': 1, '4': 3, '5': 9, '10': 'values'},
+  ],
+};
+
+/// Descriptor for `LabelValues`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List labelValuesDescriptor = $convert
+    .base64Decode('CgtMYWJlbFZhbHVlcxIWCgZ2YWx1ZXMYASADKAlSBnZhbHVlcw==');
+
 @$core.Deprecated('Use getLabelsByDatasourceResponseDescriptor instead')
 const GetLabelsByDatasourceResponse$json = {
   '1': 'GetLabelsByDatasourceResponse',
   '2': [
     {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
     {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
-    {'1': 'labels', '3': 3, '4': 3, '5': 9, '10': 'labels'},
+    {
+      '1': 'labels',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.GetLabelsByDatasourceResponse.LabelsEntry',
+      '10': 'labels'
+    },
   ],
+  '3': [GetLabelsByDatasourceResponse_LabelsEntry$json],
+};
+
+@$core.Deprecated('Use getLabelsByDatasourceResponseDescriptor instead')
+const GetLabelsByDatasourceResponse_LabelsEntry$json = {
+  '1': 'LabelsEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.metrics_explorer.LabelValues',
+      '10': 'value'
+    },
+  ],
+  '7': {'7': true},
 };
 
 /// Descriptor for `GetLabelsByDatasourceResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getLabelsByDatasourceResponseDescriptor =
-    $convert.base64Decode(
-        'Ch1HZXRMYWJlbHNCeURhdGFzb3VyY2VSZXNwb25zZRISCgRjb2RlGAEgASgFUgRjb2RlEhgKB2'
-        '1lc3NhZ2UYAiABKAlSB21lc3NhZ2USFgoGbGFiZWxzGAMgAygJUgZsYWJlbHM=');
+final $typed_data.Uint8List getLabelsByDatasourceResponseDescriptor = $convert.base64Decode(
+    'Ch1HZXRMYWJlbHNCeURhdGFzb3VyY2VSZXNwb25zZRISCgRjb2RlGAEgASgFUgRjb2RlEhgKB2'
+    '1lc3NhZ2UYAiABKAlSB21lc3NhZ2USUwoGbGFiZWxzGAMgAygLMjsubWV0cmljc19leHBsb3Jl'
+    'ci5HZXRMYWJlbHNCeURhdGFzb3VyY2VSZXNwb25zZS5MYWJlbHNFbnRyeVIGbGFiZWxzGlgKC0'
+    'xhYmVsc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EjMKBXZhbHVlGAIgASgLMh0ubWV0cmljc19l'
+    'eHBsb3Jlci5MYWJlbFZhbHVlc1IFdmFsdWU6AjgB');
 
 @$core.Deprecated('Use getMetricNamesByDatasourceRequestDescriptor instead')
 const GetMetricNamesByDatasourceRequest$json = {
@@ -351,6 +406,245 @@ final $typed_data.Uint8List getMetricNamesByDatasourceResponseDescriptor =
         'CiJHZXRNZXRyaWNOYW1lc0J5RGF0YXNvdXJjZVJlc3BvbnNlEhIKBGNvZGUYASABKAVSBGNvZG'
         'USGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZRIhCgxtZXRyaWNfbmFtZXMYAyADKAlSC21ldHJp'
         'Y05hbWVz');
+
+@$core.Deprecated('Use getSeriesByDatasourceRequestDescriptor instead')
+const GetSeriesByDatasourceRequest$json = {
+  '1': 'GetSeriesByDatasourceRequest',
+  '2': [
+    {'1': 'session', '3': 1, '4': 1, '5': 9, '10': 'session'},
+    {
+      '1': 'vm_datasource_name',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'vmDatasourceName'
+    },
+    {'1': 'metric_name', '3': 3, '4': 1, '5': 9, '10': 'metricName'},
+  ],
+};
+
+/// Descriptor for `GetSeriesByDatasourceRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getSeriesByDatasourceRequestDescriptor =
+    $convert.base64Decode(
+        'ChxHZXRTZXJpZXNCeURhdGFzb3VyY2VSZXF1ZXN0EhgKB3Nlc3Npb24YASABKAlSB3Nlc3Npb2'
+        '4SLAoSdm1fZGF0YXNvdXJjZV9uYW1lGAIgASgJUhB2bURhdGFzb3VyY2VOYW1lEh8KC21ldHJp'
+        'Y19uYW1lGAMgASgJUgptZXRyaWNOYW1l');
+
+@$core.Deprecated('Use tagValuesDescriptor instead')
+const TagValues$json = {
+  '1': 'TagValues',
+  '2': [
+    {'1': 'values', '3': 1, '4': 3, '5': 9, '10': 'values'},
+    {'1': 'show_times', '3': 2, '4': 3, '5': 5, '10': 'showTimes'},
+  ],
+};
+
+/// Descriptor for `TagValues`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List tagValuesDescriptor = $convert.base64Decode(
+    'CglUYWdWYWx1ZXMSFgoGdmFsdWVzGAEgAygJUgZ2YWx1ZXMSHQoKc2hvd190aW1lcxgCIAMoBV'
+    'IJc2hvd1RpbWVz');
+
+@$core.Deprecated('Use metricTagsDescriptor instead')
+const MetricTags$json = {
+  '1': 'MetricTags',
+  '2': [
+    {
+      '1': 'tags',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.MetricTags.TagsEntry',
+      '10': 'tags'
+    },
+  ],
+  '3': [MetricTags_TagsEntry$json],
+};
+
+@$core.Deprecated('Use metricTagsDescriptor instead')
+const MetricTags_TagsEntry$json = {
+  '1': 'TagsEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
+  ],
+  '7': {'7': true},
+};
+
+/// Descriptor for `MetricTags`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List metricTagsDescriptor = $convert.base64Decode(
+    'CgpNZXRyaWNUYWdzEjoKBHRhZ3MYASADKAsyJi5tZXRyaWNzX2V4cGxvcmVyLk1ldHJpY1RhZ3'
+    'MuVGFnc0VudHJ5UgR0YWdzGjcKCVRhZ3NFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1'
+    'ZRgCIAEoCVIFdmFsdWU6AjgB');
+
+@$core.Deprecated('Use getSeriesByDatasourceResponseDescriptor instead')
+const GetSeriesByDatasourceResponse$json = {
+  '1': 'GetSeriesByDatasourceResponse',
+  '2': [
+    {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'tags',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.GetSeriesByDatasourceResponse.TagsEntry',
+      '10': 'tags'
+    },
+    {
+      '1': 'ts',
+      '3': 5,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.MetricTags',
+      '10': 'ts'
+    },
+  ],
+  '3': [GetSeriesByDatasourceResponse_TagsEntry$json],
+};
+
+@$core.Deprecated('Use getSeriesByDatasourceResponseDescriptor instead')
+const GetSeriesByDatasourceResponse_TagsEntry$json = {
+  '1': 'TagsEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.metrics_explorer.TagValues',
+      '10': 'value'
+    },
+  ],
+  '7': {'7': true},
+};
+
+/// Descriptor for `GetSeriesByDatasourceResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getSeriesByDatasourceResponseDescriptor = $convert.base64Decode(
+    'Ch1HZXRTZXJpZXNCeURhdGFzb3VyY2VSZXNwb25zZRISCgRjb2RlGAEgASgFUgRjb2RlEhgKB2'
+    '1lc3NhZ2UYAiABKAlSB21lc3NhZ2USTQoEdGFncxgEIAMoCzI5Lm1ldHJpY3NfZXhwbG9yZXIu'
+    'R2V0U2VyaWVzQnlEYXRhc291cmNlUmVzcG9uc2UuVGFnc0VudHJ5UgR0YWdzEiwKAnRzGAUgAy'
+    'gLMhwubWV0cmljc19leHBsb3Jlci5NZXRyaWNUYWdzUgJ0cxpUCglUYWdzRW50cnkSEAoDa2V5'
+    'GAEgASgJUgNrZXkSMQoFdmFsdWUYAiABKAsyGy5tZXRyaWNzX2V4cGxvcmVyLlRhZ1ZhbHVlc1'
+    'IFdmFsdWU6AjgB');
+
+@$core.Deprecated('Use getRangeByDatasourceRequestDescriptor instead')
+const GetRangeByDatasourceRequest$json = {
+  '1': 'GetRangeByDatasourceRequest',
+  '2': [
+    {'1': 'session', '3': 1, '4': 1, '5': 9, '10': 'session'},
+    {
+      '1': 'vm_datasource_name',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'vmDatasourceName'
+    },
+    {'1': 'queries', '3': 3, '4': 3, '5': 9, '10': 'queries'},
+    {'1': 'start', '3': 4, '4': 1, '5': 9, '10': 'start'},
+    {'1': 'end', '3': 5, '4': 1, '5': 9, '10': 'end'},
+    {'1': 'step', '3': 6, '4': 1, '5': 9, '10': 'step'},
+    {'1': 'timeout', '3': 7, '4': 1, '5': 9, '10': 'timeout'},
+  ],
+};
+
+/// Descriptor for `GetRangeByDatasourceRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getRangeByDatasourceRequestDescriptor = $convert.base64Decode(
+    'ChtHZXRSYW5nZUJ5RGF0YXNvdXJjZVJlcXVlc3QSGAoHc2Vzc2lvbhgBIAEoCVIHc2Vzc2lvbh'
+    'IsChJ2bV9kYXRhc291cmNlX25hbWUYAiABKAlSEHZtRGF0YXNvdXJjZU5hbWUSGAoHcXVlcmll'
+    'cxgDIAMoCVIHcXVlcmllcxIUCgVzdGFydBgEIAEoCVIFc3RhcnQSEAoDZW5kGAUgASgJUgNlbm'
+    'QSEgoEc3RlcBgGIAEoCVIEc3RlcBIYCgd0aW1lb3V0GAcgASgJUgd0aW1lb3V0');
+
+@$core.Deprecated('Use rangeDataDescriptor instead')
+const RangeData$json = {
+  '1': 'RangeData',
+  '2': [
+    {
+      '1': 'tags',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.RangeData.TagsEntry',
+      '10': 'tags'
+    },
+    {'1': 'points', '3': 4, '4': 3, '5': 1, '10': 'points'},
+    {'1': 'const_value', '3': 5, '4': 1, '5': 1, '10': 'constValue'},
+    {
+      '1': 'metric_type',
+      '3': 6,
+      '4': 1,
+      '5': 14,
+      '6': '.metrics_explorer.MetricType',
+      '10': 'metricType'
+    },
+  ],
+  '3': [RangeData_TagsEntry$json],
+};
+
+@$core.Deprecated('Use rangeDataDescriptor instead')
+const RangeData_TagsEntry$json = {
+  '1': 'TagsEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
+  ],
+  '7': {'7': true},
+};
+
+/// Descriptor for `RangeData`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rangeDataDescriptor = $convert.base64Decode(
+    'CglSYW5nZURhdGESOQoEdGFncxgDIAMoCzIlLm1ldHJpY3NfZXhwbG9yZXIuUmFuZ2VEYXRhLl'
+    'RhZ3NFbnRyeVIEdGFncxIWCgZwb2ludHMYBCADKAFSBnBvaW50cxIfCgtjb25zdF92YWx1ZRgF'
+    'IAEoAVIKY29uc3RWYWx1ZRI9CgttZXRyaWNfdHlwZRgGIAEoDjIcLm1ldHJpY3NfZXhwbG9yZX'
+    'IuTWV0cmljVHlwZVIKbWV0cmljVHlwZRo3CglUYWdzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkS'
+    'FAoFdmFsdWUYAiABKAlSBXZhbHVlOgI4AQ==');
+
+@$core.Deprecated('Use queryResultDescriptor instead')
+const QueryResult$json = {
+  '1': 'QueryResult',
+  '2': [
+    {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'datas',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.RangeData',
+      '10': 'datas'
+    },
+  ],
+};
+
+/// Descriptor for `QueryResult`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List queryResultDescriptor = $convert.base64Decode(
+    'CgtRdWVyeVJlc3VsdBISCgRjb2RlGAEgASgFUgRjb2RlEhgKB21lc3NhZ2UYAiABKAlSB21lc3'
+    'NhZ2USMQoFZGF0YXMYAyADKAsyGy5tZXRyaWNzX2V4cGxvcmVyLlJhbmdlRGF0YVIFZGF0YXM=');
+
+@$core.Deprecated('Use getRangeByDatasourceResponseDescriptor instead')
+const GetRangeByDatasourceResponse$json = {
+  '1': 'GetRangeByDatasourceResponse',
+  '2': [
+    {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'queries_result',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.QueryResult',
+      '10': 'queriesResult'
+    },
+    {'1': 'timestamps', '3': 4, '4': 3, '5': 3, '10': 'timestamps'},
+  ],
+};
+
+/// Descriptor for `GetRangeByDatasourceResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getRangeByDatasourceResponseDescriptor = $convert.base64Decode(
+    'ChxHZXRSYW5nZUJ5RGF0YXNvdXJjZVJlc3BvbnNlEhIKBGNvZGUYASABKAVSBGNvZGUSGAoHbW'
+    'Vzc2FnZRgCIAEoCVIHbWVzc2FnZRJECg5xdWVyaWVzX3Jlc3VsdBgDIAMoCzIdLm1ldHJpY3Nf'
+    'ZXhwbG9yZXIuUXVlcnlSZXN1bHRSDXF1ZXJpZXNSZXN1bHQSHgoKdGltZXN0YW1wcxgEIAMoA1'
+    'IKdGltZXN0YW1wcw==');
 
 @$core.Deprecated('Use getMenuListRequestDescriptor instead')
 const GetMenuListRequest$json = {
@@ -528,7 +822,7 @@ const MenuTreeNode$json = {
     {'1': 'menu_name', '3': 2, '4': 1, '5': 9, '10': 'menuName'},
     {'1': 'link', '3': 3, '4': 1, '5': 9, '10': 'link'},
     {'1': 'target', '3': 4, '4': 1, '5': 9, '10': 'target'},
-    {'1': 'expanded', '3': 5, '4': 1, '5': 8, '10': 'expanded'},
+    {'1': 'bit_flags', '3': 5, '4': 1, '5': 4, '10': 'bitFlags'},
     {
       '1': 'children',
       '3': 6,
@@ -544,8 +838,8 @@ const MenuTreeNode$json = {
 final $typed_data.Uint8List menuTreeNodeDescriptor = $convert.base64Decode(
     'CgxNZW51VHJlZU5vZGUSFwoHbWVudV9pZBgBIAEoBFIGbWVudUlkEhsKCW1lbnVfbmFtZRgCIA'
     'EoCVIIbWVudU5hbWUSEgoEbGluaxgDIAEoCVIEbGluaxIWCgZ0YXJnZXQYBCABKAlSBnRhcmdl'
-    'dBIaCghleHBhbmRlZBgFIAEoCFIIZXhwYW5kZWQSOgoIY2hpbGRyZW4YBiADKAsyHi5tZXRyaW'
-    'NzX2V4cGxvcmVyLk1lbnVUcmVlTm9kZVIIY2hpbGRyZW4=');
+    'dBIbCgliaXRfZmxhZ3MYBSABKARSCGJpdEZsYWdzEjoKCGNoaWxkcmVuGAYgAygLMh4ubWV0cm'
+    'ljc19leHBsb3Jlci5NZW51VHJlZU5vZGVSCGNoaWxkcmVu');
 
 @$core.Deprecated('Use loadMenuTreeResponseDescriptor instead')
 const LoadMenuTreeResponse$json = {

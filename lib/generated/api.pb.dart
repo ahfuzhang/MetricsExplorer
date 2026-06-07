@@ -15,7 +15,11 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'api.pbenum.dart';
+
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'api.pbenum.dart';
 
 class GetGlobalConfigsResponse extends $pb.GeneratedMessage {
   factory GetGlobalConfigsResponse({
@@ -1300,16 +1304,65 @@ class GetLabelsByDatasourceRequest extends $pb.GeneratedMessage {
   void clearVmDatasourceName() => $_clearField(2);
 }
 
+class LabelValues extends $pb.GeneratedMessage {
+  factory LabelValues({
+    $core.Iterable<$core.String>? values,
+  }) {
+    final result = create();
+    if (values != null) result.values.addAll(values);
+    return result;
+  }
+
+  LabelValues._();
+
+  factory LabelValues.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LabelValues.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LabelValues',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'values')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LabelValues clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LabelValues copyWith(void Function(LabelValues) updates) =>
+      super.copyWith((message) => updates(message as LabelValues))
+          as LabelValues;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LabelValues create() => LabelValues._();
+  @$core.override
+  LabelValues createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LabelValues getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LabelValues>(create);
+  static LabelValues? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get values => $_getList(0);
+}
+
 class GetLabelsByDatasourceResponse extends $pb.GeneratedMessage {
   factory GetLabelsByDatasourceResponse({
     $core.int? code,
     $core.String? message,
-    $core.Iterable<$core.String>? labels,
+    $core.Iterable<$core.MapEntry<$core.String, LabelValues>>? labels,
   }) {
     final result = create();
     if (code != null) result.code = code;
     if (message != null) result.message = message;
-    if (labels != null) result.labels.addAll(labels);
+    if (labels != null) result.labels.addEntries(labels);
     return result;
   }
 
@@ -1329,7 +1382,13 @@ class GetLabelsByDatasourceResponse extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..aI(1, _omitFieldNames ? '' : 'code')
     ..aOS(2, _omitFieldNames ? '' : 'message')
-    ..pPS(3, _omitFieldNames ? '' : 'labels')
+    ..m<$core.String, LabelValues>(3, _omitFieldNames ? '' : 'labels',
+        entryClassName: 'GetLabelsByDatasourceResponse.LabelsEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OM,
+        valueCreator: LabelValues.create,
+        valueDefaultOrMaker: LabelValues.getDefault,
+        packageName: const $pb.PackageName('metrics_explorer'))
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1373,7 +1432,7 @@ class GetLabelsByDatasourceResponse extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $pb.PbList<$core.String> get labels => $_getList(2);
+  $pb.PbMap<$core.String, LabelValues> get labels => $_getMap(2);
 }
 
 class GetMetricNamesByDatasourceRequest extends $pb.GeneratedMessage {
@@ -1524,6 +1583,649 @@ class GetMetricNamesByDatasourceResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $pb.PbList<$core.String> get metricNames => $_getList(2);
+}
+
+class GetSeriesByDatasourceRequest extends $pb.GeneratedMessage {
+  factory GetSeriesByDatasourceRequest({
+    $core.String? session,
+    $core.String? vmDatasourceName,
+    $core.String? metricName,
+  }) {
+    final result = create();
+    if (session != null) result.session = session;
+    if (vmDatasourceName != null) result.vmDatasourceName = vmDatasourceName;
+    if (metricName != null) result.metricName = metricName;
+    return result;
+  }
+
+  GetSeriesByDatasourceRequest._();
+
+  factory GetSeriesByDatasourceRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSeriesByDatasourceRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSeriesByDatasourceRequest',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'session')
+    ..aOS(2, _omitFieldNames ? '' : 'vmDatasourceName')
+    ..aOS(3, _omitFieldNames ? '' : 'metricName')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSeriesByDatasourceRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSeriesByDatasourceRequest copyWith(
+          void Function(GetSeriesByDatasourceRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetSeriesByDatasourceRequest))
+          as GetSeriesByDatasourceRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSeriesByDatasourceRequest create() =>
+      GetSeriesByDatasourceRequest._();
+  @$core.override
+  GetSeriesByDatasourceRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSeriesByDatasourceRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSeriesByDatasourceRequest>(create);
+  static GetSeriesByDatasourceRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get session => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set session($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSession() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSession() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get vmDatasourceName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set vmDatasourceName($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasVmDatasourceName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVmDatasourceName() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get metricName => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set metricName($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasMetricName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMetricName() => $_clearField(3);
+}
+
+class TagValues extends $pb.GeneratedMessage {
+  factory TagValues({
+    $core.Iterable<$core.String>? values,
+    $core.Iterable<$core.int>? showTimes,
+  }) {
+    final result = create();
+    if (values != null) result.values.addAll(values);
+    if (showTimes != null) result.showTimes.addAll(showTimes);
+    return result;
+  }
+
+  TagValues._();
+
+  factory TagValues.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory TagValues.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TagValues',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'values')
+    ..p<$core.int>(2, _omitFieldNames ? '' : 'showTimes', $pb.PbFieldType.K3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TagValues clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TagValues copyWith(void Function(TagValues) updates) =>
+      super.copyWith((message) => updates(message as TagValues)) as TagValues;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static TagValues create() => TagValues._();
+  @$core.override
+  TagValues createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static TagValues getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TagValues>(create);
+  static TagValues? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get values => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$core.int> get showTimes => $_getList(1);
+}
+
+class MetricTags extends $pb.GeneratedMessage {
+  factory MetricTags({
+    $core.Iterable<$core.MapEntry<$core.String, $core.String>>? tags,
+  }) {
+    final result = create();
+    if (tags != null) result.tags.addEntries(tags);
+    return result;
+  }
+
+  MetricTags._();
+
+  factory MetricTags.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MetricTags.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MetricTags',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..m<$core.String, $core.String>(1, _omitFieldNames ? '' : 'tags',
+        entryClassName: 'MetricTags.TagsEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OS,
+        packageName: const $pb.PackageName('metrics_explorer'))
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MetricTags clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MetricTags copyWith(void Function(MetricTags) updates) =>
+      super.copyWith((message) => updates(message as MetricTags)) as MetricTags;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MetricTags create() => MetricTags._();
+  @$core.override
+  MetricTags createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MetricTags getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MetricTags>(create);
+  static MetricTags? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbMap<$core.String, $core.String> get tags => $_getMap(0);
+}
+
+class GetSeriesByDatasourceResponse extends $pb.GeneratedMessage {
+  factory GetSeriesByDatasourceResponse({
+    $core.int? code,
+    $core.String? message,
+    $core.Iterable<$core.MapEntry<$core.String, TagValues>>? tags,
+    $core.Iterable<MetricTags>? ts,
+  }) {
+    final result = create();
+    if (code != null) result.code = code;
+    if (message != null) result.message = message;
+    if (tags != null) result.tags.addEntries(tags);
+    if (ts != null) result.ts.addAll(ts);
+    return result;
+  }
+
+  GetSeriesByDatasourceResponse._();
+
+  factory GetSeriesByDatasourceResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetSeriesByDatasourceResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetSeriesByDatasourceResponse',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'code')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..m<$core.String, TagValues>(4, _omitFieldNames ? '' : 'tags',
+        entryClassName: 'GetSeriesByDatasourceResponse.TagsEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OM,
+        valueCreator: TagValues.create,
+        valueDefaultOrMaker: TagValues.getDefault,
+        packageName: const $pb.PackageName('metrics_explorer'))
+    ..pPM<MetricTags>(5, _omitFieldNames ? '' : 'ts',
+        subBuilder: MetricTags.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSeriesByDatasourceResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetSeriesByDatasourceResponse copyWith(
+          void Function(GetSeriesByDatasourceResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetSeriesByDatasourceResponse))
+          as GetSeriesByDatasourceResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetSeriesByDatasourceResponse create() =>
+      GetSeriesByDatasourceResponse._();
+  @$core.override
+  GetSeriesByDatasourceResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetSeriesByDatasourceResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetSeriesByDatasourceResponse>(create);
+  static GetSeriesByDatasourceResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  /// repeated string series = 3;
+  @$pb.TagNumber(4)
+  $pb.PbMap<$core.String, TagValues> get tags => $_getMap(2);
+
+  @$pb.TagNumber(5)
+  $pb.PbList<MetricTags> get ts => $_getList(3);
+}
+
+class GetRangeByDatasourceRequest extends $pb.GeneratedMessage {
+  factory GetRangeByDatasourceRequest({
+    $core.String? session,
+    $core.String? vmDatasourceName,
+    $core.Iterable<$core.String>? queries,
+    $core.String? start,
+    $core.String? end,
+    $core.String? step,
+    $core.String? timeout,
+  }) {
+    final result = create();
+    if (session != null) result.session = session;
+    if (vmDatasourceName != null) result.vmDatasourceName = vmDatasourceName;
+    if (queries != null) result.queries.addAll(queries);
+    if (start != null) result.start = start;
+    if (end != null) result.end = end;
+    if (step != null) result.step = step;
+    if (timeout != null) result.timeout = timeout;
+    return result;
+  }
+
+  GetRangeByDatasourceRequest._();
+
+  factory GetRangeByDatasourceRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetRangeByDatasourceRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetRangeByDatasourceRequest',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'session')
+    ..aOS(2, _omitFieldNames ? '' : 'vmDatasourceName')
+    ..pPS(3, _omitFieldNames ? '' : 'queries')
+    ..aOS(4, _omitFieldNames ? '' : 'start')
+    ..aOS(5, _omitFieldNames ? '' : 'end')
+    ..aOS(6, _omitFieldNames ? '' : 'step')
+    ..aOS(7, _omitFieldNames ? '' : 'timeout')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetRangeByDatasourceRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetRangeByDatasourceRequest copyWith(
+          void Function(GetRangeByDatasourceRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetRangeByDatasourceRequest))
+          as GetRangeByDatasourceRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetRangeByDatasourceRequest create() =>
+      GetRangeByDatasourceRequest._();
+  @$core.override
+  GetRangeByDatasourceRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetRangeByDatasourceRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetRangeByDatasourceRequest>(create);
+  static GetRangeByDatasourceRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get session => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set session($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSession() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSession() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get vmDatasourceName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set vmDatasourceName($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasVmDatasourceName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVmDatasourceName() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get queries => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $core.String get start => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set start($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasStart() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearStart() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get end => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set end($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasEnd() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearEnd() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get step => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set step($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasStep() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearStep() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get timeout => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set timeout($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasTimeout() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearTimeout() => $_clearField(7);
+}
+
+class RangeData extends $pb.GeneratedMessage {
+  factory RangeData({
+    $core.Iterable<$core.MapEntry<$core.String, $core.String>>? tags,
+    $core.Iterable<$core.double>? points,
+    $core.double? constValue,
+    MetricType? metricType,
+  }) {
+    final result = create();
+    if (tags != null) result.tags.addEntries(tags);
+    if (points != null) result.points.addAll(points);
+    if (constValue != null) result.constValue = constValue;
+    if (metricType != null) result.metricType = metricType;
+    return result;
+  }
+
+  RangeData._();
+
+  factory RangeData.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RangeData.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RangeData',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..m<$core.String, $core.String>(3, _omitFieldNames ? '' : 'tags',
+        entryClassName: 'RangeData.TagsEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OS,
+        packageName: const $pb.PackageName('metrics_explorer'))
+    ..p<$core.double>(4, _omitFieldNames ? '' : 'points', $pb.PbFieldType.KD)
+    ..aD(5, _omitFieldNames ? '' : 'constValue')
+    ..aE<MetricType>(6, _omitFieldNames ? '' : 'metricType',
+        enumValues: MetricType.values)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RangeData clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RangeData copyWith(void Function(RangeData) updates) =>
+      super.copyWith((message) => updates(message as RangeData)) as RangeData;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RangeData create() => RangeData._();
+  @$core.override
+  RangeData createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RangeData getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RangeData>(create);
+  static RangeData? _defaultInstance;
+
+  @$pb.TagNumber(3)
+  $pb.PbMap<$core.String, $core.String> get tags => $_getMap(0);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<$core.double> get points => $_getList(1);
+
+  @$pb.TagNumber(5)
+  $core.double get constValue => $_getN(2);
+  @$pb.TagNumber(5)
+  set constValue($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(5)
+  $core.bool hasConstValue() => $_has(2);
+  @$pb.TagNumber(5)
+  void clearConstValue() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  MetricType get metricType => $_getN(3);
+  @$pb.TagNumber(6)
+  set metricType(MetricType value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasMetricType() => $_has(3);
+  @$pb.TagNumber(6)
+  void clearMetricType() => $_clearField(6);
+}
+
+class QueryResult extends $pb.GeneratedMessage {
+  factory QueryResult({
+    $core.int? code,
+    $core.String? message,
+    $core.Iterable<RangeData>? datas,
+  }) {
+    final result = create();
+    if (code != null) result.code = code;
+    if (message != null) result.message = message;
+    if (datas != null) result.datas.addAll(datas);
+    return result;
+  }
+
+  QueryResult._();
+
+  factory QueryResult.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory QueryResult.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'QueryResult',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'code')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPM<RangeData>(3, _omitFieldNames ? '' : 'datas',
+        subBuilder: RangeData.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryResult clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryResult copyWith(void Function(QueryResult) updates) =>
+      super.copyWith((message) => updates(message as QueryResult))
+          as QueryResult;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static QueryResult create() => QueryResult._();
+  @$core.override
+  QueryResult createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static QueryResult getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<QueryResult>(create);
+  static QueryResult? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<RangeData> get datas => $_getList(2);
+}
+
+class GetRangeByDatasourceResponse extends $pb.GeneratedMessage {
+  factory GetRangeByDatasourceResponse({
+    $core.int? code,
+    $core.String? message,
+    $core.Iterable<QueryResult>? queriesResult,
+    $core.Iterable<$fixnum.Int64>? timestamps,
+  }) {
+    final result = create();
+    if (code != null) result.code = code;
+    if (message != null) result.message = message;
+    if (queriesResult != null) result.queriesResult.addAll(queriesResult);
+    if (timestamps != null) result.timestamps.addAll(timestamps);
+    return result;
+  }
+
+  GetRangeByDatasourceResponse._();
+
+  factory GetRangeByDatasourceResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetRangeByDatasourceResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetRangeByDatasourceResponse',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'code')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..pPM<QueryResult>(3, _omitFieldNames ? '' : 'queriesResult',
+        subBuilder: QueryResult.create)
+    ..p<$fixnum.Int64>(
+        4, _omitFieldNames ? '' : 'timestamps', $pb.PbFieldType.K6)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetRangeByDatasourceResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetRangeByDatasourceResponse copyWith(
+          void Function(GetRangeByDatasourceResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetRangeByDatasourceResponse))
+          as GetRangeByDatasourceResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetRangeByDatasourceResponse create() =>
+      GetRangeByDatasourceResponse._();
+  @$core.override
+  GetRangeByDatasourceResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetRangeByDatasourceResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetRangeByDatasourceResponse>(create);
+  static GetRangeByDatasourceResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<QueryResult> get queriesResult => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<$fixnum.Int64> get timestamps => $_getList(3);
 }
 
 class GetMenuListRequest extends $pb.GeneratedMessage {
@@ -2254,7 +2956,7 @@ class MenuTreeNode extends $pb.GeneratedMessage {
     $core.String? menuName,
     $core.String? link,
     $core.String? target,
-    $core.bool? expanded,
+    $fixnum.Int64? bitFlags,
     $core.Iterable<MenuTreeNode>? children,
   }) {
     final result = create();
@@ -2262,7 +2964,7 @@ class MenuTreeNode extends $pb.GeneratedMessage {
     if (menuName != null) result.menuName = menuName;
     if (link != null) result.link = link;
     if (target != null) result.target = target;
-    if (expanded != null) result.expanded = expanded;
+    if (bitFlags != null) result.bitFlags = bitFlags;
     if (children != null) result.children.addAll(children);
     return result;
   }
@@ -2286,7 +2988,9 @@ class MenuTreeNode extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'menuName')
     ..aOS(3, _omitFieldNames ? '' : 'link')
     ..aOS(4, _omitFieldNames ? '' : 'target')
-    ..aOB(5, _omitFieldNames ? '' : 'expanded')
+    ..a<$fixnum.Int64>(
+        5, _omitFieldNames ? '' : 'bitFlags', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..pPM<MenuTreeNode>(6, _omitFieldNames ? '' : 'children',
         subBuilder: MenuTreeNode.create)
     ..hasRequiredFields = false;
@@ -2347,13 +3051,13 @@ class MenuTreeNode extends $pb.GeneratedMessage {
   void clearTarget() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.bool get expanded => $_getBF(4);
+  $fixnum.Int64 get bitFlags => $_getI64(4);
   @$pb.TagNumber(5)
-  set expanded($core.bool value) => $_setBool(4, value);
+  set bitFlags($fixnum.Int64 value) => $_setInt64(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasExpanded() => $_has(4);
+  $core.bool hasBitFlags() => $_has(4);
   @$pb.TagNumber(5)
-  void clearExpanded() => $_clearField(5);
+  void clearBitFlags() => $_clearField(5);
 
   @$pb.TagNumber(6)
   $pb.PbList<MenuTreeNode> get children => $_getList(5);

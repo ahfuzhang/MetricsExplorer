@@ -10,4 +10,5 @@ metrics_explorer:
   admin:
     name: admin
     passwd: "admin"
-
+  metric_data_source:
+    resfresh_interval_seconds: 120

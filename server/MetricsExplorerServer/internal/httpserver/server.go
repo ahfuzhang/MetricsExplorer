@@ -57,6 +57,8 @@ func New() *Server {
 	mux.HandleFunc(pathPrefix+"api/v1/modify_menu", menu.ModifyMenu())
 	mux.HandleFunc(pathPrefix+"api/v1/get_labels_by_datasource", metricdata.GetLabelsByDatasource())
 	mux.HandleFunc(pathPrefix+"api/v1/get_metric_names_by_datasource", metricdata.GetMetricNamesByDatasource())
+	mux.HandleFunc(pathPrefix+"api/v1/get_series_by_datasource", metricdata.GetSeriesByDatasource())
+	mux.HandleFunc(pathPrefix+"api/v1/get_range_by_datasource", metricdata.GetRangeByDatasource())
 
 	indexTarget := pathPrefix + "web/index.html"
 	mux.HandleFunc(pathPrefix, func(w http.ResponseWriter, r *http.Request) {

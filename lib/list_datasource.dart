@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'generated/api.pb.dart';
-import 'main.dart';
-import 'show_labels.dart';
-import 'show_metric_names.dart';
+import 'session.dart';
+import 'metricsui/show_labels.dart';
+import 'metricsui/show_metric_names.dart';
 
 class ListDatasourcePage extends StatefulWidget {
   final AppSession session;

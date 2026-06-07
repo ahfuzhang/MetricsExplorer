@@ -1,11 +1,13 @@
 package menu
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/api"
+	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/config"
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/global"
 	pb "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer"
 )
@@ -45,11 +47,12 @@ func LoadMenu() http.HandlerFunc {
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
 
-		_, ok := api.OnlineUsers.Load(req.Session)
+		u, ok := api.OnlineUsers.Load(req.Session)
 		if !ok {
 			respond(1, "invalid session", pb.MenuTreeNode{})
 			return
 		}
+		isAdmin := u.(*api.OnlineUser).UserName == config.Get().Admin.Name
 
 		db := global.GetMysql()
 		rows, err := db.Query(
@@ -83,10 +86,19 @@ func LoadMenu() http.HandlerFunc {
 			respond(4, "rows error: "+err.Error(), pb.MenuTreeNode{})
 			return
 		}
-
+		var maxMenuID uint64
 		childrenOf := make(map[uint64][]menuRow, len(allRows))
 		idToRow := make(map[uint64]menuRow, len(allRows))
+		isAdminOnly := func(m menuRow) bool {
+			return m.menuName == "Admin" || m.menuName == "Users" || m.menuName == "Menus" || m.menuName == "Datasources"
+		}
 		for _, m := range allRows {
+			if !isAdmin && isAdminOnly(m) {
+				continue
+			}
+			if m.menuID > maxMenuID {
+				maxMenuID = m.menuID
+			}
 			idToRow[m.menuID] = m
 			childrenOf[m.parentID] = append(childrenOf[m.parentID], m)
 		}
@@ -100,7 +112,7 @@ func LoadMenu() http.HandlerFunc {
 				MenuName: m.menuName,
 				Link:     m.link,
 				Target:   m.target,
-				Expanded: m.bitFlags&1 == 1,
+				BitFlags: m.bitFlags,
 			}
 			for _, child := range childrenOf[m.menuID] {
 				if _, seen := visited[child.menuID]; seen {
@@ -116,7 +128,52 @@ func LoadMenu() http.HandlerFunc {
 			respond(5, "root menu not found", pb.MenuTreeNode{})
 			return
 		}
+		menus := buildNode(root)
+		AddMetricDataSources(&menus, maxMenuID)
+		respond(0, "success", menus)
+	}
+}
 
-		respond(0, "success", buildNode(root))
+func AddMetricDataSources(menu *pb.MenuTreeNode, maxMenuID uint64) {
+	maxMenuID += 10000
+	getMenuID := func() uint64 {
+		maxMenuID++
+		return maxMenuID
+	}
+	for i, item := range menu.Children {
+		if item.MenuName == "Metric Data Sources" {
+			// 这里加入 metrics 数据源
+			global.AllDataSources.Range(func(key, value any) bool {
+				name, ok1 := key.(string)
+				ds, ok2 := value.(*global.DataSourceClient)
+				if ok1 && ok2 {
+					item.Children = append(item.Children, pb.MenuTreeNode{
+						MenuName: name,
+						MenuId:   getMenuID(),
+						Link:     fmt.Sprintf(`{"id":%d,"name":"%s"}`, ds.ID, name),
+						Target:   "content",
+						BitFlags: 1, // Set the bit flag for expanded state
+						Children: []pb.MenuTreeNode{
+							//
+							pb.MenuTreeNode{
+								MenuName: "Labels",
+								MenuId:   getMenuID(),
+								Link:     fmt.Sprintf(`{"id":%d,"name":"%s"}`, ds.ID, name),
+								Target:   "content",
+							},
+							pb.MenuTreeNode{
+								MenuName: "Metric Names",
+								MenuId:   getMenuID(),
+								Link:     fmt.Sprintf(`{"id":%d,"name":"%s"}`, ds.ID, name),
+								Target:   "content",
+							},
+						},
+					})
+				}
+				return true
+			})
+			menu.Children[i] = item
+			break
+		}
 	}
 }
