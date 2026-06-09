@@ -331,7 +331,7 @@ func LoadAllMetricsDataSources() error {
 		return fmt.Errorf("query victoria_metrics_data_source fail, err=%+v", err)
 	}
 	defer rows.Close()
-
+	cnt := 0
 	for rows.Next() {
 		var id uint64
 		var name, addr string
@@ -344,6 +344,7 @@ func LoadAllMetricsDataSources() error {
 			ID:     id,
 			Name:   name,
 		})
+		cnt++
 	}
 	if err = rows.Err(); err != nil {
 		return fmt.Errorf("rows error from victoria_metrics_data_source, err=%+v", err)
@@ -351,6 +352,7 @@ func LoadAllMetricsDataSources() error {
 
 	checkAllDataSources() // populate labels before the HTTP server starts
 	go healthCheckLoop()
+	log.Println("\tload metric datasource:", cnt)
 	return nil
 }
 
@@ -423,6 +425,7 @@ func healthCheckLoop() {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for range ticker.C {
+		log.Println("\tcheckAllDataSources(metric)")
 		checkAllDataSources()
 	}
 }

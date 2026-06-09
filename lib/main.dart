@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'generated/api.pb.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'sans-serif',
         useMaterial3: true,
       ),
-      home: const GlobalConfigPage(),
+      home: kIsWeb ? const GlobalConfigPage() : const ServerConfigPage(),
     );
   }
 }
@@ -82,6 +83,125 @@ class _GlobalConfigPageState extends State<GlobalConfigPage> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
+// ─── Server config (non-web only) ────────────────────────────────────────────
+
+class ServerConfigPage extends StatefulWidget {
+  const ServerConfigPage({super.key});
+
+  @override
+  State<ServerConfigPage> createState() => _ServerConfigPageState();
+}
+
+class _ServerConfigPageState extends State<ServerConfigPage> {
+  final _urlController = TextEditingController(text: 'http://');
+  bool _loading = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _connect() async {
+    final input = _urlController.text.trim();
+    if (input.isEmpty) return;
+
+    final baseUrl = input.endsWith('/') ? input : '$input/';
+
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final uri = Uri.parse('${baseUrl}api/v1/get_global_configs');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/protobuf'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = GetGlobalConfigsResponse.fromBuffer(response.bodyBytes);
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => LoginPage(salt: decoded.salt, apiPath: baseUrl),
+          ),
+        );
+      } else {
+        setState(() => _errorMessage = 'HTTP Error: ${response.statusCode}\n${response.body}');
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Error: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('MetricsExplorer')),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Card(
+            elevation: 4,
+            margin: const EdgeInsets.all(24),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Connect to Server',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _urlController,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _loading ? null : _connect(),
+                    decoration: const InputDecoration(
+                      labelText: 'Server URL',
+                      hintText: 'http://example.com:8080',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: _loading ? null : _connect,
+                    child: _loading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Connect'),
+                  ),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 16),
+                    SelectableText(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

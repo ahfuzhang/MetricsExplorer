@@ -33,15 +33,18 @@ func main() {
 		fmt.Fprintf(os.Stderr, "read config file %s failed: %v\n", *configFile, err)
 		os.Exit(1)
 	}
+	log.Println("load config ok")
 	if err := global.InitMysql(); err != nil {
 		log.Fatalln(err)
 		return
 	}
+	log.Println("init mysql ok")
 	// 初始化所有的数据源
 	if err := global.LoadAllMetricsDataSources(); err != nil {
 		log.Fatalln(err)
 		return
 	}
+	log.Println("load metric datasource ok")
 	srv := httpserver.New()
 	fmt.Printf("listening on port %d\n", config.Get().Http.Port)
 	if err := srv.Start(); err != nil {

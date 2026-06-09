@@ -2,9 +2,7 @@ package datasource
 
 import (
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/api"
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/config"
@@ -15,28 +13,13 @@ import (
 
 func AddDatasource() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			io.Copy(io.Discard, r.Body)
-			r.Body.Close()
-			return
-		}
-		if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/protobuf") {
-			w.WriteHeader(http.StatusBadRequest)
-			io.Copy(io.Discard, r.Body)
-			r.Body.Close()
-			return
-		}
-		body, err := io.ReadAll(r.Body)
+		reqBytes, err := api.Validate(w, r)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			r.Body.Close()
 			return
 		}
-		_ = r.Body.Close()
 
 		req := &pb.ReadonlyAddDatasourceRequest{}
-		if err = req.FromProtobuf(body); err != nil {
+		if err = req.FromProtobuf(reqBytes); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

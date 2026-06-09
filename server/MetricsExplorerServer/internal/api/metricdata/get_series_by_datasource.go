@@ -14,28 +14,13 @@ import (
 
 func GetSeriesByDatasource() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			io.Copy(io.Discard, r.Body)
-			r.Body.Close()
-			return
-		}
-		if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/protobuf") {
-			w.WriteHeader(http.StatusBadRequest)
-			io.Copy(io.Discard, r.Body)
-			r.Body.Close()
-			return
-		}
-		body, err := io.ReadAll(r.Body)
+		reqBytes, err := api.Validate(w, r)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			r.Body.Close()
 			return
 		}
-		_ = r.Body.Close()
 
 		req := &pb.ReadonlyGetSeriesByDatasourceRequest{}
-		if err = req.FromProtobuf(body); err != nil {
+		if err = req.FromProtobuf(reqBytes); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

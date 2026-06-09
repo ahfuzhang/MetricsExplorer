@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 
@@ -84,7 +85,7 @@ func New() *Server {
 		Handler:   middleware.Compress(mux),
 		Protocols: &protocols,
 	}
-
+	log.Println("init web server ok")
 	return &Server{httpServer: srv}
 }
 

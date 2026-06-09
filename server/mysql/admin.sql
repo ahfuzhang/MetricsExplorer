@@ -14,7 +14,7 @@ create table IF NOT EXISTS `users`(
     unique (user_name)
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 comment = 'admin users';
 
-insert into users(user_name, `passwd`) values('admin', '');
+--insert into users(user_name, `passwd`) values('admin', '');
 
 -- 角色信息
 create table IF NOT EXISTS roles(
@@ -83,6 +83,15 @@ insert into
     menus(menu_name, parent_id, role_id)
 values
     ('root', 1, 0);
+
+insert into
+    menus(menu_name, parent_id, role_id, bit_flags, link, `target`)
+values
+    ('Admin', 1, 0, 1, '', 'content'),
+      ('Users', 2, 0, 0, 'user', 'content'),
+      ('Menus', 2, 0, 0, 'menus', 'content'),
+      ('Data Sources', 2, 0, 0, 'data_source', 'content'),
+    ('Metric Data Sources', 1, 0, 1, '', 'content');
 
 /*
  alter table users add column passwd varchar(200) default '' comment 'user password, use sha256 hashcode';
