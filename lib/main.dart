@@ -422,6 +422,26 @@ class _MainPageState extends State<MainPage> {
     _loadMenu();
   }
 
+  Future<void> _logout() async {
+    try {
+      final request = LogoutRequest(session: widget.session.sessionToken);
+      final uri = Uri.parse('${widget.session.apiPath}api/v1/logout');
+      await http.post(
+        uri,
+        headers: {'Content-Type': 'application/protobuf'},
+        body: request.writeToBuffer(),
+      );
+    } catch (_) {
+      // ignore errors — proceed to login page regardless
+    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => LoginPage(salt: widget.session.salt, apiPath: widget.session.apiPath),
+      ),
+    );
+  }
+
   Future<void> _loadMenu() async {
     try {
       final request = LoadMenuTreeRequest(session: widget.session.sessionToken);
@@ -491,12 +511,19 @@ class _MainPageState extends State<MainPage> {
         title: const Text('MetricsExplorer'),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Center(
               child: Text(
                 'Hello, ${widget.session.userName}',
                 style: const TextStyle(fontSize: 14),
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: OutlinedButton(
+              onPressed: _logout,
+              child: const Text('Logout'),
             ),
           ),
         ],

@@ -34,11 +34,28 @@ class TagFilterPanelState extends State<TagFilterPanel> {
   Map<String, Set<String>> _activeFilters = {};
   bool _showPredictions = false;
   String? _lastToggledTag;
+  bool _hasMultipleNames = false;
 
   @override
   void dispose() {
     _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _checkNameField() {
+    final names = <String>{};
+    for (final metric in _ts) {
+      final name = metric.tags['__name__'];
+      if (name != null) names.add(name);
+    }
+    if (names.length <= 1) {
+      _hasMultipleNames = false;
+      return;
+    }
+    const histogramSuffixes = ['_bucket', '_sum', '_count'];
+    final allHistogram =
+        names.every((n) => histogramSuffixes.any((s) => n.endsWith(s)));
+    _hasMultipleNames = !allHistogram;
   }
 
   List<MetricTags> get _displayedTs {
@@ -159,6 +176,7 @@ class TagFilterPanelState extends State<TagFilterPanel> {
           setState(() {
             _ts = decoded.ts.toList();
             _tags = Map.from(decoded.tags);
+            _checkNameField();
           });
           widget.onCounterQueryChanged?.call(_buildCounterQuery());
           widget.onGaugeQueryChanged?.call(_buildGaugeQuery());
@@ -181,14 +199,90 @@ class TagFilterPanelState extends State<TagFilterPanel> {
     }
   }
 
+  Widget _buildNameFilterRow() {
+    final counts = <String, int>{};
+    for (final metric in _ts) {
+      final name = metric.tags['__name__'];
+      if (name != null) counts[name] = (counts[name] ?? 0) + 1;
+    }
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final selectedValues = _activeFilters['__name__'] ?? {};
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '__name__=[',
+          style: TextStyle(
+            fontSize: 12,
+            fontFamily: 'monospace',
+            color: Color(0xFF333333),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Expanded(
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: sorted.map((e) {
+              final value = e.key;
+              final count = e.value;
+              final isSelected = selectedValues.contains(value);
+              return GestureDetector(
+                onTap: () => _toggleFilter('__name__', value),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF1B5E20)
+                        : const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF1B5E20)
+                          : Colors.green.shade400,
+                    ),
+                  ),
+                  child: Text(
+                    '$value($count)',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      color:
+                          isSelected ? Colors.white : const Color(0xFF1B5E20),
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const Text(
+          ']',
+          style: TextStyle(
+            fontSize: 12,
+            fontFamily: 'monospace',
+            color: Color(0xFF333333),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTagsSection() {
     if (_tags.isEmpty || _ts.isEmpty) return const SizedBox.shrink();
     final n = _ts.length;
 
     final commonParts = <String>[];
-    final otherTags = <MapEntry<String, TagValues>>[];
+    final otherTagsRaw = <MapEntry<String, TagValues>>[];
 
     for (final entry in _tags.entries) {
+      if (_hasMultipleNames && entry.key == '__name__') continue;
       final tv = entry.value;
       bool isCommon = false;
       for (int i = 0; i < tv.showTimes.length && i < tv.values.length; i++) {
@@ -198,12 +292,54 @@ class TagFilterPanelState extends State<TagFilterPanel> {
           break;
         }
       }
-      if (!isCommon) otherTags.add(entry);
+      if (!isCommon) otherTagsRaw.add(entry);
     }
 
-    // sort ascending by number of distinct values
-    otherTags.sort(
-        (a, b) => a.value.values.length.compareTo(b.value.values.length));
+    // Sorting strategy (most-discriminating tags first, left-to-right):
+    // Group 1: sum(showTimes) == n  →  tag appears in every series.
+    //   Sort by max(showTimes) desc: the tag whose top value covers the most
+    //   series ranks first, giving the fastest single-click filter.
+    // Group 2: sum(showTimes) < n  →  tag is absent in some series.
+    //   Sort by sum(showTimes) desc.
+    // Within every tag row, values are sorted by showTimes descending.
+    final group1 = <MapEntry<String, TagValues>>[];
+    final group2 = <MapEntry<String, TagValues>>[];
+    for (final entry in otherTagsRaw) {
+      final tv = entry.value;
+      // Build a sorted index over this tag's values (showTimes desc).
+      final indices = List.generate(tv.values.length, (i) => i);
+      indices.sort((i, j) {
+        final ci = i < tv.showTimes.length ? tv.showTimes[i] : 0;
+        final cj = j < tv.showTimes.length ? tv.showTimes[j] : 0;
+        return cj.compareTo(ci);
+      });
+      final sortedTv = TagValues()
+        ..values.addAll(indices.map((i) => tv.values[i]))
+        ..showTimes.addAll(
+            indices.map((i) => i < tv.showTimes.length ? tv.showTimes[i] : 0));
+      final sortedEntry = MapEntry(entry.key, sortedTv);
+      final total = tv.showTimes.fold<int>(0, (a, b) => a + b);
+      if (total == n) {
+        group1.add(sortedEntry);
+      } else {
+        group2.add(sortedEntry);
+      }
+    }
+    group1.sort((a, b) {
+      final maxA = a.value.showTimes.isEmpty
+          ? 0
+          : a.value.showTimes.reduce((x, y) => x > y ? x : y);
+      final maxB = b.value.showTimes.isEmpty
+          ? 0
+          : b.value.showTimes.reduce((x, y) => x > y ? x : y);
+      return maxB.compareTo(maxA);
+    });
+    group2.sort((a, b) {
+      final sumA = a.value.showTimes.fold<int>(0, (acc, v) => acc + v);
+      final sumB = b.value.showTimes.fold<int>(0, (acc, v) => acc + v);
+      return sumB.compareTo(sumA);
+    });
+    final otherTags = [...group1, ...group2];
 
     // Prediction target: the tag immediately after _lastToggledTag in display
     // order, provided it has no active filter (adding a value is AND semantics).
@@ -226,6 +362,10 @@ class TagFilterPanelState extends State<TagFilterPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_hasMultipleNames) ...[
+            _buildNameFilterRow(),
+            const SizedBox(height: 4),
+          ],
           if (commonParts.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),

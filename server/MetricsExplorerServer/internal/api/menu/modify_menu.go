@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/api"
-	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/config"
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/global"
 	pb "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer"
 )
@@ -28,19 +27,9 @@ func ModifyMenu() http.HandlerFunc {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
-
-		info, ok := api.OnlineUsers.Load(req.Session)
-		if !ok || info == nil {
-			respond(1, "invalid session")
-			return
-		}
-		u, ok1 := info.(*api.OnlineUser)
-		if !ok1 {
-			respond(11, "invalid data type, internal error")
-			return
-		}
-		if u.UserName != config.Get().Admin.Name {
-			respond(12, "only admin user allowd")
+		user, code, msg := api.Auth(req.Session, true)
+		if code != 0 {
+			respond(code, msg)
 			return
 		}
 
@@ -57,7 +46,7 @@ func ModifyMenu() http.HandlerFunc {
 		_, err = db.Exec(
 			"INSERT INTO log_menus (op_user, op_type, op_time, menu_id, menu_name, parent_id, role_id, link, `target`, bit_flags) "+
 				"SELECT ?, ?, UNIX_TIMESTAMP(), menu_id, menu_name, parent_id, role_id, link, `target`, bit_flags FROM menus WHERE menu_id = ?",
-			u.UserName, "modify", req.Menu.MenuId,
+			user.UserName, "modify", req.Menu.MenuId,
 		)
 		if err != nil {
 			respond(2, "log menu error: "+err.Error())

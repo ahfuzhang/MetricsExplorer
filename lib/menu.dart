@@ -11,6 +11,7 @@ import 'list_menu.dart';
 import 'list_user.dart';
 import 'metricsui/show_labels.dart';
 import 'metricsui/show_metric_names.dart';
+import 'metricsui/show_pods.dart';
 import 'session.dart';
 
 // ─── Tree node data model ─────────────────────────────────────────────────────
@@ -283,6 +284,13 @@ class ContentArea extends StatelessWidget {
           if (type == 'Metric Names') {
             return ShowMetricNamesPanel(
               key: ValueKey('metric_names_$name'),
+              session: session,
+              datasource: ds,
+            );
+          }
+          if (type == 'Pods') {
+            return ShowPodsPanel(
+              key: ValueKey('pods_$name'),
               session: session,
               datasource: ds,
             );

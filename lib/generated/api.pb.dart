@@ -260,6 +260,128 @@ class LoginResponse extends $pb.GeneratedMessage {
   void clearSession() => $_clearField(3);
 }
 
+class LogoutRequest extends $pb.GeneratedMessage {
+  factory LogoutRequest({
+    $core.String? session,
+  }) {
+    final result = create();
+    if (session != null) result.session = session;
+    return result;
+  }
+
+  LogoutRequest._();
+
+  factory LogoutRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LogoutRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LogoutRequest',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'session')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogoutRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogoutRequest copyWith(void Function(LogoutRequest) updates) =>
+      super.copyWith((message) => updates(message as LogoutRequest))
+          as LogoutRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LogoutRequest create() => LogoutRequest._();
+  @$core.override
+  LogoutRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LogoutRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LogoutRequest>(create);
+  static LogoutRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get session => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set session($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSession() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSession() => $_clearField(1);
+}
+
+class LogoutResponse extends $pb.GeneratedMessage {
+  factory LogoutResponse({
+    $core.int? code,
+    $core.String? message,
+  }) {
+    final result = create();
+    if (code != null) result.code = code;
+    if (message != null) result.message = message;
+    return result;
+  }
+
+  LogoutResponse._();
+
+  factory LogoutResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LogoutResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LogoutResponse',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'code')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogoutResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogoutResponse copyWith(void Function(LogoutResponse) updates) =>
+      super.copyWith((message) => updates(message as LogoutResponse))
+          as LogoutResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LogoutResponse create() => LogoutResponse._();
+  @$core.override
+  LogoutResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LogoutResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LogoutResponse>(create);
+  static LogoutResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+}
+
 class AddUserRequest extends $pb.GeneratedMessage {
   factory AddUserRequest({
     $core.String? session,
@@ -2226,6 +2348,200 @@ class GetRangeByDatasourceResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(4)
   $pb.PbList<$fixnum.Int64> get timestamps => $_getList(3);
+}
+
+class GetPodsRequest extends $pb.GeneratedMessage {
+  factory GetPodsRequest({
+    $core.String? session,
+    $core.String? vmDatasourceName,
+  }) {
+    final result = create();
+    if (session != null) result.session = session;
+    if (vmDatasourceName != null) result.vmDatasourceName = vmDatasourceName;
+    return result;
+  }
+
+  GetPodsRequest._();
+
+  factory GetPodsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetPodsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPodsRequest',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'session')
+    ..aOS(2, _omitFieldNames ? '' : 'vmDatasourceName')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPodsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPodsRequest copyWith(void Function(GetPodsRequest) updates) =>
+      super.copyWith((message) => updates(message as GetPodsRequest))
+          as GetPodsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetPodsRequest create() => GetPodsRequest._();
+  @$core.override
+  GetPodsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetPodsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPodsRequest>(create);
+  static GetPodsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get session => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set session($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSession() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSession() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get vmDatasourceName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set vmDatasourceName($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasVmDatasourceName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVmDatasourceName() => $_clearField(2);
+}
+
+class PodGroup extends $pb.GeneratedMessage {
+  factory PodGroup({
+    $core.Iterable<$core.String>? podName,
+  }) {
+    final result = create();
+    if (podName != null) result.podName.addAll(podName);
+    return result;
+  }
+
+  PodGroup._();
+
+  factory PodGroup.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory PodGroup.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PodGroup',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'podName')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PodGroup clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PodGroup copyWith(void Function(PodGroup) updates) =>
+      super.copyWith((message) => updates(message as PodGroup)) as PodGroup;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static PodGroup create() => PodGroup._();
+  @$core.override
+  PodGroup createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static PodGroup getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PodGroup>(create);
+  static PodGroup? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get podName => $_getList(0);
+}
+
+class GetPodsResponse extends $pb.GeneratedMessage {
+  factory GetPodsResponse({
+    $core.int? code,
+    $core.String? message,
+    $core.Iterable<$core.MapEntry<$core.String, PodGroup>>? pods,
+  }) {
+    final result = create();
+    if (code != null) result.code = code;
+    if (message != null) result.message = message;
+    if (pods != null) result.pods.addEntries(pods);
+    return result;
+  }
+
+  GetPodsResponse._();
+
+  factory GetPodsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetPodsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPodsResponse',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'metrics_explorer'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'code')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..m<$core.String, PodGroup>(3, _omitFieldNames ? '' : 'pods',
+        entryClassName: 'GetPodsResponse.PodsEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OM,
+        valueCreator: PodGroup.create,
+        valueDefaultOrMaker: PodGroup.getDefault,
+        packageName: const $pb.PackageName('metrics_explorer'))
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPodsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPodsResponse copyWith(void Function(GetPodsResponse) updates) =>
+      super.copyWith((message) => updates(message as GetPodsResponse))
+          as GetPodsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetPodsResponse create() => GetPodsResponse._();
+  @$core.override
+  GetPodsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetPodsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPodsResponse>(create);
+  static GetPodsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbMap<$core.String, PodGroup> get pods => $_getMap(2);
 }
 
 class GetMenuListRequest extends $pb.GeneratedMessage {

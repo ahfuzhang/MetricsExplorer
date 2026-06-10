@@ -10,7 +10,7 @@ run:
 
 # ── Web 前端 ─────────────────────────────────────────────────────────────────
 build_web:
-	flutter build web
+	flutter build web --wasm
 	sed -i '' 's|<base href="/">|<base href="./">|' build/web/index.html
 
 run_web:

@@ -5,29 +5,29 @@ package metrics_explorer;
 option go_package = "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer";
 
 message MysqlConfigs {
-    // @yamlName=dsn
-    string dsn = 1;
+  // @yamlName=dsn
+  string dsn = 1;
 }
 
 message HttpServer {
-    // @yamlName=port
-    int32 port = 1;
+  // @yamlName=port
+  int32 port = 1;
 
-    // @yamlName=path
-    string path = 2;
+  // @yamlName=path
+  string path = 2;
 }
 
 message AdminConfig {
-    // @yamlName=name
-    string name = 1;
+  // @yamlName=name
+  string name = 1;
 
-    // @yamlName=passwd
-    string passwd = 2;
+  // @yamlName=passwd
+  string passwd = 2;
 }
 
 message MetricDataSourceConfig {
-    // @yamlName=resfresh_interval_seconds
-    int32 resfresh_interval_seconds = 1;
+  // @yamlName=resfresh_interval_seconds
+  int32 resfresh_interval_seconds = 1;
 }
 
 message MetricsExplorerConfigs {
@@ -45,6 +45,9 @@ message MetricsExplorerConfigs {
 
   // @yamlName=metric_data_source
   MetricDataSourceConfig metric_data_source = 5;
+
+  // @yamlName=session_timeout_seconds
+  int64 session_timeout_seconds = 6;
 }
 
 // 定义配置文件

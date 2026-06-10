@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/api"
-	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/config"
 	"github.com/ahfuzhang/MetricsExplorer/server/MetricsExplorerServer/internal/global"
 	pb "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer"
 )
@@ -28,19 +27,9 @@ func ListUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
-
-		info, ok := api.OnlineUsers.Load(req.Session)
-		if !ok || info == nil {
-			respond(1, "invalid session", nil)
-			return
-		}
-		u, ok1 := info.(*api.OnlineUser)
-		if !ok1 {
-			respond(11, "invalid data type, internal error", nil)
-			return
-		}
-		if u.UserName != config.Get().Admin.Name {
-			respond(12, "only admin user allowd", nil)
+		_, code, msg := api.Auth(req.Session, true)
+		if code != 0 {
+			respond(code, msg, nil)
 			return
 		}
 

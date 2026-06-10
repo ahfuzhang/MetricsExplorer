@@ -8,25 +8,26 @@ import (
 	pb "github.com/ahfuzhang/MetricsExplorer/server/generated/metrics_explorer"
 )
 
-func GetLabelsByDatasource() http.HandlerFunc {
+func GetPodsByDatasource() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqBytes, err := api.Validate(w, r)
 		if err != nil {
 			return
 		}
 
-		req := &pb.ReadonlyGetLabelsByDatasourceRequest{}
+		req := &pb.ReadonlyGetPodsRequest{}
 		if err = req.FromProtobuf(reqBytes); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		respond := func(code int32, msg string, labels map[string]*pb.LabelValues) {
-			rsp := &pb.GetLabelsByDatasourceResponse{Code: code, Message: msg, Labels: labels}
+		respond := func(code int32, msg string, pods map[string]*pb.PodGroup) {
+			rsp := &pb.GetPodsResponse{Code: code, Message: msg, Pods: pods}
 			w.Header().Set("Content-Type", "application/protobuf")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
+
 		_, code, msg := api.Auth(req.Session, false)
 		if code != 0 {
 			respond(code, msg, nil)
@@ -38,15 +39,16 @@ func GetLabelsByDatasource() http.HandlerFunc {
 			respond(3, "datasource not available", nil)
 			return
 		}
-		m := ds.GetLabels()
-		outMap := make(map[string]*pb.LabelValues, len(m))
-		for k, v := range m {
-			values := make([]string, 0, len(v))
-			for labelValue := range v {
-				values = append(values, labelValue)
+
+		pods := ds.GetPods()
+		result := make(map[string]*pb.PodGroup, len(pods))
+		for prefix, podSet := range pods {
+			names := make([]string, 0, len(podSet))
+			for name := range podSet {
+				names = append(names, name)
 			}
-			outMap[k] = &pb.LabelValues{Values: values}
+			result[prefix] = &pb.PodGroup{PodName: names}
 		}
-		respond(0, "success", outMap)
+		respond(0, "success", result)
 	}
 }

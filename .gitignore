@@ -46,3 +46,4 @@ app.*.map.json
 /.idea/
 /.claude/
 /server/MetricsExplorerServer/MetricsExplorerServer
+/test/k8s/

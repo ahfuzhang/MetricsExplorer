@@ -45,6 +45,7 @@ func New() *Server {
 	}
 	mux.HandleFunc(pathPrefix+"api/v1/get_global_configs", api.GetGlobalConfigs(cfg))
 	mux.HandleFunc(pathPrefix+"api/v1/login", api.Login())
+	mux.HandleFunc(pathPrefix+"api/v1/logout", api.Logout())
 	mux.HandleFunc(pathPrefix+"api/v1/add_user", user.AddUser())
 	mux.HandleFunc(pathPrefix+"api/v1/list_user", user.ListUser())
 	mux.HandleFunc(pathPrefix+"api/v1/remove_user", user.RemoveUser())
@@ -60,6 +61,7 @@ func New() *Server {
 	mux.HandleFunc(pathPrefix+"api/v1/get_metric_names_by_datasource", metricdata.GetMetricNamesByDatasource())
 	mux.HandleFunc(pathPrefix+"api/v1/get_series_by_datasource", metricdata.GetSeriesByDatasource())
 	mux.HandleFunc(pathPrefix+"api/v1/get_range_by_datasource", metricdata.GetRangeByDatasource())
+	mux.HandleFunc(pathPrefix+"api/v1/get_pods_by_datasource", metricdata.GetPodsByDatasource())
 
 	indexTarget := pathPrefix + "web/index.html"
 	mux.HandleFunc(pathPrefix, func(w http.ResponseWriter, r *http.Request) {

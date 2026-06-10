@@ -1034,20 +1034,22 @@ func (m *MetricDataSourceConfig) ToProtobuf(dst []byte) []byte {
 }
 // MetricsExplorerConfigs field tag IDs.
 const (
-	MetricsExplorerConfigsAdminTag            = 4
-	MetricsExplorerConfigsSaltTag             = 1
-	MetricsExplorerConfigsMysqlTag            = 3
-	MetricsExplorerConfigsHttpTag             = 2
-	MetricsExplorerConfigsMetricDataSourceTag = 5
+	MetricsExplorerConfigsAdminTag                 = 4
+	MetricsExplorerConfigsSaltTag                  = 1
+	MetricsExplorerConfigsMysqlTag                 = 3
+	MetricsExplorerConfigsHttpTag                  = 2
+	MetricsExplorerConfigsSessionTimeoutSecondsTag = 6
+	MetricsExplorerConfigsMetricDataSourceTag      = 5
 )
 
 // MetricsExplorerConfigs JSON field name string constants.
 const (
-	NameOfMetricsExplorerConfigsAdmin            = "admin"
-	NameOfMetricsExplorerConfigsSalt             = "salt"
-	NameOfMetricsExplorerConfigsMysql            = "mysql"
-	NameOfMetricsExplorerConfigsHttp             = "http"
-	NameOfMetricsExplorerConfigsMetricDataSource = "metric_data_source"
+	NameOfMetricsExplorerConfigsAdmin                 = "admin"
+	NameOfMetricsExplorerConfigsSalt                  = "salt"
+	NameOfMetricsExplorerConfigsMysql                 = "mysql"
+	NameOfMetricsExplorerConfigsHttp                  = "http"
+	NameOfMetricsExplorerConfigsSessionTimeoutSeconds = "session_timeout_seconds"
+	NameOfMetricsExplorerConfigsMetricDataSource      = "metric_data_source"
 )
 
 // MetricsExplorerConfigs YAML field name string constants.
@@ -1056,18 +1058,20 @@ const (
 	NameOfYamlFieldMetricsExplorerConfigsSalt = "salt"
 	NameOfYamlFieldMetricsExplorerConfigsMysql = "mysql"
 	NameOfYamlFieldMetricsExplorerConfigsHttp = "http"
+	NameOfYamlFieldMetricsExplorerConfigsSessionTimeoutSeconds = "session_timeout_seconds"
 	NameOfYamlFieldMetricsExplorerConfigsMetricDataSource = "metric_data_source"
 )
 
 // MetricsExplorerConfigs writer struct.
 // Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
 type MetricsExplorerConfigs struct {
-	Admin            AdminConfig            `json:"admin,omitempty" yaml:"admin"`
-	Salt             string                 `json:"salt,omitempty" yaml:"salt"`
-	Mysql            MysqlConfigs           `json:"mysql,omitempty" yaml:"mysql"`
-	Http             HttpServer             `json:"http,omitempty" yaml:"http"`
-	MetricDataSource MetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
-	arena            []byte
+	Admin                 AdminConfig            `json:"admin,omitempty" yaml:"admin"`
+	Salt                  string                 `json:"salt,omitempty" yaml:"salt"`
+	Mysql                 MysqlConfigs           `json:"mysql,omitempty" yaml:"mysql"`
+	Http                  HttpServer             `json:"http,omitempty" yaml:"http"`
+	SessionTimeoutSeconds int64                  `json:"session_timeout_seconds,omitempty" yaml:"session_timeout_seconds"`
+	MetricDataSource      MetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
+	arena                 []byte
 }
 
 func (m *MetricsExplorerConfigs) Reset() {
@@ -1077,6 +1081,7 @@ func (m *MetricsExplorerConfigs) Reset() {
 	m.Salt = ""
 	m.Mysql.Reset()
 	m.Http.Reset()
+	m.SessionTimeoutSeconds = 0
 	m.MetricDataSource.Reset()
 }
 
@@ -1104,6 +1109,9 @@ func (m *MetricsExplorerConfigs) ProtobufSize() int {
 			size += 1 /* TagSize(MetricsExplorerConfigsHttpTag, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
 		}
 	}
+	if m.SessionTimeoutSeconds != 0 {
+		size += 1 /* TagSize(MetricsExplorerConfigsSessionTimeoutSecondsTag, Varint=0) */ + (bits.Len64((uint64(m.SessionTimeoutSeconds))|1) + 6) / 7
+	}
 	{
 		sub := m.MetricDataSource.ProtobufSize()
 		if sub > 0 {
@@ -1121,6 +1129,10 @@ func (m *MetricsExplorerConfigs) ToProtobufByAppend(in []byte) []byte {
 			in = utils.AppendVarint(in, uint64(sub))
 			in = m.MetricDataSource.ToProtobuf(in)
 		}
+	}
+	if m.SessionTimeoutSeconds != 0 {
+		in = utils.AppendTag(in, MetricsExplorerConfigsSessionTimeoutSecondsTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.SessionTimeoutSeconds))
 	}
 	{
 		sub := m.Http.ProtobufSize()
@@ -1191,6 +1203,22 @@ func (m *MetricsExplorerConfigs) ToJSON(dst []byte) []byte {
 	dst = append(dst, NameOfMetricsExplorerConfigsHttp...)
 	dst = append(dst, '"', ':')
 	dst = m.Http.ToJSON(dst)
+	if m.SessionTimeoutSeconds != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfMetricsExplorerConfigsSessionTimeoutSeconds...)
+		dst = append(dst, '"', ':')
+		if int64(m.SessionTimeoutSeconds) > 9007199254740991 || int64(m.SessionTimeoutSeconds) < -9007199254740991 {
+			dst = append(dst, '"')
+			dst = strconv.AppendInt(dst, int64(m.SessionTimeoutSeconds), 10)
+			dst = append(dst, '"')
+		} else {
+			dst = strconv.AppendInt(dst, int64(m.SessionTimeoutSeconds), 10)
+		}
+	}
 	if !_jsonFirstField {
 		dst = append(dst, ',')
 	}
@@ -1208,12 +1236,13 @@ func (m *MetricsExplorerConfigs) ToJSON(dst []byte) []byte {
 // minimal memory padding and minimal GC scan range.
 type ReadonlyMetricsExplorerConfigs struct {
 	parser                          fastjson.Parser
-	Salt             string               `json:"salt,omitempty" yaml:"salt"`
-	Admin            ReadonlyAdminConfig  `json:"admin,omitempty" yaml:"admin"`
-	Mysql            ReadonlyMysqlConfigs `json:"mysql,omitempty" yaml:"mysql"`
-	rawBuffer        []byte
-	Http             ReadonlyHttpServer             `json:"http,omitempty" yaml:"http"`
-	MetricDataSource ReadonlyMetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
+	Salt                  string               `json:"salt,omitempty" yaml:"salt"`
+	Admin                 ReadonlyAdminConfig  `json:"admin,omitempty" yaml:"admin"`
+	Mysql                 ReadonlyMysqlConfigs `json:"mysql,omitempty" yaml:"mysql"`
+	rawBuffer             []byte
+	Http                  ReadonlyHttpServer             `json:"http,omitempty" yaml:"http"`
+	MetricDataSource      ReadonlyMetricDataSourceConfig `json:"metric_data_source,omitempty" yaml:"metric_data_source"`
+	SessionTimeoutSeconds int64                          `json:"session_timeout_seconds,omitempty" yaml:"session_timeout_seconds"`
 }
 
 func (r *ReadonlyMetricsExplorerConfigs) Clone(dst *MetricsExplorerConfigs) *MetricsExplorerConfigs {
@@ -1238,6 +1267,7 @@ func (r *ReadonlyMetricsExplorerConfigs) Clone(dst *MetricsExplorerConfigs) *Met
 	}
 	r.Mysql.Clone(&dst.Mysql)
 	r.Http.Clone(&dst.Http)
+	dst.SessionTimeoutSeconds = r.SessionTimeoutSeconds
 	r.MetricDataSource.Clone(&dst.MetricDataSource)
 	return dst
 }
@@ -1249,6 +1279,7 @@ func (r *ReadonlyMetricsExplorerConfigs) Reset() {
 	r.Salt = ""
 	r.Mysql.Reset()
 	r.Http.Reset()
+	r.SessionTimeoutSeconds = 0
 	r.MetricDataSource.Reset()
 }
 
@@ -1305,6 +1336,19 @@ func (r *ReadonlyMetricsExplorerConfigs) FromProtobuf(in []byte) error {
 				return err
 			}
 			if err = r.Http.FromProtobuf(subData); err != nil {
+				return err
+			}
+		case MetricsExplorerConfigsSessionTimeoutSecondsTag: // SessionTimeoutSeconds
+			if wt == utils.WireTypeVarint {
+				r.SessionTimeoutSeconds, in, err = utils.ReadInt64(in)
+			} else if wt == utils.WireType64bit {
+				var _fv uint64
+				_fv, in, err = utils.ReadFixed64(in)
+				r.SessionTimeoutSeconds = int64(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionTimeoutSeconds", wt)
+			}
+			if err != nil {
 				return err
 			}
 		case MetricsExplorerConfigsMetricDataSourceTag: // MetricDataSource
@@ -1372,6 +1416,30 @@ func (r *ReadonlyMetricsExplorerConfigs) fromJSONValue(obj *fastjson.Object, par
 			if _e2 := r.Http.fromJSONValue(_subObj, parser); _e2 != nil {
 				visitErr = _e2
 			}
+		case NameOfMetricsExplorerConfigsSessionTimeoutSeconds:
+			var _iv int64
+			if v.Type(parser) == fastjson.TypeString {
+				_sb, _e := v.StringBytes()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
+				var _e2 error
+				// _iv, _e2 = strconv.ParseInt(unsafe.String(unsafe.SliceData(_sb), len(_sb)), 10, 64)
+				_iv, _e2 = fastfloat.ParseInt64(unsafe.String(unsafe.SliceData(_sb), len(_sb)))
+				if _e2 != nil {
+					visitErr = _e2
+					return
+				}
+			} else {
+				var _e error
+				_iv, _e = v.Int64()
+				if _e != nil {
+					visitErr = _e
+					return
+				}
+			}
+			r.SessionTimeoutSeconds = int64(_iv)
 		case NameOfMetricsExplorerConfigsMetricDataSource:
 			_subObj, _e := v.Object()
 			if _e != nil {
@@ -1462,6 +1530,11 @@ func (m *MetricsExplorerConfigs) marshalToSizedBufferVT(dAtA []byte) int {
 			i--
 		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
 		}
+	}
+	if m.SessionTimeoutSeconds != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.SessionTimeoutSeconds))
+		i--
+		dAtA[i] = 48 /*field=6, wireType=Varint, (6<<3)|0 (48)*/
 	}
 	{
 		size := m.MetricDataSource.marshalToSizedBufferVT(dAtA[:i])

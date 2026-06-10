@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -15,6 +16,7 @@ import (
 	pb "github.com/ahfuzhang/MetricsExplorer/server/generated/vectoria_metrics_api"
 )
 
+// 每个数据源的源数据，及其数据缓存
 type DataSourceClient struct {
 	Addr        string
 	ID          uint64
@@ -28,6 +30,10 @@ type DataSourceClient struct {
 	metricNameArena        []byte
 	locker                 sync.RWMutex
 	loadLabelValuesRunning atomic.Bool
+
+	Pods       map[string]map[string]struct{} // 前缀 -> 详细 pod 列表
+	podsLocker sync.RWMutex
+	podArena   []byte
 }
 
 // RangeQueryRequest holds parameters for the query_range API.
@@ -266,7 +272,7 @@ func (c *DataSourceClient) LoadLabelValues() error {
 			log.Printf("get label values for [%s] from datasource [%s] fail, response status=%s", label, c.Name, rsp.Status)
 			continue
 		}
-		log.Printf("\t\t label=%s, value count=%d", label, len(rsp.Data))
+		//log.Printf("\t\t label=%s, value count=%d", label, len(rsp.Data))
 		m := make(map[string]struct{}, len(rsp.Data))
 		var l int
 		for _, v := range rsp.Data {
@@ -283,6 +289,11 @@ func (c *DataSourceClient) LoadLabelValues() error {
 		c.locker.Lock()
 		c.Labels[label] = m
 		c.locker.Unlock()
+		// 特殊处理 pod
+		if label == "pod" {
+			//log.Println("load pods")
+			c.LoadPods()
+		}
 	}
 	return nil
 }
@@ -318,6 +329,125 @@ func (c *DataSourceClient) GetMetricNames() []string {
 		metricNames = append(metricNames, name)
 	}
 	return metricNames
+}
+
+func (c *DataSourceClient) LoadPods() {
+	//log.Println("LoadPods")
+	c.locker.RLock()
+	//log.Println("c.locker.RLock()")
+	if len(c.Labels) == 0 {
+		c.locker.RUnlock()
+		//log.Println("len(c.Labels) == 0")
+		return
+	}
+	podsMap, ok := c.Labels["pod"]
+	if !ok || len(podsMap) == 0 {
+		c.locker.RUnlock()
+		//log.Println("c.Labels[\"pod\"] empty")
+		return
+	}
+	//log.Printf("%+v", podsMap)
+	c.podArena = make([]byte, 0, 1024*16)
+	c.Pods = make(map[string]map[string]struct{}, 100)
+	for k := range podsMap {
+		//log.Println(k)
+		prefix := getPodPrefix(k)
+		//log.Println(k, prefix)
+		l := len(c.podArena)
+		c.podArena = append(c.podArena, prefix...)
+		prefix1 := unsafe.String(unsafe.SliceData(c.podArena[l:]), len(prefix))
+		c.podsLocker.Lock()
+		m1, ok := c.Pods[prefix1]
+		if !ok {
+			m1 = make(map[string]struct{}, 50)
+			//log.Printf("pod prefix [%s]", prefix1)
+			c.Pods[prefix1] = m1
+		}
+		// clone string
+		l = len(c.podArena)
+		c.podArena = append(c.podArena, k...)
+		podName := unsafe.String(unsafe.SliceData(c.podArena[l:]), len(k))
+		m1[podName] = struct{}{}
+		c.podsLocker.Unlock()
+		//log.Printf("pod prefix [%s]=[%s]", prefix1, podName)
+	}
+	c.locker.RUnlock()
+}
+
+func (c *DataSourceClient) GetPods() map[string]map[string]struct{} {
+	c.podsLocker.RLock()
+	defer c.podsLocker.RUnlock()
+	result := make(map[string]map[string]struct{}, len(c.Pods))
+	for prefix, podSet := range c.Pods {
+		result[prefix] = podSet
+	}
+	return result
+}
+
+func getPodPrefix(s string) string {
+	idx := strings.IndexByte(s, '-')
+	if idx == -1 {
+		return s
+	}
+	tail := s[idx+1:]
+	offset := idx
+	for len(tail) > 0 {
+		idx = strings.IndexByte(tail, '-')
+		if idx == -1 {
+			seg := tail
+			lastChar := seg[len(seg)-1]
+			if lastChar >= '0' && lastChar <= '9' {
+				seg = seg[:len(seg)-1] // 最后的字符如果是数字，则不认为是 pod 的随机名字
+			}
+			if len(seg) == 0 || isPodTail(seg) {
+				return s[:offset]
+			}
+			offset += len(tail) + 1
+			return s[:offset]
+		}
+		seg := tail[:idx]
+		if len(seg) == 0 {
+			return s[:offset]
+		}
+		lastChar := seg[len(seg)-1]
+		if lastChar >= '0' && lastChar <= '9' {
+			seg = seg[:len(seg)-1] // 最后的字符如果是数字，则不认为是 pod 的随机名字
+		}
+		if isPodTail(seg) {
+			return s[:offset]
+		}
+		tail = tail[idx+1:]
+		offset += idx + 1
+	}
+	// ss := s
+	// for len(ss) > 0 {
+	// 	idx := strings.LastIndexByte(ss, '-')
+	// 	if idx == -1 {
+	// 		return ss
+	// 	}
+	// 	tail := ss[idx+1:]
+	// 	if !isPodTail(tail) {
+	// 		return ss
+	// 	}
+	// 	ss = ss[:idx]
+	// }
+	return s[:offset]
+}
+
+func isPodTail(s string) bool {
+	hasLetter := false
+	hasNumber := false
+	hasOther := false
+	for _, c := range s {
+		if c >= 'a' && c <= 'z' {
+			hasLetter = true
+		} else if c >= '0' && c <= '9' {
+			hasNumber = true
+		} else {
+			hasOther = true
+		}
+	}
+	return hasLetter && hasNumber && !hasOther
 }
 
 var AllDataSources sync.Map // key: datasource_name (string), value: *DataSourceClient

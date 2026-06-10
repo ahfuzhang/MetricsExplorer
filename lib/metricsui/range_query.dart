@@ -1,28 +1,12 @@
 import 'dart:convert';
-import 'dart:math' show max, min;
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../generated/api.pb.dart';
 import '../session.dart';
-
-const _kSeriesColors = [
-  Color(0xFF5C6BC0),
-  Color(0xFF26A69A),
-  Color(0xFFFF7043),
-  Color(0xFFAB47BC),
-  Color(0xFF66BB6A),
-  Color(0xFF42A5F5),
-];
-
-class _BucketData {
-  final double upperBound;
-  final List<double> points;
-  final String tagLabel;
-  _BucketData({required this.upperBound, required this.points, required this.tagLabel});
-}
+import 'counter_chart.dart';
+import 'heatmap.dart';
 
 class RangeQueryPanel extends StatefulWidget {
   final AppSession session;
@@ -41,6 +25,7 @@ class RangeQueryPanel extends StatefulWidget {
 class RangeQueryPanelState extends State<RangeQueryPanel> {
   final _scrollCtrl = ScrollController();
   bool _loading = false;
+  bool _refreshing = false;
   String? _error;
   String? _resultJson;
   String? _metricKind;
@@ -51,10 +36,9 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
   bool _counterLoading = false;
   String? _counterError;
   List<int>? _counterTimestamps;
-  List<({String label, List<double> points, Map<String, String> tags})>? _counterSeries;
+  List<SeriesData>? _counterSeries;
   // Unit suffix shown in tooltip: '/s', '/min', or '' (Gauge)
   String _chartUnit = '';
-  int? _chartHoveredIndex;
 
   // Static metric table state
   List<({double value, Map<String, String> tags})>? _staticSeries;
@@ -65,11 +49,27 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
 
   // Histogram heatmap state
   List<int>? _histogramTimestamps;
-  List<_BucketData>? _histogramBuckets;
+  List<BucketData>? _histogramBuckets;
+  List<String>? _histogramQueries;
+
+  // Time range controls (Counter / Gauge bar)
+  static const _startOptions = [
+    'now-5m', 'now-10m', 'now-15m', 'now-30m',
+    'now-1h', 'now-3h', 'now-6h',
+    'now-1d', 'now-2d', 'now-3d', 'now-7d',
+  ];
+  static const _endOptions = ['now'];
+
+  final _startCtrl = TextEditingController(text: 'now-30m');
+  final _endCtrl   = TextEditingController(text: 'now');
+  final _stepCtrl  = TextEditingController(text: '60');
 
   @override
   void dispose() {
     _scrollCtrl.dispose();
+    _startCtrl.dispose();
+    _endCtrl.dispose();
+    _stepCtrl.dispose();
     super.dispose();
   }
 
@@ -79,6 +79,34 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
 
   void setGaugeQuery(String? query) {
     _gaugeQuery = query;
+  }
+
+  int _parseTimeExpr(String expr) {
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final s = expr.trim();
+    if (s == 'now') return now;
+    final m = RegExp(r'^now-(\d+)(m|h|d)$').firstMatch(s);
+    if (m != null) {
+      final n = int.parse(m.group(1)!);
+      final unit = m.group(2)!;
+      final secs = unit == 'm' ? n * 60 : unit == 'h' ? n * 3600 : n * 86400;
+      return now - secs;
+    }
+    final asInt = int.tryParse(s);
+    if (asInt != null) return asInt;
+    final dt = DateTime.tryParse(s);
+    if (dt != null) return dt.millisecondsSinceEpoch ~/ 1000;
+    return now;
+  }
+
+  void _onRefresh() {
+    if (_metricKind == 'Counter') {
+      _fetchCounterChart(isRefresh: true);
+    } else if (_metricKind == null && _gaugeQuery != null) {
+      _fetchGaugeChart(isRefresh: true);
+    } else if (_metricKind == 'Histogram') {
+      _fetchHistogramChart(isRefresh: true);
+    }
   }
 
   String? _detectMetricKind(GetRangeByDatasourceResponse decoded) {
@@ -153,11 +181,11 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       _chartUnit = '';
       _counterError = null;
       _counterLoading = false;
-      _chartHoveredIndex = null;
       _staticSeries = null;
       _rawCounterTagsList = null;
       _histogramTimestamps = null;
       _histogramBuckets = null;
+      _histogramQueries = null;
     });
     try {
       final request = GetRangeByDatasourceRequest(
@@ -217,6 +245,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
           } else if (kind == null) {
             _fetchGaugeChart();
           } else if (kind == 'Histogram') {
+            setState(() => _histogramQueries = queries);
             _prepareHistogramData(decoded);
           }
         } else {
@@ -237,28 +266,37 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     }
   }
 
-  Future<void> _fetchCounterChart() async {
+  Future<void> _fetchCounterChart({bool isRefresh = false}) async {
     final query = _counterQuery;
     if (query == null) return;
 
-    setState(() {
-      _counterLoading = true;
-      _counterError = null;
-      _counterTimestamps = null;
-      _counterSeries = null;
-      _chartUnit = '';
-    });
+    if (isRefresh) {
+      setState(() {
+        _refreshing = true;
+        _counterError = null;
+      });
+    } else {
+      setState(() {
+        _counterLoading = true;
+        _counterError = null;
+        _counterTimestamps = null;
+        _counterSeries = null;
+        _chartUnit = '';
+      });
+    }
 
     // Executes one range request; sets _counterError and returns null on failure.
     Future<GetRangeByDatasourceResponse?> doFetch(String q) async {
-      final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final startSec = _parseTimeExpr(_startCtrl.text);
+      final endSec   = _parseTimeExpr(_endCtrl.text);
+      final stepVal  = int.tryParse(_stepCtrl.text.trim()) ?? 60;
       final request = GetRangeByDatasourceRequest(
         session: widget.session.sessionToken,
         vmDatasourceName: widget.datasource.datasourceName,
         queries: [q],
-        start: (nowSec - 1800).toString(),
-        end: nowSec.toString(),
-        step: '1m',
+        start: startSec.toString(),
+        end: endSec.toString(),
+        step: '${stepVal}s',
       );
       final uri = Uri.parse(
           '${widget.session.apiPath}api/v1/get_range_by_datasource');
@@ -321,7 +359,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     } catch (e) {
       if (mounted) setState(() => _counterError = 'Error: $e');
     } finally {
-      if (mounted) setState(() => _counterLoading = false);
+      if (mounted) setState(() { _counterLoading = false; _refreshing = false; });
     }
   }
 
@@ -342,27 +380,36 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
         .toList();
   }
 
-  Future<void> _fetchGaugeChart() async {
+  Future<void> _fetchGaugeChart({bool isRefresh = false}) async {
     final query = _gaugeQuery;
     if (query == null) return;
 
-    setState(() {
-      _counterLoading = true;
-      _counterError = null;
-      _counterTimestamps = null;
-      _counterSeries = null;
-      _chartUnit = '';
-    });
+    if (isRefresh) {
+      setState(() {
+        _refreshing = true;
+        _counterError = null;
+      });
+    } else {
+      setState(() {
+        _counterLoading = true;
+        _counterError = null;
+        _counterTimestamps = null;
+        _counterSeries = null;
+        _chartUnit = '';
+      });
+    }
 
     try {
-      final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final startSec = _parseTimeExpr(_startCtrl.text);
+      final endSec   = _parseTimeExpr(_endCtrl.text);
+      final stepVal  = int.tryParse(_stepCtrl.text.trim()) ?? 60;
       final request = GetRangeByDatasourceRequest(
         session: widget.session.sessionToken,
         vmDatasourceName: widget.datasource.datasourceName,
         queries: [query],
-        start: (nowSec - 1800).toString(),
-        end: nowSec.toString(),
-        step: '1m',
+        start: startSec.toString(),
+        end: endSec.toString(),
+        step: '${stepVal}s',
       );
       final uri = Uri.parse(
           '${widget.session.apiPath}api/v1/get_range_by_datasource');
@@ -396,7 +443,49 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     } catch (e) {
       if (mounted) setState(() => _counterError = 'Error: $e');
     } finally {
-      if (mounted) setState(() => _counterLoading = false);
+      if (mounted) setState(() { _counterLoading = false; _refreshing = false; });
+    }
+  }
+
+  Future<void> _fetchHistogramChart({bool isRefresh = false}) async {
+    final queries = _histogramQueries;
+    if (queries == null || queries.isEmpty) return;
+
+    if (isRefresh) {
+      setState(() => _refreshing = true);
+    } else {
+      setState(() {
+        _histogramTimestamps = null;
+        _histogramBuckets = null;
+      });
+    }
+
+    try {
+      final startSec = _parseTimeExpr(_startCtrl.text);
+      final endSec   = _parseTimeExpr(_endCtrl.text);
+      final stepVal  = int.tryParse(_stepCtrl.text.trim()) ?? 60;
+      final request = GetRangeByDatasourceRequest(
+        session: widget.session.sessionToken,
+        vmDatasourceName: widget.datasource.datasourceName,
+        queries: queries,
+        start: startSec.toString(),
+        end: endSec.toString(),
+        step: '${stepVal}s',
+      );
+      final uri = Uri.parse(
+          '${widget.session.apiPath}api/v1/get_range_by_datasource');
+      final resp = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/protobuf'},
+        body: request.writeToBuffer(),
+      );
+      if (resp.statusCode != 200) return;
+      final decoded = GetRangeByDatasourceResponse.fromBuffer(resp.bodyBytes);
+      if (decoded.code != 0) return;
+      if (mounted) _prepareHistogramData(decoded);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
     }
   }
 
@@ -458,7 +547,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     }
 
     final sortedBounds = bucketMap.keys.toList()..sort();
-    var buckets = sortedBounds.map((bound) => _BucketData(
+    var buckets = sortedBounds.map((bound) => BucketData(
       upperBound: bound,
       points: List<double>.from(bucketMap[bound]!),
       tagLabel: _formatAxisValue(bound),
@@ -469,7 +558,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       for (int i = buckets.length - 1; i > 0; i--) {
         final curr = buckets[i].points;
         final prev = buckets[i - 1].points;
-        buckets[i] = _BucketData(
+        buckets[i] = BucketData(
           upperBound: buckets[i].upperBound,
           tagLabel: buckets[i].tagLabel,
           points: List.generate(n, (j) {
@@ -510,7 +599,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       height: chartHeight,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(4, 8, 16, 4),
-        child: _HeatmapChart(
+        child: HeatmapChart(
           timestamps: ts,
           buckets: buckets,
           minValue: minVal,
@@ -742,6 +831,88 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     );
   }
 
+  Widget _buildComboField({
+    required TextEditingController ctrl,
+    required List<String> options,
+    double width = 130,
+  }) {
+    return SizedBox(
+      width: width,
+      child: TextField(
+        controller: ctrl,
+        style: const TextStyle(fontSize: 12),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
+          isDense: true,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+          suffixIconConstraints: const BoxConstraints(maxWidth: 24, maxHeight: 30),
+          suffixIcon: PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.arrow_drop_down, size: 18),
+            onSelected: (v) => ctrl.text = v,
+            itemBuilder: (_) => options
+                .map((o) => PopupMenuItem<String>(
+                      value: o,
+                      height: 36,
+                      child: Text(o, style: const TextStyle(fontSize: 12)),
+                    ))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeRangeBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FF),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Row(
+        children: [
+          const Text('Start:', style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
+          _buildComboField(ctrl: _startCtrl, options: _startOptions, width: 125),
+          const SizedBox(width: 10),
+          const Text('End:', style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
+          _buildComboField(ctrl: _endCtrl, options: _endOptions, width: 80),
+          const SizedBox(width: 10),
+          const Text('Step:', style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
+          SizedBox(
+            width: 56,
+            child: TextField(
+              controller: _stepCtrl,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(fontSize: 12),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          const Text('seconds', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(width: 10),
+          ElevatedButton.icon(
+            onPressed: _onRefresh,
+            icon: const Icon(Icons.refresh, size: 14),
+            label: const Text('Refresh', style: TextStyle(fontSize: 12)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildKindLabel(String label, Color bgColor, Color textColor) {
     return Container(
       width: double.infinity,
@@ -766,254 +937,14 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     return v.toStringAsFixed(3);
   }
 
-  Widget _buildCounterChart() {
-    const chartHeight = 200.0;
-
-    if (_counterLoading) {
-      return const SizedBox(
-        height: chartHeight,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_counterError != null) {
-      return Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Center(
-          child: Text(
-            'Chart: $_counterError',
-            style: const TextStyle(color: Colors.red, fontSize: 11),
-          ),
-        ),
-      );
-    }
-
-    final ts = _counterTimestamps;
-    final series = _counterSeries;
-    if (ts == null || series == null || series.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final n = ts.length;
-    if (n == 0) return const SizedBox.shrink();
-
-    // Compute Y range across all series
-    double maxY = 0, minY = double.infinity;
-    for (final s in series) {
-      final pts = s.points;
-      for (final v in pts) {
-        if (v > maxY) maxY = v;
-        if (v < minY) minY = v;
-      }
-    }
-    if (minY == double.infinity) minY = 0;
-    final range = maxY - minY;
-    final displayMax = maxY + (range > 0 ? range * 0.1 : max(maxY * 0.1, 0.001));
-    final displayMin = (minY - (range > 0 ? range * 0.1 : 0)).clamp(0.0, double.infinity);
-
-    final xInterval = max(1, (n / 6).ceil()).toDouble();
-
-    // Build bars first so showingTooltipIndicators can reference them.
-    final bars = series.asMap().entries.map((entry) {
-      final idx = entry.key;
-      final s = entry.value;
-      final color = _kSeriesColors[idx % _kSeriesColors.length];
-      final pts = s.points;
-      final count = min(n, pts.length);
-      final spots = List.generate(count, (i) => FlSpot(i.toDouble(), pts[i]));
-      return LineChartBarData(
-        spots: spots,
-        isCurved: true,
-        curveSmoothness: 0.3,
-        color: color,
-        barWidth: 2,
-        isStrokeCapRound: true,
-        dotData: const FlDotData(show: false),
-        belowBarData: BarAreaData(
-          show: true,
-          gradient: LinearGradient(
-            colors: [
-              color.withValues(alpha: 0.22),
-              color.withValues(alpha: 0.02),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-      );
-    }).toList();
-
-    // Compute which spots to pin the tooltip to (column-based, never disappears).
-    final hoveredIdx = _chartHoveredIndex;
-    final showingIndicators = (hoveredIdx == null || bars.isEmpty)
-        ? <ShowingTooltipIndicators>[]
-        : () {
-            final spots = bars.asMap().entries
-                .where((e) => hoveredIdx < e.value.spots.length)
-                .map((e) => LineBarSpot(e.value, e.key, e.value.spots[hoveredIdx]))
-                .toList();
-            return spots.isEmpty ? <ShowingTooltipIndicators>[] : [ShowingTooltipIndicators(spots)];
-          }();
-
-    // Horizontal crosshair lines for each series at the hovered index.
-    final extraLines = <HorizontalLine>[];
-    if (hoveredIdx != null) {
-      for (int i = 0; i < series.length; i++) {
-        final pts = series[i].points;
-        if (hoveredIdx < pts.length) {
-          extraLines.add(HorizontalLine(
-            y: pts[hoveredIdx],
-            color: _kSeriesColors[i % _kSeriesColors.length].withValues(alpha: 0.5),
-            strokeWidth: 1,
-            dashArray: [5, 4],
-          ));
-        }
-      }
-    }
-
-    return SizedBox(
-      height: chartHeight,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 8, 16, 4),
-        child: LineChart(
-          LineChartData(
-            minX: 0,
-            maxX: (n - 1).toDouble(),
-            minY: displayMin,
-            maxY: displayMax,
-            showingTooltipIndicators: showingIndicators,
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              getDrawingHorizontalLine: (_) => FlLine(
-                color: Colors.grey.shade200,
-                strokeWidth: 1,
-              ),
-            ),
-            borderData: FlBorderData(
-              show: true,
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            titlesData: FlTitlesData(
-              topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 64,
-                  getTitlesWidget: (v, _) => Text(
-                    _formatAxisValue(v),
-                    style: const TextStyle(
-                        fontSize: 9, color: Color(0xFF6B7280)),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 26,
-                  interval: xInterval,
-                  getTitlesWidget: (v, _) {
-                    final i = v.toInt().clamp(0, ts.length - 1);
-                    final dt = DateTime.fromMillisecondsSinceEpoch(
-                        ts[i] * 1000);
-                    final hh = dt.hour.toString().padLeft(2, '0');
-                    final mm = dt.minute.toString().padLeft(2, '0');
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        '$hh:$mm',
-                        style: const TextStyle(
-                            fontSize: 9, color: Color(0xFF6B7280)),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            lineTouchData: LineTouchData(
-              // Disable built-in threshold-based detection so the tooltip
-              // never disappears while the cursor is over the chart.
-              handleBuiltInTouches: false,
-              // Large threshold so lineBarSpots always resolves to the
-              // nearest column regardless of vertical mouse position.
-              touchSpotThreshold: 1000,
-              touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
-                if (!mounted) return;
-                int? newIdx;
-                if (event is! FlPointerExitEvent) {
-                  final spots = response?.lineBarSpots;
-                  if (spots != null && spots.isNotEmpty) {
-                    newIdx = spots.first.spotIndex;
-                  }
-                }
-                if (newIdx != _chartHoveredIndex) {
-                  setState(() => _chartHoveredIndex = newIdx);
-                }
-              },
-              getTouchedSpotIndicator: (barData, spotIndexes) =>
-                  spotIndexes.map((_) => TouchedSpotIndicatorData(
-                        FlLine(
-                          color: Colors.grey.withValues(alpha: 0.5),
-                          strokeWidth: 1,
-                          dashArray: [5, 4],
-                        ),
-                        FlDotData(
-                          show: true,
-                          getDotPainter: (spot, percent, bar, index) =>
-                              FlDotCirclePainter(
-                                radius: 5,
-                                color: barData.color ?? Colors.grey,
-                                strokeWidth: 2,
-                                strokeColor: Colors.white,
-                              ),
-                        ),
-                      )).toList(),
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (_) => Colors.white,
-                tooltipBorder: BorderSide(color: Colors.grey.shade300),
-                tooltipRoundedRadius: 4,
-                getTooltipItems: (spots) =>
-                    spots.asMap().entries.map((entry) {
-                  final spot = entry.value;
-                  final i = spot.x.toInt().clamp(0, ts.length - 1);
-                  final dt = DateTime.fromMillisecondsSinceEpoch(
-                      ts[i] * 1000);
-                  final hh = dt.hour.toString().padLeft(2, '0');
-                  final mm = dt.minute.toString().padLeft(2, '0');
-                  final header = entry.key == 0 ? '$hh:$mm\n' : '';
-                  return LineTooltipItem(
-                    header,
-                    const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF6B7280),
-                        fontWeight: FontWeight.w500),
-                    children: [
-                      TextSpan(
-                        text: '${_formatAxisValue(spot.y)}$_chartUnit',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _kSeriesColors[
-                              spot.barIndex % _kSeriesColors.length],
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-            extraLinesData: ExtraLinesData(horizontalLines: extraLines),
-            lineBarsData: bars,
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildCounterChart() => CounterChart(
+    isLoading: _counterLoading,
+    error: _counterError,
+    timestamps: _counterTimestamps ?? [],
+    series: _counterSeries ?? [],
+    unit: _chartUnit,
+    formatValue: _formatAxisValue,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1031,18 +962,34 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
               color: const Color(0xFFEEF0FD),
               border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.timeline, size: 16, color: Color(0xFF5C6BC0)),
-                SizedBox(width: 8),
-                Text(
-                  'Range Data (last 30 min)',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                const Icon(Icons.timeline, size: 16, color: Color(0xFF5C6BC0)),
+                const SizedBox(width: 8),
+                if (_refreshing) ...[
+                  const Text(
+                    'Loading...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF5C6BC0),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ] else
+                  const Text(
+                    'Range Data (last 30 min)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -1070,6 +1017,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
             )
           else ...[
             if (_metricKind == 'Counter') ...[
+              _buildTimeRangeBar(),
               _buildCounterChart(),
               _buildKindLabel(
                 'Counter  ·  ${_chartUnit == '/min' ? 'per minute' : 'per second'}',
@@ -1079,6 +1027,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
               Expanded(child: _buildSeriesTagsPanel()),
             ] else if (_metricKind == null) ...[
               // Undetected type → treat as Gauge
+              _buildTimeRangeBar(),
               _buildCounterChart(),
               _buildKindLabel('Gauge', Colors.teal.shade50, Colors.teal),
               Expanded(
@@ -1100,6 +1049,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
                 ),
               ),
             ] else if (_metricKind == 'Histogram') ...[
+              _buildTimeRangeBar(),
               _buildHeatmap(),
               _buildKindLabel('Histogram', Colors.purple.shade50, Colors.purple),
               Expanded(
@@ -1147,259 +1097,4 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       ),
     );
   }
-}
-
-// ──────────────────────────────────────────────
-// Heatmap widget
-// ──────────────────────────────────────────────
-
-class _HeatmapChart extends StatefulWidget {
-  final List<int> timestamps;
-  final List<_BucketData> buckets;
-  final double minValue;
-  final double maxValue;
-  final String Function(double) formatValue;
-
-  const _HeatmapChart({
-    required this.timestamps,
-    required this.buckets,
-    required this.minValue,
-    required this.maxValue,
-    required this.formatValue,
-  });
-
-  @override
-  State<_HeatmapChart> createState() => _HeatmapChartState();
-}
-
-class _HeatmapChartState extends State<_HeatmapChart> {
-  Offset? _hoverPos;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (e) {
-        if (_hoverPos != e.localPosition) {
-          setState(() => _hoverPos = e.localPosition);
-        }
-      },
-      onExit: (_) => setState(() => _hoverPos = null),
-      child: CustomPaint(
-        painter: _HeatmapPainter(
-          timestamps: widget.timestamps,
-          buckets: widget.buckets,
-          minValue: widget.minValue,
-          maxValue: widget.maxValue,
-          hoverPos: _hoverPos,
-          formatValue: widget.formatValue,
-        ),
-        child: const SizedBox.expand(),
-      ),
-    );
-  }
-}
-
-class _HeatmapPainter extends CustomPainter {
-  static const _leftPad = 60.0;
-  static const _rightPad = 8.0;
-  static const _topPad = 4.0;
-  static const _xAxisH = 22.0;
-  static const _colorBarH = 10.0;
-  static const _bottomPad = _xAxisH + _colorBarH + 14.0;
-
-  final List<int> timestamps;
-  final List<_BucketData> buckets;
-  final double minValue;
-  final double maxValue;
-  final Offset? hoverPos;
-  final String Function(double) formatValue;
-
-  _HeatmapPainter({
-    required this.timestamps,
-    required this.buckets,
-    required this.minValue,
-    required this.maxValue,
-    required this.hoverPos,
-    required this.formatValue,
-  });
-
-  Color _heatColor(double t) {
-    const low = Color(0xFFECEFF1);
-    const high = Color(0xFF0D47A1);
-    return Color.lerp(low, high, t.clamp(0.0, 1.0))!;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridW = size.width - _leftPad - _rightPad;
-    final gridH = size.height - _topPad - _bottomPad;
-    if (gridW <= 0 || gridH <= 0) return;
-
-    final n = timestamps.length;
-    final m = buckets.length;
-    if (n == 0 || m == 0) return;
-
-    final cellW = gridW / n;
-    final cellH = gridH / m;
-    final valueRange = maxValue - minValue;
-
-    // Determine hover cell
-    int? hovCol, hovRow;
-    final hp = hoverPos;
-    if (hp != null) {
-      final dx = hp.dx - _leftPad;
-      final dy = hp.dy - _topPad;
-      if (dx >= 0 && dx < gridW && dy >= 0 && dy < gridH) {
-        hovCol = (dx / cellW).floor().clamp(0, n - 1);
-        hovRow = (m - 1) - (dy / cellH).floor().clamp(0, m - 1);
-      }
-    }
-
-    // Draw cells (row 0 = lowest bucket at bottom, row m-1 = highest at top)
-    final cellPaint = Paint();
-    for (int col = 0; col < n; col++) {
-      for (int row = 0; row < m; row++) {
-        final screenRow = (m - 1) - row;
-        final left = _leftPad + col * cellW;
-        final top = _topPad + screenRow * cellH;
-        final rect = Rect.fromLTWH(left, top, cellW, cellH);
-
-        final pts = buckets[row].points;
-        final val = col < pts.length ? pts[col] : 0.0;
-        final t = valueRange > 0 ? (val - minValue) / valueRange : 0.0;
-        cellPaint.color = (hovCol == col && hovRow == row)
-            ? _heatColor(t).withValues(alpha: 0.55)
-            : _heatColor(t);
-        canvas.drawRect(rect, cellPaint);
-      }
-    }
-
-    // Grid border
-    canvas.drawRect(
-      Rect.fromLTWH(_leftPad, _topPad, gridW, gridH),
-      Paint()
-        ..color = Colors.grey.shade400
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.5,
-    );
-
-    // Y-axis labels
-    final tp = TextPainter(textDirection: TextDirection.ltr);
-    final maxYLabels = max(1, (gridH / 14).floor());
-    final yStep = max(1, (m / maxYLabels).ceil());
-    for (int row = 0; row < m; row += yStep) {
-      final screenRow = (m - 1) - row;
-      final y = _topPad + (screenRow + 0.5) * cellH;
-      tp.text = TextSpan(
-        text: buckets[row].tagLabel,
-        style: const TextStyle(fontSize: 9, color: Color(0xFF6B7280)),
-      );
-      tp.layout(maxWidth: _leftPad - 4);
-      tp.paint(canvas, Offset(_leftPad - tp.width - 4, y - tp.height / 2));
-    }
-
-    // X-axis labels
-    final maxXLabels = max(1, (gridW / 34).floor());
-    final xStep = max(1, (n / maxXLabels).ceil());
-    for (int col = 0; col < n; col += xStep) {
-      final x = _leftPad + (col + 0.5) * cellW;
-      final dt = DateTime.fromMillisecondsSinceEpoch(timestamps[col] * 1000);
-      final label =
-          '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-      tp.text = TextSpan(
-        text: label,
-        style: const TextStyle(fontSize: 9, color: Color(0xFF6B7280)),
-      );
-      tp.layout();
-      tp.paint(canvas, Offset(x - tp.width / 2, _topPad + gridH + 4));
-    }
-
-    // Color bar
-    final barTop = _topPad + gridH + _xAxisH;
-    final barRect = Rect.fromLTWH(_leftPad, barTop, gridW, _colorBarH);
-    canvas.drawRect(
-      barRect,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [_heatColor(0), _heatColor(1)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(barRect),
-    );
-    canvas.drawRect(
-      barRect,
-      Paint()
-        ..color = Colors.grey.shade400
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.5,
-    );
-
-    // Color bar min/max labels
-    tp.text = TextSpan(
-      text: formatValue(minValue),
-      style: const TextStyle(fontSize: 9, color: Color(0xFF6B7280)),
-    );
-    tp.layout();
-    tp.paint(canvas, Offset(_leftPad, barTop + _colorBarH + 2));
-
-    tp.text = TextSpan(
-      text: formatValue(maxValue),
-      style: const TextStyle(fontSize: 9, color: Color(0xFF6B7280)),
-    );
-    tp.layout();
-    tp.paint(canvas, Offset(_leftPad + gridW - tp.width, barTop + _colorBarH + 2));
-
-    // Tooltip
-    if (hovCol != null && hovRow != null) {
-      _drawTooltip(canvas, size, hovCol, hovRow, cellW, cellH, m);
-    }
-  }
-
-  void _drawTooltip(
-      Canvas canvas, Size size, int col, int row, double cellW, double cellH, int m) {
-    final bucket = buckets[row];
-    final pts = bucket.points;
-    final val = col < pts.length ? pts[col] : 0.0;
-    final dt = DateTime.fromMillisecondsSinceEpoch(timestamps[col] * 1000);
-    final time =
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-    final tipText = '$time  ≤${bucket.tagLabel}  ${formatValue(val)}';
-
-    final tp = TextPainter(textDirection: TextDirection.ltr);
-    tp.text = TextSpan(
-      text: tipText,
-      style: const TextStyle(fontSize: 10, color: Color(0xFF212121)),
-    );
-    tp.layout(maxWidth: size.width - 24);
-
-    final tipW = tp.width + 12;
-    final tipH = tp.height + 8;
-    final screenRow = (m - 1) - row;
-    var tipX = _leftPad + (col + 1) * cellW + 4;
-    var tipY = _topPad + screenRow * cellH - tipH - 2;
-    tipX = tipX.clamp(0.0, size.width - tipW);
-    tipY = tipY.clamp(0.0, size.height - tipH);
-
-    final tipRRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(tipX, tipY, tipW, tipH),
-      const Radius.circular(4),
-    );
-    canvas.drawRRect(tipRRect, Paint()..color = Colors.white);
-    canvas.drawRRect(
-      tipRRect,
-      Paint()
-        ..color = Colors.grey.shade300
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-    tp.paint(canvas, Offset(tipX + 6, tipY + 4));
-  }
-
-  @override
-  bool shouldRepaint(_HeatmapPainter old) =>
-      old.hoverPos != hoverPos ||
-      !identical(old.timestamps, timestamps) ||
-      !identical(old.buckets, buckets) ||
-      old.minValue != minValue ||
-      old.maxValue != maxValue;
 }

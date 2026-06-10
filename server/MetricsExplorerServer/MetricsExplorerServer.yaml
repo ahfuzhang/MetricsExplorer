@@ -12,3 +12,5 @@ metrics_explorer:
     passwd: "admin"
   metric_data_source:
     resfresh_interval_seconds: 120
+  session_timeout_seconds: 3600
+  

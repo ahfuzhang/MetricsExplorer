@@ -1022,6 +1022,497 @@ func (m *LoginResponse) ToProtobufVT(dst []byte) []byte {
 func (m *LoginResponse) ToProtobuf(dst []byte) []byte {
 	return m.ToProtobufVT(dst)
 }
+// LogoutRequest field tag IDs.
+const (
+	LogoutRequestSessionTag = 1
+)
+
+// LogoutRequest JSON field name string constants.
+const (
+	NameOfLogoutRequestSession = "session"
+)
+
+// LogoutRequest writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type LogoutRequest struct {
+	Session string `json:"session,omitempty"`
+	arena   []byte
+}
+
+func (m *LogoutRequest) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Session = ""
+}
+
+func (m *LogoutRequest) ProtobufSize() int {
+	size := 0
+	if m.Session != "" {
+		n := len(m.Session)
+		size += 1 /* TagSize(LogoutRequestSessionTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *LogoutRequest) ToProtobufByAppend(in []byte) []byte {
+	if m.Session != "" {
+		in = utils.AppendTag(in, LogoutRequestSessionTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Session), len(m.Session)))
+	}
+	return in
+}
+func (m *LogoutRequest) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Session) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfLogoutRequestSession...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Session, dst)
+		dst = append(dst, '"')
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyLogoutRequest readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyLogoutRequest struct {
+	parser                          fastjson.Parser
+	Session   string `json:"session,omitempty"`
+	rawBuffer []byte
+}
+
+func (r *ReadonlyLogoutRequest) Clone(dst *LogoutRequest) *LogoutRequest {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &LogoutRequest{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Session) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Session...)
+		dst.Session = unsafe.String(&dst.arena[_loc], len(r.Session))
+	} else {
+		dst.Session = ""
+	}
+	return dst
+}
+
+func (r *ReadonlyLogoutRequest) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Session = ""
+}
+
+func (r *ReadonlyLogoutRequest) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case LogoutRequestSessionTag: // Session
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Session", wt)
+			}
+			r.Session, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyLogoutRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfLogoutRequestSession:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Session = unsafe.String(unsafe.SliceData(_b), len(_b))
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyLogoutRequest) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyLogoutRequest) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyLogoutRequest) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *LogoutRequest) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Session) > 0 {
+		i -= len(m.Session)
+		copy(dAtA[i:], m.Session)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Session)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *LogoutRequest) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *LogoutRequest) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// LogoutResponse field tag IDs.
+const (
+	LogoutResponseMessageTag = 2
+	LogoutResponseCodeTag    = 1
+)
+
+// LogoutResponse JSON field name string constants.
+const (
+	NameOfLogoutResponseMessage = "message"
+	NameOfLogoutResponseCode    = "code"
+)
+
+// LogoutResponse writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type LogoutResponse struct {
+	Message string `json:"message,omitempty"`
+	Code    int32  `json:"code,omitempty"`
+	arena   []byte
+}
+
+func (m *LogoutResponse) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Message = ""
+	m.Code = 0
+}
+
+func (m *LogoutResponse) ProtobufSize() int {
+	size := 0
+	if m.Message != "" {
+		n := len(m.Message)
+		size += 1 /* TagSize(LogoutResponseMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Code != 0 {
+		size += 1 /* TagSize(LogoutResponseCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *LogoutResponse) ToProtobufByAppend(in []byte) []byte {
+	if m.Code != 0 {
+		in = utils.AppendTag(in, LogoutResponseCodeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.Code))
+	}
+	if m.Message != "" {
+		in = utils.AppendTag(in, LogoutResponseMessageTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
+	}
+	return in
+}
+func (m *LogoutResponse) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Message) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfLogoutResponseMessage...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Message, dst)
+		dst = append(dst, '"')
+	}
+	if m.Code != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfLogoutResponseCode...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.Code), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyLogoutResponse readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyLogoutResponse struct {
+	parser                          fastjson.Parser
+	Message   string `json:"message,omitempty"`
+	rawBuffer []byte
+	Code      int32 `json:"code,omitempty"`
+}
+
+func (r *ReadonlyLogoutResponse) Clone(dst *LogoutResponse) *LogoutResponse {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &LogoutResponse{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Message) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Message...)
+		dst.Message = unsafe.String(&dst.arena[_loc], len(r.Message))
+	} else {
+		dst.Message = ""
+	}
+	dst.Code = r.Code
+	return dst
+}
+
+func (r *ReadonlyLogoutResponse) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Message = ""
+	r.Code = 0
+}
+
+func (r *ReadonlyLogoutResponse) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case LogoutResponseMessageTag: // Message
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
+			}
+			r.Message, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case LogoutResponseCodeTag: // Code
+			if wt == utils.WireTypeVarint {
+				r.Code, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.Code = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyLogoutResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfLogoutResponseMessage:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfLogoutResponseCode:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Code = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyLogoutResponse) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyLogoutResponse) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyLogoutResponse) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *LogoutResponse) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if m.Code != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *LogoutResponse) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *LogoutResponse) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
 // AddUserRequest field tag IDs.
 const (
 	AddUserRequestSessionTag  = 1
@@ -10497,6 +10988,1005 @@ func (m *GetRangeByDatasourceResponse) ToProtobufVT(dst []byte) []byte {
 }
 
 func (m *GetRangeByDatasourceResponse) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufByAppend(dst)
+}
+// GetPodsRequest field tag IDs.
+const (
+	GetPodsRequestSessionTag          = 1
+	GetPodsRequestVmDatasourceNameTag = 2
+)
+
+// GetPodsRequest JSON field name string constants.
+const (
+	NameOfGetPodsRequestSession          = "session"
+	NameOfGetPodsRequestVmDatasourceName = "vm_datasource_name"
+)
+
+// GetPodsRequest writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetPodsRequest struct {
+	Session          string `json:"session,omitempty"`
+	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
+	arena            []byte
+}
+
+func (m *GetPodsRequest) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.Session = ""
+	m.VmDatasourceName = ""
+}
+
+func (m *GetPodsRequest) ProtobufSize() int {
+	size := 0
+	if m.Session != "" {
+		n := len(m.Session)
+		size += 1 /* TagSize(GetPodsRequestSessionTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.VmDatasourceName != "" {
+		n := len(m.VmDatasourceName)
+		size += 1 /* TagSize(GetPodsRequestVmDatasourceNameTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *GetPodsRequest) ToProtobufByAppend(in []byte) []byte {
+	if m.VmDatasourceName != "" {
+		in = utils.AppendTag(in, GetPodsRequestVmDatasourceNameTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.VmDatasourceName), len(m.VmDatasourceName)))
+	}
+	if m.Session != "" {
+		in = utils.AppendTag(in, GetPodsRequestSessionTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Session), len(m.Session)))
+	}
+	return in
+}
+func (m *GetPodsRequest) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Session) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetPodsRequestSession...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Session, dst)
+		dst = append(dst, '"')
+	}
+	if len(m.VmDatasourceName) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetPodsRequestVmDatasourceName...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.VmDatasourceName, dst)
+		dst = append(dst, '"')
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetPodsRequest readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetPodsRequest struct {
+	parser                          fastjson.Parser
+	Session          string `json:"session,omitempty"`
+	VmDatasourceName string `json:"vm_datasource_name,omitempty"`
+	rawBuffer        []byte
+}
+
+func (r *ReadonlyGetPodsRequest) Clone(dst *GetPodsRequest) *GetPodsRequest {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetPodsRequest{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Session) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Session...)
+		dst.Session = unsafe.String(&dst.arena[_loc], len(r.Session))
+	} else {
+		dst.Session = ""
+	}
+	if len(r.VmDatasourceName) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.VmDatasourceName...)
+		dst.VmDatasourceName = unsafe.String(&dst.arena[_loc], len(r.VmDatasourceName))
+	} else {
+		dst.VmDatasourceName = ""
+	}
+	return dst
+}
+
+func (r *ReadonlyGetPodsRequest) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.Session = ""
+	r.VmDatasourceName = ""
+}
+
+func (r *ReadonlyGetPodsRequest) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetPodsRequestSessionTag: // Session
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Session", wt)
+			}
+			r.Session, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetPodsRequestVmDatasourceNameTag: // VmDatasourceName
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field VmDatasourceName", wt)
+			}
+			r.VmDatasourceName, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetPodsRequest) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetPodsRequestSession:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Session = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetPodsRequestVmDatasourceName:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.VmDatasourceName = unsafe.String(unsafe.SliceData(_b), len(_b))
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetPodsRequest) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetPodsRequest) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetPodsRequest) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetPodsRequest) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	if len(m.Session) > 0 {
+		i -= len(m.Session)
+		copy(dAtA[i:], m.Session)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Session)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	if len(m.VmDatasourceName) > 0 {
+		i -= len(m.VmDatasourceName)
+		copy(dAtA[i:], m.VmDatasourceName)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.VmDatasourceName)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetPodsRequest) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetPodsRequest) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// PodGroup field tag IDs.
+const (
+	PodGroupPodNameTag = 1
+)
+
+// PodGroup JSON field name string constants.
+const (
+	NameOfPodGroupPodName = "pod_name"
+)
+
+// PodGroup writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type PodGroup struct {
+	PodName []string `json:"pod_name,omitempty"`
+	arena   []byte
+}
+
+func (m *PodGroup) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	m.PodName = m.PodName[:0]
+}
+
+func (m *PodGroup) ProtobufSize() int {
+	size := 0
+	for _, v := range m.PodName {
+		n := len(v)
+		size += 1 /* TagSize(PodGroupPodNameTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	return size
+}
+
+func (m *PodGroup) ToProtobufByAppend(in []byte) []byte {
+	for _, v := range m.PodName {
+		in = utils.AppendTag(in, PodGroupPodNameTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(v), len(v)))
+	}
+	return in
+}
+func (m *PodGroup) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.PodName) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfPodGroupPodName...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '[')
+			for _i, _v := range m.PodName {
+				if _i > 0 {
+					dst = append(dst, ',')
+				}
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_v, dst)
+				dst = append(dst, '"')
+			}
+			dst = append(dst, ']')
+		}
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyPodGroup readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyPodGroup struct {
+	parser                          fastjson.Parser
+	rawBuffer []byte
+	PodName   []string `json:"pod_name,omitempty"`
+}
+
+func (r *ReadonlyPodGroup) Clone(dst *PodGroup) *PodGroup {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &PodGroup{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.PodName) > 0 {
+		_total := 0
+		for _, _s := range r.PodName {
+			_total += len(_s)
+		}
+		if cap(dst.arena)-len(dst.arena) < _total {
+			_nc := cap(dst.arena)*2 + _total
+			_na := make([]byte, len(dst.arena), _nc)
+			copy(_na, dst.arena)
+			dst.arena = _na
+		}
+		if cap(dst.PodName) >= len(r.PodName) {
+			dst.PodName = dst.PodName[:len(r.PodName)]
+		} else {
+			dst.PodName = make([]string, len(r.PodName))
+		}
+		for _i, _s := range r.PodName {
+			_loc := len(dst.arena)
+			dst.arena = append(dst.arena, _s...)
+			dst.PodName[_i] = unsafe.String(&dst.arena[_loc], len(_s))
+		}
+	} else {
+		dst.PodName = dst.PodName[:0]
+	}
+	return dst
+}
+
+func (r *ReadonlyPodGroup) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	r.PodName = r.PodName[:0]
+}
+
+func (r *ReadonlyPodGroup) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case PodGroupPodNameTag: // PodName
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field PodName", wt)
+			}
+            if cap(r.PodName) < 64 {
+				temp := make([]string, 0, 64)  // 一开始就分配一个大一点内存，避免频繁的对 slice 扩容
+				r.PodName = append(temp, r.PodName...)
+			}
+			var sv string
+			sv, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+			r.PodName = append(r.PodName, sv)
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyPodGroup) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfPodGroupPodName:
+			_arr, _e := v.Array()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if cap(r.PodName) < len(_arr) {
+				r.PodName = make([]string, 0, len(_arr))
+			} else {
+				r.PodName = r.PodName[:0]
+			}
+			for _, _item := range _arr {
+				_ = _item.Type(parser)
+				_b, _ei := _item.StringBytes()
+				if _ei != nil {
+					visitErr = _ei
+					return
+				}
+				r.PodName = append(r.PodName, unsafe.String(unsafe.SliceData(_b), len(_b)))
+			}
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyPodGroup) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyPodGroup) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyPodGroup) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *PodGroup) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for iNdEx := len(m.PodName) - 1; iNdEx >= 0; iNdEx-- {
+		s := m.PodName[iNdEx]
+		i -= len(s)
+		copy(dAtA[i:], s)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(s)))
+		i--
+		dAtA[i] = 10 /*field=1, wireType=LenDelim, (1<<3)|2 (10)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *PodGroup) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *PodGroup) ToProtobuf(dst []byte) []byte {
+	return m.ToProtobufVT(dst)
+}
+// GetPodsResponse field tag IDs.
+const (
+	GetPodsResponsePodsTag    = 3
+	GetPodsResponseMessageTag = 2
+	GetPodsResponseCodeTag    = 1
+)
+
+// GetPodsResponse JSON field name string constants.
+const (
+	NameOfGetPodsResponsePods    = "pods"
+	NameOfGetPodsResponseMessage = "message"
+	NameOfGetPodsResponseCode    = "code"
+)
+
+// GetPodsResponse writer struct.
+// Fields are ordered by alignment (desc) then size (desc) for minimal memory padding.
+type GetPodsResponse struct {
+	Pods    map[string]*PodGroup `json:"pods,omitempty"`
+	Message string               `json:"message,omitempty"`
+	Code    int32                `json:"code,omitempty"`
+	arena   []byte
+}
+
+func (m *GetPodsResponse) Reset() {
+	clear(m.arena) // pointer might be cause not GC correctly
+	m.arena = m.arena[:0]
+	clear(m.Pods)
+	m.Message = ""
+	m.Code = 0
+}
+
+func (m *GetPodsResponse) ProtobufSize() int {
+	size := 0
+	for k, v := range m.Pods {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		{
+			sub := v.ProtobufSize()
+			entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(sub))|1) + 6) / 7 + sub
+		}
+		size += 1 /* TagSize(GetPodsResponsePodsTag, LenDelim=2) */ + (bits.Len64((uint64(entrySize))|1) + 6) / 7 + entrySize
+	}
+	if m.Message != "" {
+		n := len(m.Message)
+		size += 1 /* TagSize(GetPodsResponseMessageTag, LenDelim=2) */ + (bits.Len64((uint64(n))|1) + 6) / 7 + n
+	}
+	if m.Code != 0 {
+		size += 1 /* TagSize(GetPodsResponseCodeTag, Varint=0) */ + (bits.Len64((uint64(m.Code))|1) + 6) / 7
+	}
+	return size
+}
+
+func (m *GetPodsResponse) ToProtobufByAppend(in []byte) []byte {
+	if m.Code != 0 {
+		in = utils.AppendTag(in, GetPodsResponseCodeTag, utils.WireTypeVarint)
+		in = utils.AppendVarint(in, uint64(m.Code))
+	}
+	if m.Message != "" {
+		in = utils.AppendTag(in, GetPodsResponseMessageTag, utils.WireTypeLenDelim)
+		in = utils.AppendLenDelim(in, unsafe.Slice(unsafe.StringData(m.Message), len(m.Message)))
+	}
+	for k, v := range m.Pods {
+		entrySize := 0
+		{
+			kn := len(k)
+			entrySize += 1 /* TagSize(1, LenDelim=2) */ + (bits.Len64((uint64(kn))|1) + 6) / 7 + kn
+		}
+		valMsgSize := v.ProtobufSize()
+		entrySize += 1 /* TagSize(2, LenDelim=2) */ + (bits.Len64((uint64(valMsgSize))|1) + 6) / 7 + valMsgSize
+		in = utils.AppendTag(in, GetPodsResponsePodsTag, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(entrySize))
+		in = utils.AppendTag(in, 1, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(len(k)))
+		in = append(in, k...)
+		in = utils.AppendTag(in, 2, utils.WireTypeLenDelim)
+		in = utils.AppendVarint(in, uint64(valMsgSize))
+		in = v.ToProtobuf(in)
+	}
+	return in
+}
+func (m *GetPodsResponse) ToJSON(dst []byte) []byte {
+	dst = append(dst, '{')
+	_jsonFirstField := true
+	if len(m.Pods) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetPodsResponsePods...)
+		dst = append(dst, '"', ':')
+		{
+			dst = append(dst, '{')
+			_jsonFirst := true
+			for _k, _v := range m.Pods {
+				if !_jsonFirst {
+					dst = append(dst, ',')
+				}
+				_jsonFirst = false
+				dst = append(dst, '"')
+				dst = utils.EncodeJSONString(_k, dst)
+				dst = append(dst, '"')
+				dst = append(dst, ':')
+				dst = _v.ToJSON(dst)
+			}
+			dst = append(dst, '}')
+		}
+	}
+	if len(m.Message) > 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetPodsResponseMessage...)
+		dst = append(dst, '"', ':')
+		dst = append(dst, '"')
+		dst = utils.EncodeJSONString(m.Message, dst)
+		dst = append(dst, '"')
+	}
+	if m.Code != 0 {
+		if !_jsonFirstField {
+			dst = append(dst, ',')
+		}
+		_jsonFirstField = false
+		dst = append(dst, '"')
+		dst = append(dst, NameOfGetPodsResponseCode...)
+		dst = append(dst, '"', ':')
+		dst = strconv.AppendInt(dst, int64(m.Code), 10)
+	}
+	dst = append(dst, '}')
+	return dst
+}
+
+// ReadonlyGetPodsResponse readonly struct.
+// Fields (including rawBuffer) are sorted with the fieldalignment strategy for
+// minimal memory padding and minimal GC scan range.
+type ReadonlyGetPodsResponse struct {
+	parser                          fastjson.Parser
+	Pods      map[string]*ReadonlyPodGroup `json:"pods,omitempty"`
+	_PodsArr  []ReadonlyPodGroup
+	Message   string `json:"message,omitempty"`
+	rawBuffer []byte
+	Code      int32 `json:"code,omitempty"`
+}
+
+func (r *ReadonlyGetPodsResponse) Clone(dst *GetPodsResponse) *GetPodsResponse {
+	// _alignZeroPad provides zero bytes for alignment padding without heap allocation.
+	// append(slice, _alignZeroPad[:n]...) appends a string — no temporary []byte is allocated.
+	const _alignZeroPad = "\x00\x00\x00\x00\x00\x00\x00" // 7 bytes covers up to 8-byte alignment
+	if dst == nil {
+		dst = &GetPodsResponse{}
+	}
+	if dst.arena == nil {
+		dst.arena = make([]byte, 0, len(r.rawBuffer))
+	} else {
+		dst.arena = dst.arena[:0]
+	}
+	if len(r.Pods) > 0 {
+		if dst.Pods == nil {
+			dst.Pods = make(map[string]*PodGroup, len(r.Pods))
+		} else {
+			clear(dst.Pods)
+		}
+		for _rk, _rv := range r.Pods {
+			{
+				_kloc := len(dst.arena)
+				dst.arena = append(dst.arena, _rk...)
+				_nk := unsafe.String(&dst.arena[_kloc], len(_rk))
+				_nv := new(PodGroup)
+				_rv.Clone(_nv)
+				dst.Pods[_nk] = _nv
+			}
+		}
+	}
+	if len(r.Message) > 0 {
+		_loc := len(dst.arena)
+		dst.arena = append(dst.arena, r.Message...)
+		dst.Message = unsafe.String(&dst.arena[_loc], len(r.Message))
+	} else {
+		dst.Message = ""
+	}
+	dst.Code = r.Code
+	return dst
+}
+
+func (r *ReadonlyGetPodsResponse) Reset() {
+	r.rawBuffer = nil
+	r.parser.Reset()
+	clear(r.Pods)
+	clear(r._PodsArr)
+	r._PodsArr = r._PodsArr[:0]
+	r.Message = ""
+	r.Code = 0
+}
+
+func (r *ReadonlyGetPodsResponse) FromProtobuf(in []byte) error {
+	r.rawBuffer = in
+	var err error
+	for len(in) > 0 {
+		var fieldNum int
+		var wt utils.WireType
+		fieldNum, wt, in, err = utils.ConsumeTag(in)
+		if err != nil {
+			return err
+		}
+		switch fieldNum {
+		case GetPodsResponsePodsTag: // Pods
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pods", wt)
+			}
+			var entryData []byte
+			entryData, in, err = utils.ConsumeBytes(in)
+			if err != nil {
+				return err
+			}
+			// todo: 提前 count 元素个数
+			//  _mapKeyCount := utils.CountMapKey(entryData)  // 这个没有用，这个值一定是 1
+			var mKey string
+			if cap(r._PodsArr) < 16 {
+				r._PodsArr = append(make([]ReadonlyPodGroup, 0, 16), r._PodsArr...)
+			}
+			if cap(r._PodsArr) == len(r._PodsArr) {
+				r._PodsArr = append(r._PodsArr, ReadonlyPodGroup{})
+			} else {
+				r._PodsArr = r._PodsArr[:len(r._PodsArr)+1]
+			}
+			_mValIdx := len(r._PodsArr) - 1
+			for len(entryData) > 0 {
+				var efn int
+				var ewt utils.WireType
+				efn, ewt, entryData, err = utils.ConsumeTag(entryData)
+				if err != nil {
+					return err
+				}
+				switch efn {
+				case 1:
+					mKey, entryData, err = utils.ReadString(entryData)
+				case 2:
+					var _subBytes []byte
+					_subBytes, entryData, err = utils.ConsumeBytes(entryData)
+					if err != nil {
+						break
+					}
+					err = r._PodsArr[_mValIdx].FromProtobuf(_subBytes)
+				default:
+					entryData, err = utils.SkipField(ewt, entryData)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			if r.Pods == nil {
+				r.Pods = make(map[string]*ReadonlyPodGroup, 64)
+			}
+			r.Pods[mKey] = &r._PodsArr[_mValIdx]
+		case GetPodsResponseMessageTag: // Message
+			if wt != utils.WireTypeLenDelim {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wt)
+			}
+			r.Message, in, err = utils.ReadString(in)
+			if err != nil {
+				return err
+			}
+		case GetPodsResponseCodeTag: // Code
+			if wt == utils.WireTypeVarint {
+				r.Code, in, err = utils.ReadInt32(in)
+			} else if wt == utils.WireType32bit {
+				var _fv uint32
+				_fv, in, err = utils.ReadFixed32(in)
+				r.Code = int32(_fv)
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wt)
+			}
+			if err != nil {
+				return err
+			}
+		default:
+			var err2 error
+			in, err2 = utils.SkipField(wt, in)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	return nil
+}
+func (r *ReadonlyGetPodsResponse) fromJSONValue(obj *fastjson.Object, parser *fastjson.Parser) error {
+	var visitErr error
+	obj.Visit(func(k []byte, v *fastjson.Value) {
+		if visitErr != nil {
+			return
+		}
+		k1 := unsafe.String(unsafe.SliceData(k), len(k))
+		switch k1 {
+		case NameOfGetPodsResponsePods:
+			_mapObj, _e := v.Object()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			if r.Pods == nil {
+				r.Pods = make(map[string]*ReadonlyPodGroup, _mapObj.Len())
+			}
+			if r._PodsArr == nil {
+				r._PodsArr = make([]ReadonlyPodGroup, 0, _mapObj.Len())
+			} else {
+				if cap(r._PodsArr) >= _mapObj.Len() {
+					r._PodsArr = r._PodsArr[:0]
+				} else {
+					r._PodsArr = make([]ReadonlyPodGroup, 0, _mapObj.Len())
+				}
+			}
+			_mapObj.Visit(func(mk []byte, mv *fastjson.Value) {
+				if visitErr != nil {
+					return
+				}
+				var mKey string
+				mKey = unsafe.String(unsafe.SliceData(mk), len(mk))
+				// r._PodsArr = append(r._PodsArr, ReadonlyPodGroup{})
+				r._PodsArr = r._PodsArr[:len(r._PodsArr)+1]
+				_mValIdx := len(r._PodsArr) - 1
+				sub := &r._PodsArr[_mValIdx]
+				_subObj, _eo := mv.Object()
+				if _eo != nil {
+					visitErr = _eo
+					return
+				}
+				if _eo2 := sub.fromJSONValue(_subObj, parser); _eo2 != nil {
+					visitErr = _eo2
+					return
+				}
+				r.Pods[mKey] = sub
+			}, parser, false)
+		case NameOfGetPodsResponseMessage:
+			_ = v.Type(parser)
+			_b, _e := v.StringBytes()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Message = unsafe.String(unsafe.SliceData(_b), len(_b))
+		case NameOfGetPodsResponseCode:
+			_iv, _e := v.Int64()
+			if _e != nil {
+				visitErr = _e
+				return
+			}
+			r.Code = int32(_iv)
+		}
+	}, parser, true/*skip unescape keys, because all key must by proto field name*/)
+	return visitErr
+}
+
+func (r *ReadonlyGetPodsResponse) FromJSON(src []byte) error {
+	r.rawBuffer = src
+	parser := &r.parser
+	v, err := parser.Parse(unsafe.String(unsafe.SliceData(src), len(src)))
+	if err != nil {
+		return err
+	}
+	obj, err := v.Object()  // todo: 函数本身消耗资源为整个函数的 33.86%
+	if err != nil {
+		return err
+	}
+	return r.fromJSONValue(obj, parser)
+}
+
+func (r *ReadonlyGetPodsResponse) FromProtobufWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromProtobuf(r.rawBuffer)
+}
+
+func (r *ReadonlyGetPodsResponse) FromJSONWithCopy(in []byte) error {
+	if cap(r.rawBuffer) < len(in) {
+		r.rawBuffer = make([]byte, len(in))
+	} else {
+		r.rawBuffer = r.rawBuffer[:len(in)]
+	}
+	copy(r.rawBuffer, in)
+	return r.FromJSON(r.rawBuffer)
+}
+
+// marshalToSizedBufferVT writes m into dAtA using vtprotobuf's backward-fill
+// approach (starts at the end, works toward the front).
+// Returns number of bytes written = len(dAtA) - final_i.
+func (m *GetPodsResponse) marshalToSizedBufferVT(dAtA []byte) int {
+	if m == nil {
+		return 0
+	}
+	i := len(dAtA)
+	_ = i
+	for k := range m.Pods {
+		v := m.Pods[k]
+		baseI := i
+		size := v.marshalToSizedBufferVT(dAtA[:i])
+		i -= size
+		i = utils.EncodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 18 /*(2<<3)|2=18, field=2, wireType=LenDelim*/
+		i -= len(k)
+		copy(dAtA[i:], k)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(k)))
+		i--
+		dAtA[i] = 10 /*(1<<3)|2=10, field=1, wireType=LenDelim*/
+		// write outer map entry length + field tag
+		i = utils.EncodeVarint(dAtA, i, uint64(baseI-i))
+		i--
+		dAtA[i] = 26 /*field=3, wireType=LenDelim, (3<<3)|2 (26)*/
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = utils.EncodeVarint(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 18 /*field=2, wireType=LenDelim, (2<<3)|2 (18)*/
+	}
+	if m.Code != 0 {
+		i = utils.EncodeVarint(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 8 /*field=1, wireType=Varint, (1<<3)|0 (8)*/
+	}
+	return len(dAtA) - i
+}
+
+// ToProtobufVT serializes m into dst, reusing its backing array when cap is sufficient.
+// Pass nil to allocate a fresh buffer. Equivalent to vtprotobuf MarshalVT().
+func (m *GetPodsResponse) ToProtobufVT(dst []byte) []byte {
+	if m == nil {
+		return dst
+	}
+	// todo: 当存在 map 类型时。这个方法的调用导致了 ToProtobuf() 两次遍历 map，最多导致 33.1% 的性能下降
+	size := m.ProtobufSize()
+	oldLen := len(dst)
+	if cap(dst)-oldLen < size {
+		next := make([]byte, oldLen+size)
+		copy(next, dst)
+		dst = next
+	} else {
+		dst = dst[:oldLen+size]
+	}
+	n := m.marshalToSizedBufferVT(dst[oldLen:])
+	return dst[:oldLen+n]
+}
+
+func (m *GetPodsResponse) ToProtobuf(dst []byte) []byte {
 	return m.ToProtobufByAppend(dst)
 }
 // GetMenuListRequest field tag IDs.

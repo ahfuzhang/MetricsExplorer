@@ -30,12 +30,17 @@ func LoadMenu() http.HandlerFunc {
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
 
-		u, ok := api.OnlineUsers.Load(req.Session)
-		if !ok {
-			respond(1, "invalid session", pb.MenuTreeNode{})
+		user, code, msg := api.Auth(req.Session, false)
+		if code != 0 {
+			respond(code, msg, pb.MenuTreeNode{})
 			return
 		}
-		isAdmin := u.(*api.OnlineUser).UserName == config.Get().Admin.Name
+		// u, ok := api.OnlineUsers.Load(req.Session)
+		// if !ok {
+		// 	respond(1, "invalid session", pb.MenuTreeNode{})
+		// 	return
+		// }
+		isAdmin := user.UserName == config.Get().Admin.Name
 
 		db := global.GetMysql()
 		rows, err := db.Query(
@@ -146,6 +151,12 @@ func AddMetricDataSources(menu *pb.MenuTreeNode, maxMenuID uint64) {
 							},
 							pb.MenuTreeNode{
 								MenuName: "Metric Names",
+								MenuId:   getMenuID(),
+								Link:     fmt.Sprintf(`{"id":%d,"name":"%s"}`, ds.ID, name),
+								Target:   "content",
+							},
+							pb.MenuTreeNode{
+								MenuName: "Pods",
 								MenuId:   getMenuID(),
 								Link:     fmt.Sprintf(`{"id":%d,"name":"%s"}`, ds.ID, name),
 								Target:   "content",

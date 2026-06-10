@@ -23,6 +23,15 @@ message LoginResponse {
   string session = 3;
 }
 
+message LogoutRequest {
+  string session = 1;
+}
+
+message LogoutResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
 message AddUserRequest {
   string session = 1;
   string user_name = 2;
@@ -181,6 +190,21 @@ message GetRangeByDatasourceResponse {
   string message = 2;
   repeated QueryResult queries_result = 3; // 对应着多个查询的结果
   repeated int64 timestamps = 4;
+}
+
+message GetPodsRequest {
+  string session = 1;
+  string vm_datasource_name = 2;
+}
+
+message PodGroup {
+  repeated string pod_name = 1;
+}
+
+message GetPodsResponse {
+  int32 code = 1;
+  string message = 2;
+  map<string, PodGroup> pods = 3;
 }
 
 message GetMenuListRequest {

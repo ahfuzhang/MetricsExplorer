@@ -28,9 +28,9 @@ func GetMetricNamesByDatasource() http.HandlerFunc {
 			_, _ = w.Write(rsp.ToProtobuf(nil))
 		}
 
-		_, ok := api.OnlineUsers.Load(req.Session)
-		if !ok {
-			respond(1, "invalid session", nil)
+		_, code, msg := api.Auth(req.Session, false)
+		if code != 0 {
+			respond(code, msg, nil)
 			return
 		}
 

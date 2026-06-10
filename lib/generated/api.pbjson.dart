@@ -77,6 +77,32 @@ final $typed_data.Uint8List loginResponseDescriptor = $convert.base64Decode(
     'Cg1Mb2dpblJlc3BvbnNlEhIKBGNvZGUYASABKAVSBGNvZGUSGAoHbWVzc2FnZRgCIAEoCVIHbW'
     'Vzc2FnZRIYCgdzZXNzaW9uGAMgASgJUgdzZXNzaW9u');
 
+@$core.Deprecated('Use logoutRequestDescriptor instead')
+const LogoutRequest$json = {
+  '1': 'LogoutRequest',
+  '2': [
+    {'1': 'session', '3': 1, '4': 1, '5': 9, '10': 'session'},
+  ],
+};
+
+/// Descriptor for `LogoutRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List logoutRequestDescriptor = $convert
+    .base64Decode('Cg1Mb2dvdXRSZXF1ZXN0EhgKB3Nlc3Npb24YASABKAlSB3Nlc3Npb24=');
+
+@$core.Deprecated('Use logoutResponseDescriptor instead')
+const LogoutResponse$json = {
+  '1': 'LogoutResponse',
+  '2': [
+    {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `LogoutResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List logoutResponseDescriptor = $convert.base64Decode(
+    'Cg5Mb2dvdXRSZXNwb25zZRISCgRjb2RlGAEgASgFUgRjb2RlEhgKB21lc3NhZ2UYAiABKAlSB2'
+    '1lc3NhZ2U=');
+
 @$core.Deprecated('Use addUserRequestDescriptor instead')
 const AddUserRequest$json = {
   '1': 'AddUserRequest',
@@ -645,6 +671,80 @@ final $typed_data.Uint8List getRangeByDatasourceResponseDescriptor = $convert.ba
     'Vzc2FnZRgCIAEoCVIHbWVzc2FnZRJECg5xdWVyaWVzX3Jlc3VsdBgDIAMoCzIdLm1ldHJpY3Nf'
     'ZXhwbG9yZXIuUXVlcnlSZXN1bHRSDXF1ZXJpZXNSZXN1bHQSHgoKdGltZXN0YW1wcxgEIAMoA1'
     'IKdGltZXN0YW1wcw==');
+
+@$core.Deprecated('Use getPodsRequestDescriptor instead')
+const GetPodsRequest$json = {
+  '1': 'GetPodsRequest',
+  '2': [
+    {'1': 'session', '3': 1, '4': 1, '5': 9, '10': 'session'},
+    {
+      '1': 'vm_datasource_name',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'vmDatasourceName'
+    },
+  ],
+};
+
+/// Descriptor for `GetPodsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPodsRequestDescriptor = $convert.base64Decode(
+    'Cg5HZXRQb2RzUmVxdWVzdBIYCgdzZXNzaW9uGAEgASgJUgdzZXNzaW9uEiwKEnZtX2RhdGFzb3'
+    'VyY2VfbmFtZRgCIAEoCVIQdm1EYXRhc291cmNlTmFtZQ==');
+
+@$core.Deprecated('Use podGroupDescriptor instead')
+const PodGroup$json = {
+  '1': 'PodGroup',
+  '2': [
+    {'1': 'pod_name', '3': 1, '4': 3, '5': 9, '10': 'podName'},
+  ],
+};
+
+/// Descriptor for `PodGroup`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List podGroupDescriptor = $convert
+    .base64Decode('CghQb2RHcm91cBIZCghwb2RfbmFtZRgBIAMoCVIHcG9kTmFtZQ==');
+
+@$core.Deprecated('Use getPodsResponseDescriptor instead')
+const GetPodsResponse$json = {
+  '1': 'GetPodsResponse',
+  '2': [
+    {'1': 'code', '3': 1, '4': 1, '5': 5, '10': 'code'},
+    {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    {
+      '1': 'pods',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.metrics_explorer.GetPodsResponse.PodsEntry',
+      '10': 'pods'
+    },
+  ],
+  '3': [GetPodsResponse_PodsEntry$json],
+};
+
+@$core.Deprecated('Use getPodsResponseDescriptor instead')
+const GetPodsResponse_PodsEntry$json = {
+  '1': 'PodsEntry',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.metrics_explorer.PodGroup',
+      '10': 'value'
+    },
+  ],
+  '7': {'7': true},
+};
+
+/// Descriptor for `GetPodsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPodsResponseDescriptor = $convert.base64Decode(
+    'Cg9HZXRQb2RzUmVzcG9uc2USEgoEY29kZRgBIAEoBVIEY29kZRIYCgdtZXNzYWdlGAIgASgJUg'
+    'dtZXNzYWdlEj8KBHBvZHMYAyADKAsyKy5tZXRyaWNzX2V4cGxvcmVyLkdldFBvZHNSZXNwb25z'
+    'ZS5Qb2RzRW50cnlSBHBvZHMaUwoJUG9kc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EjAKBXZhbH'
+    'VlGAIgASgLMhoubWV0cmljc19leHBsb3Jlci5Qb2RHcm91cFIFdmFsdWU6AjgB');
 
 @$core.Deprecated('Use getMenuListRequestDescriptor instead')
 const GetMenuListRequest$json = {
