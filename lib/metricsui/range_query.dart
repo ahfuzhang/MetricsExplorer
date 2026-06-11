@@ -51,6 +51,11 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
   List<int>? _histogramTimestamps;
   List<BucketData>? _histogramBuckets;
   List<String>? _histogramQueries;
+  bool _isDurationSecondsHist = false;
+  double _histCountFirst = 0;
+  double _histCountLast  = 0;
+  double _histSumFirst   = 0;
+  double _histSumLast    = 0;
 
   // Time range controls (Counter / Gauge bar)
   static const _startOptions = [
@@ -186,6 +191,11 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       _histogramTimestamps = null;
       _histogramBuckets = null;
       _histogramQueries = null;
+      _isDurationSecondsHist = false;
+      _histCountFirst = 0;
+      _histCountLast  = 0;
+      _histSumFirst   = 0;
+      _histSumLast    = 0;
     });
     try {
       final request = GetRangeByDatasourceRequest(
@@ -239,6 +249,8 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
                         Map<String, String>.from(d.tags)
                   ]
                 : null;
+            _isDurationSecondsHist =
+                kind == 'Histogram' && _checkIsDurationSecondsHistogram(decoded);
           });
           if (kind == 'Counter') {
             _fetchCounterChart();
@@ -538,19 +550,40 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
       }
     }
 
+    // Extract _count and _sum scalars for the stats table.
+    double histCountFirst = 0, histCountLast = 0;
+    double histSumFirst = 0, histSumLast = 0;
+    for (final qr in decoded.queriesResult) {
+      for (final d in qr.datas) {
+        final name = d.tags['__name__'] ?? '';
+        if (name.endsWith('_count') && d.points.isNotEmpty) {
+          histCountFirst += d.points.first;
+          histCountLast  += d.points.last;
+        } else if (name.endsWith('_sum') && d.points.isNotEmpty) {
+          histSumFirst += d.points.first;
+          histSumLast  += d.points.last;
+        }
+      }
+    }
+
     if (bucketMap.isEmpty) {
       setState(() {
         _histogramTimestamps = timestamps;
         _histogramBuckets = [];
+        _histCountFirst = histCountFirst;
+        _histCountLast  = histCountLast;
+        _histSumFirst   = histSumFirst;
+        _histSumLast    = histSumLast;
       });
       return;
     }
 
     final sortedBounds = bucketMap.keys.toList()..sort();
+    final labelFmt = _isDurationSecondsHist ? _formatSecondsValue : _formatAxisValue;
     var buckets = sortedBounds.map((bound) => BucketData(
       upperBound: bound,
       points: List<double>.from(bucketMap[bound]!),
-      tagLabel: _formatAxisValue(bound),
+      tagLabel: labelFmt(bound),
     )).toList();
 
     // Prometheus cumulative buckets: compute per-bucket differential counts.
@@ -572,7 +605,162 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     setState(() {
       _histogramTimestamps = timestamps;
       _histogramBuckets = buckets;
+      _histCountFirst = histCountFirst;
+      _histCountLast  = histCountLast;
+      _histSumFirst   = histSumFirst;
+      _histSumLast    = histSumLast;
     });
+  }
+
+  Widget _tableCell(String text, TextStyle style,
+      {TextAlign align = TextAlign.left}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Text(text, style: style, textAlign: align),
+      );
+
+  // ignore: unused_element
+  Widget _buildHistogramTable() {
+    final buckets = _histogramBuckets;
+    if (buckets == null || buckets.isEmpty) return const SizedBox.shrink();
+
+    final deltaCount = _histCountLast - _histCountFirst;
+    final deltaSum   = _histSumLast  - _histSumFirst;
+
+    // delta per bucket = last data point − first data point
+    final bucketDeltas = buckets.map((b) {
+      if (b.points.isEmpty) return 0.0;
+      final d = b.points.last - b.points.first;
+      return d < 0 ? 0.0 : d;
+    }).toList();
+
+    // cumulative sum of bucket deltas
+    final cumDeltas = <double>[];
+    double running = 0.0;
+    for (final d in bucketDeltas) {
+      running += d;
+      cumDeltas.add(running);
+    }
+
+    String fmtPct(double pct) =>
+        pct > 99.0 ? pct.toString() : pct.toStringAsFixed(2);
+
+    const hStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace');
+    const cStyle = TextStyle(fontSize: 11, fontFamily: 'monospace');
+
+    TableRow makeRow(List<String> cells, {TextStyle style = cStyle, Color? bg}) {
+      return TableRow(
+        decoration: bg != null ? BoxDecoration(color: bg) : null,
+        children: [
+          _tableCell(cells[0], style),
+          for (int i = 1; i < cells.length; i++)
+            _tableCell(cells[i], style, align: TextAlign.right),
+        ],
+      );
+    }
+
+    final rows = <TableRow>[
+      makeRow(['Bucket', 'Avg', 'Pct%', 'Cum%'],
+          style: hStyle, bg: Colors.grey.shade100),
+    ];
+
+    for (int i = 0; i < buckets.length; i++) {
+      final delta  = bucketDeltas[i];
+      final avg    = deltaCount > 0 ? delta / deltaCount : 0.0;
+      final pct    = deltaSum   > 0 ? (delta / deltaSum) * 100 : 0.0;
+      final cumPct = deltaSum   > 0 ? (cumDeltas[i] / deltaSum) * 100 : 0.0;
+      rows.add(makeRow([
+        '<${buckets[i].tagLabel}',
+        _formatAxisValue(avg),
+        '${fmtPct(pct)}%',
+        '${fmtPct(cumPct)}%',
+      ]));
+    }
+
+    final overallAvg = deltaCount > 0 ? deltaSum / deltaCount : 0.0;
+    rows.add(makeRow(
+      ['Overall Avg', _formatAxisValue(overallAvg), '', ''],
+      style: hStyle,
+      bg: Colors.grey.shade100,
+    ));
+
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300, width: 1),
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(1.5),
+        2: FlexColumnWidth(1),
+        3: FlexColumnWidth(1),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: rows,
+    );
+  }
+
+  // ignore: unused_element
+  Widget _buildHistogramDebugTable() {
+    final buckets = _histogramBuckets;
+    if (buckets == null || buckets.isEmpty) return const SizedBox.shrink();
+
+    final n          = _histogramTimestamps?.length ?? 0;
+    final deltaCount = _histCountLast - _histCountFirst;
+    final deltaSum   = _histSumLast  - _histSumFirst;
+
+    const hStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace');
+    const cStyle = TextStyle(fontSize: 11, fontFamily: 'monospace');
+
+    TableRow makeRow(List<String> cells, {TextStyle style = cStyle, Color? bg}) {
+      return TableRow(
+        decoration: bg != null ? BoxDecoration(color: bg) : null,
+        children: [
+          _tableCell(cells[0], style),
+          for (int i = 1; i < cells.length; i++)
+            _tableCell(cells[i], style, align: TextAlign.right),
+        ],
+      );
+    }
+
+    final rows = <TableRow>[
+      makeRow(['Bucket', 'delta', 'delta/unit'],
+          style: hStyle, bg: Colors.orange.shade50),
+    ];
+
+    double bucketDeltaTotal = 0;
+    for (final b in buckets) {
+      final raw   = b.points.isEmpty ? 0.0 : b.points.last - b.points.first;
+      final delta = raw < 0 ? 0.0 : raw;
+      bucketDeltaTotal += delta;
+      rows.add(makeRow([
+        '<${b.tagLabel}',
+        _formatAxisValue(delta),
+        _formatAxisValue(n > 0 ? delta / n : 0.0),
+      ]));
+    }
+
+    final footerBg = Colors.orange.shade100;
+    rows.add(makeRow(
+      ['Σ bucket  |  delta_sum', _formatAxisValue(bucketDeltaTotal), _formatAxisValue(deltaSum)],
+      style: hStyle, bg: footerBg,
+    ));
+    rows.add(makeRow(
+      ['delta_count', _formatAxisValue(deltaCount), ''],
+      style: hStyle, bg: footerBg,
+    ));
+    rows.add(makeRow(
+      ['data pts', n.toString(), ''],
+      style: hStyle, bg: footerBg,
+    ));
+
+    return Table(
+      border: TableBorder.all(color: Colors.orange.shade300, width: 1),
+      columnWidths: const {
+        0: FlexColumnWidth(2.5),
+        1: FlexColumnWidth(1.5),
+        2: FlexColumnWidth(1.5),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: rows,
+    );
   }
 
   Widget _buildHeatmap() {
@@ -604,7 +792,7 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
           buckets: buckets,
           minValue: minVal,
           maxValue: maxVal,
-          formatValue: _formatAxisValue,
+          formatValue: _isDurationSecondsHist ? _formatSecondsValue : _formatAxisValue,
         ),
       ),
     );
@@ -937,6 +1125,37 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
     return v.toStringAsFixed(3);
   }
 
+  String _formatSecondsValue(double v) {
+    if (v == 0) return '0s';
+    final abs = v.abs();
+    if (abs >= 1.0) return '${_trimZeros(v.toStringAsFixed(3))}s';
+    if (abs >= 1e-3) return '${_trimZeros((v * 1e3).toStringAsFixed(3))}ms';
+    if (abs >= 1e-6) return '${_trimZeros((v * 1e6).toStringAsFixed(3))}us';
+    return '${_trimZeros((v * 1e9).toStringAsFixed(3))}ns';
+  }
+
+  static String _trimZeros(String s) {
+    if (!s.contains('.')) return s;
+    return s.replaceAll(RegExp(r'\.?0+$'), '');
+  }
+
+  bool _checkIsDurationSecondsHistogram(GetRangeByDatasourceResponse decoded) {
+    const durationSuffixes = [
+      '_duration_seconds_bucket',
+      '_duration_seconds_sum',
+      '_duration_seconds_count',
+    ];
+    for (final qr in decoded.queriesResult) {
+      for (final d in qr.datas) {
+        final name = d.tags['__name__'] ?? '';
+        for (final suffix in durationSuffixes) {
+          if (name.endsWith(suffix)) return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Widget _buildCounterChart() => CounterChart(
     isLoading: _counterLoading,
     error: _counterError,
@@ -1052,24 +1271,19 @@ class RangeQueryPanelState extends State<RangeQueryPanel> {
               _buildTimeRangeBar(),
               _buildHeatmap(),
               _buildKindLabel('Histogram', Colors.purple.shade50, Colors.purple),
-              Expanded(
-                child: Scrollbar(
-                  controller: _scrollCtrl,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _scrollCtrl,
-                    padding: const EdgeInsets.all(12),
-                    child: SelectableText(
-                      _resultJson!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Expanded(
+              //   child: SingleChildScrollView(
+              //     padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.stretch,
+              //       children: [
+              //         _buildHistogramTable(),
+              //         // const SizedBox(height: 16),
+              //         // _buildHistogramDebugTable(),
+              //       ],
+              //     ),
+              //   ),
+              // ),
             ] else ...[
               if (_metricKind == 'Static') _buildStaticTable(),
               _buildKindLabel(_metricKind!, Colors.red.shade50, Colors.red),

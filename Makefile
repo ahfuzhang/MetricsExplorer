@@ -1,5 +1,5 @@
 
-.PHONY: build build_web run run_web build_server run_server dev
+.PHONY: build build_web build_android build_windows build_linux run run_web build_server run_server dev
 
 # ── macOS 客户端 ─────────────────────────────────────────────────────────────
 build:
@@ -15,6 +15,18 @@ build_web:
 
 run_web:
 	flutter run -d chrome
+
+# ── Android ──────────────────────────────────────────────────────────────────
+build_android:
+	flutter build apk --release
+
+# ── Windows ──────────────────────────────────────────────────────────────────
+build_windows:
+	flutter build windows --release
+
+# ── Linux ────────────────────────────────────────────────────────────────────
+build_linux:
+	flutter build linux --release
 
 # ── Go 后端 ──────────────────────────────────────────────────────────────────
 build_server:
