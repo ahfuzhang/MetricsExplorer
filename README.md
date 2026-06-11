@@ -4,6 +4,8 @@ Metric Explorer is a client application for browsing metrics that supports the V
 
 (Currently supports web, Android, and macOS)
 
+Release page: https://github.com/ahfuzhang/MetricsExplorer/releases/tag/v0.1.0
+
 ## Background
 
 In the `Observability` domain, applications report the summaries over a period of time to the time-series database using the following metric format:
